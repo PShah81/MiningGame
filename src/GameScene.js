@@ -5,9 +5,22 @@ export default class GameScene extends Phaser.Scene
     constructor()
     {
         super('game-scene');
-        this.miningRate = 500;
+        this.miningRate = 100;
         this.miningTimerRate = 200;
         this.bufferZone = 20;
+        this.gold = 0;
+        this.tileIndexMapping = {
+            0: "grass",
+            1: "dirt",
+            2: "stone",
+            3: "coal",
+            4: "iron",
+            5: "copper",
+            6: "silver",
+            7: "gold",
+            8: "diamond",
+            9: "emerald"
+        }
 
     }
 
@@ -16,6 +29,7 @@ export default class GameScene extends Phaser.Scene
         this.load.spritesheet('tiles', '../assets/sprites/ores.png', { frameWidth: 16, frameHeight: 16});
         this.load.image('sky', '../assets/sprites/sky.png');
         this.load.image('underground', '../assets/sprites/background.png');
+        this.load.image('goldImage', '../assets/sprites/gold.png');
         this.load.spritesheet("rightmine", '../assets/sprites/3 SteamMan/SteamMan_attack1.png', { frameWidth: 48, frameHeight: 48});
         this.load.spritesheet("leftmine", '../assets/sprites/3 SteamMan/SteamMan_attack1flipped.png', { frameWidth: 48, frameHeight: 48});
         this.load.spritesheet("rightwalk", '../assets/sprites/3 SteamMan/SteamMan_walk.png', { frameWidth: 48, frameHeight: 48});
@@ -28,11 +42,13 @@ export default class GameScene extends Phaser.Scene
         
         this.add.image(400,300, 'sky');
 
+        // Background that shows after a block has been mined
         let underground = this.add.image(0,500, 'underground');
         underground.setOrigin(0,0)
         underground.setDisplaySize(this.game.canvas.width, this.game.canvas.height - 500)
-        console.log(underground)
-        this.map = this.make.tilemap({ width: 25, height: 100, tileWidth: 16, tileHeight: 16});
+
+
+        this.map = this.make.tilemap({ width: 25, height: 200, tileWidth: 16, tileHeight: 16});
         let tileset = this.map.addTilesetImage('tiles', null, 16, 16);
         this.groundLayer = this.map.createBlankLayer('groundLayer', tileset);
         this.groundLayer.setScale(2,2);
@@ -41,16 +57,34 @@ export default class GameScene extends Phaser.Scene
 
         this.generateRandomTiles(this.map.width, this.map.height);
 
+
+        // Gold Bar text
+        this.goldText = this.add.text(this.game.canvas.width-50, 5, String(this.gold), {
+            fontSize: '32px',
+            fill: '#ffffff'
+        });
+        this.goldText.setOrigin(1, 0);
+        //Keep it in the same position relative to the viewport
+        this.goldText.scrollFactorX = 0
+        this.goldText.scrollFactorY = 0
+
+        //Gold Bar image
+        let goldImage = this.add.image(this.game.canvas.width-10, 5, 'goldImage');
+        goldImage.setOrigin(1,0);
+        goldImage.setScale(2,2);
+        goldImage.scrollFactorX = 0;
+        goldImage.scrollFactorY = 0;
+
+        //Player code
         this.player = this.physics.add.sprite(400, 200, "miner").setScale(0.8);
         this.player.body.setSize(32,32);
-
         const offsetX = (this.player.width - 32) / 2;
         const offsetY = (this.player.height - 32) / 2;
         this.player.body.setOffset(8,15);
 
+
+        //Collision Code
         this.player.setCollideWorldBounds(true);
-
-
         this.groundLayer.setCollisionByExclusion([-1]);
         this.physics.add.collider(this.player, this.groundLayer);
 
@@ -176,9 +210,11 @@ export default class GameScene extends Phaser.Scene
         }
         if (tile) {
             this.miningCooldown = this.time.addEvent({
-                args: [tile.x, tile.y],
-                callback: (x,y) => {
+                args: [tile.x, tile.y, tile.index],
+                callback: (x,y,index) => {
+                    // Remove tile at coords
                     this.groundLayer.removeTileAt(x,y)
+                    this.updateGold(this.tileIndexMapping[index])
                     this.miningCooldown = null
                 },
                 callbackScope: this,
@@ -240,7 +276,7 @@ export default class GameScene extends Phaser.Scene
             {
                 0: 0,
                 1: 0,
-                2: 40,
+                2: 80,
                 3: 20,
                 4: 10,
                 5: 5,
@@ -250,7 +286,7 @@ export default class GameScene extends Phaser.Scene
             {
                 0: 0,
                 1: 0,
-                2: 40,
+                2: 200,
                 3: 80,
                 4: 40,
                 5: 20,
@@ -261,7 +297,7 @@ export default class GameScene extends Phaser.Scene
             {
                 0: 0,
                 1: 0,
-                2: 20,
+                2: 200,
                 3: 40,
                 4: 80,
                 5: 40,
@@ -305,7 +341,6 @@ export default class GameScene extends Phaser.Scene
             }
         }
     }
-
     generateFrequencyArr(distribution)
     {
         let weightedArray = [];
@@ -316,5 +351,23 @@ export default class GameScene extends Phaser.Scene
             }
         }
         return weightedArray;
+    }
+    updateGold(material)
+    {
+        console.log(material)
+        let priceChart = {
+            "grass": 0,
+            "dirt": 0,
+            "stone": 0,
+            "coal" : 0.1,
+            "iron" : 0.2,
+            "copper": 0.3,
+            "silver": 0.5,
+            "gold": 1,
+            "diamond": 3,
+            "emerald": 10
+        }
+        this.gold += (priceChart[material]);
+        this.goldText.setText(String(this.gold.toFixed(1)))
     }
 }
