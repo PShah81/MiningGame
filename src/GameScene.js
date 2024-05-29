@@ -5,7 +5,7 @@ export default class GameScene extends Phaser.Scene
     constructor()
     {
         super('game-scene');
-        this.miningRate = 100;
+        this.miningRate = 400;
         this.miningTimerRate = 200;
         this.bufferZone = 20;
         this.gold = 0;
@@ -21,6 +21,7 @@ export default class GameScene extends Phaser.Scene
             8: "diamond",
             9: "emerald"
         }
+        this.lastMovement = null;
 
     }
 
@@ -30,11 +31,10 @@ export default class GameScene extends Phaser.Scene
         this.load.image('sky', '../assets/sprites/sky.png');
         this.load.image('underground', '../assets/sprites/background.png');
         this.load.image('goldImage', '../assets/sprites/gold.png');
-        this.load.spritesheet("rightmine", '../assets/sprites/3 SteamMan/SteamMan_attack1.png', { frameWidth: 48, frameHeight: 48});
-        this.load.spritesheet("leftmine", '../assets/sprites/3 SteamMan/SteamMan_attack1flipped.png', { frameWidth: 48, frameHeight: 48});
-        this.load.spritesheet("rightwalk", '../assets/sprites/3 SteamMan/SteamMan_walk.png', { frameWidth: 48, frameHeight: 48});
-        this.load.spritesheet("leftwalk", '../assets/sprites/3 SteamMan/SteamMan_walkflipped.png', { frameWidth: 48, frameHeight: 48});
-        this.load.spritesheet("miner", '../assets/sprites/3 SteamMan/SteamMan_walkflipped.png', { frameWidth: 48, frameHeight: 48});
+        this.load.spritesheet("mine", '../assets/sprites/3 SteamMan/mine.png', { frameWidth: 48, frameHeight: 48});
+        this.load.spritesheet("walk", '../assets/sprites/3 SteamMan/walk.png', { frameWidth: 48, frameHeight: 48});
+        this.load.spritesheet("idle", '../assets/sprites/3 SteamMan/idle.png', { frameWidth: 48, frameHeight: 48});
+        this.load.spritesheet("jump", '../assets/sprites/3 SteamMan/jump.png', { frameWidth: 48, frameHeight: 48});
     }
 
     create ()
@@ -51,7 +51,7 @@ export default class GameScene extends Phaser.Scene
         this.map = this.make.tilemap({ width: 25, height: 200, tileWidth: 16, tileHeight: 16});
         let tileset = this.map.addTilesetImage('tiles', null, 16, 16);
         this.groundLayer = this.map.createBlankLayer('groundLayer', tileset);
-        this.groundLayer.setScale(2,2);
+        this.groundLayer.setScale(2.35,2.35);
         this.groundLayer.x = 0;
         this.groundLayer.y = 500;
 
@@ -59,7 +59,7 @@ export default class GameScene extends Phaser.Scene
 
 
         // Gold Bar text
-        this.goldText = this.add.text(this.game.canvas.width-50, 5, String(this.gold), {
+        this.goldText = this.add.text(this.game.canvas.width-50, 5, String(this.gold.toFixed(1)), {
             fontSize: '32px',
             fill: '#ffffff'
         });
@@ -76,11 +76,9 @@ export default class GameScene extends Phaser.Scene
         goldImage.scrollFactorY = 0;
 
         //Player code
-        this.player = this.physics.add.sprite(400, 200, "miner").setScale(0.8);
-        this.player.body.setSize(32,32);
-        const offsetX = (this.player.width - 32) / 2;
-        const offsetY = (this.player.height - 32) / 2;
-        this.player.body.setOffset(8,15);
+        this.player = this.physics.add.sprite(400, 300, "idle").setScale(1);
+        this.player.body.setSize(28,36);
+        this.player.body.setOffset(11, 12);
 
 
         //Collision Code
@@ -102,89 +100,172 @@ export default class GameScene extends Phaser.Scene
 
     update () 
     {
+        this.keyDown = null;
+        this.handleArrowKeys();  
+        if(!this.lastMovement)
+        {
+            this.player.anims.play("idle", true);
+        }
+    }
+
+    handleArrowKeys()
+    {
+
+        let keyDown = null;
+        //Handle jump
+        if(this.lastMovement == "jump" && this.player.body.onFloor())
+        {
+            this.lastMovement = "land"
+            this.player.anims.play("land", true).on('animationcomplete-land', this.landedJump, this);
+        }
+
+        //Horizontal Motion
         if (this.cursors.left.isDown)
         {
             this.player.setVelocityX(-160);
-            this.startMining("left");
-            if(this.miningCooldown && this.currentMiningDirection == "left")
-            {
-                this.player.anims.play("leftmine",true);
-            }
-            else
-            {
-                this.player.anims.play("leftwalk",true);
-            }
+            this.player.setFlipX(true);
+            keyDown = "left"
             
         }
         else if (this.cursors.right.isDown)
         {
             this.player.setVelocityX(160);
-            this.startMining("right");
-            if(this.miningCooldown && this.currentMiningDirection == "right")
-            {
-                this.player.anims.play("rightmine",true);
-            }
-            else
-            {
-                this.player.anims.play("rightwalk",true);
-            }
+            this.player.setFlipX(false);
+            keyDown = "right";
         }
         else
         {
             this.player.setVelocityX(0);
-            this.player.anims.play("idle", true);
         }
 
-        if (this.cursors.up.isDown && this.player.body.onFloor()) {
-            this.player.setVelocityY(-330);
+        //Vertical Motion
+        if (this.cursors.up.isDown && this.player.body.onFloor() && this.lastMovement != "land" && this.lastMovement != "jump") 
+        {
+            keyDown = "up";
+            this.player.setVelocityY(-310);
         }
         else if(this.cursors.down.isDown) {
-            if(this.miningCooldown && this.currentMiningDirection == "down")
-            {
-                this.player.anims.play("rightmine", true);
-            }
-            this.startMining("down");
+            keyDown = "down"; 
         }
 
-        //If no mining directions occur stop mining
-        if(this.cursors.down.isDown == false && this.cursors.left.isDown == false && this.cursors.right.isDown == false)
+
+        //Mining
+        if(this.lastMovement != "jump" && this.lastMovement != "land")
         {
-            this.stopMining();
+            switch (keyDown) {
+                case "left":
+                    this.startMining("left");   
+                    break;
+                case "right":
+                    this.startMining("right");   
+                    break;
+                case "down":
+                    this.startMining("down");   
+                    break;
+                default:
+                    //If no mining directions occur stop mining
+                    this.stopMining();
+                    break;
+            }
         }
+
         
+
+        //Animations
+        if(this.lastMovement != "jump" && this.lastMovement != "land")
+        {
+            switch (keyDown) {
+                case "left":
+                    if(this.miningCooldown && this.currentMiningDirection == "left")
+                    {
+                        this.player.anims.play("mine",true);
+                    }
+                    else
+                    {
+                        this.player.anims.play("walk",true);
+                    }
+                    this.lastMovement = "left";
+                    break;
+                case "right":
+                    if(this.miningCooldown && this.currentMiningDirection == "right")
+                    {
+                        this.player.anims.play("mine",true);
+                    }
+                    else
+                    {
+                        console.log("walk")
+                        this.player.anims.play("walk",true);
+                    }
+                    this.lastMovement = "right";
+                    break;
+                case "down":
+                    if(this.miningCooldown && this.currentMiningDirection == "down")
+                    {
+                        this.player.anims.play("mine", true);
+                        this.lastMovement = "down";
+                    }
+                    else
+                    {
+                        this.lastMovement = null;
+                    }
+                    break;
+                case "up":
+                    this.player.anims.play("jump", true);
+                    this.lastMovement = "jump";
+                    break;
+                default:
+                    this.lastMovement = null;
+                    break;
+            }
+            
+        }
     }
-    createAnimations(){
+    landedJump()
+    {
+        this.lastMovement = null;
+    }
+    createAnimations()
+    {
         this.anims.create({
-            key: 'leftwalk',
-            frames: this.anims.generateFrameNumbers('leftwalk', { start: 5, end: 0 }),
-            frameRate: 10,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'rightwalk',
-            frames: this.anims.generateFrameNumbers('rightwalk', { start: 0, end: 5 }),
+            key: 'walk',
+            frames: this.anims.generateFrameNumbers('walk', { start: 0, end: 5 }),
             frameRate: 10,
             repeat: -1
         });
         this.anims.create({
             key: 'idle',
-            frames: [{key:'rightwalk', frame:0}],
+            frames: this.anims.generateFrameNumbers('idle', { start: 0, end: 3 }),
+            frameRate: 3,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'mine',
+            frames: this.anims.generateFrameNumbers('mine', { start: 0, end: 5 }),
+            frameRate: 20,
+            repeat: -1
+        });
+        this.anims.create({
+            key: "jump",
+            frames: [
+                { key: 'jump', frame: 0, duration: 30 },
+                { key: 'jump', frame: 1, duration: 50 }, 
+                { key: 'jump', frame: 2, duration: 50 }, 
+                { key: 'jump', frame: 3, duration: 1000 }
+            ],
             frameRate: 5
         });
         this.anims.create({
-            key: 'rightmine',
-            frames: this.anims.generateFrameNumbers('rightmine', { start: 0, end: 5 }),
-            frameRate: 10,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'leftmine',
-            frames: this.anims.generateFrameNumbers('leftmine', { start: 5, end: 0 }),
-            frameRate: 10,
-            repeat: -1
-        });
+            key: "land",
+            frames: [
+                { key: 'jump', frame: 4, duration: 50 },
+                { key: 'jump', frame: 5, duration: 100 },
+                { key: 'idle', frame: 0, duration: 50}
+            ],
+            frameRate: 5
+        })
     }
-    mineBlock(direction) {
+    mineBlock(direction) 
+    {
         if(this.miningCooldown)
         {
             return
@@ -222,7 +303,8 @@ export default class GameScene extends Phaser.Scene
             });
         }
     }
-    startMining(direction) {
+    startMining(direction) 
+    {
         
         if (this.miningTimer) {
             if(this.currentMiningDirection == direction)
@@ -244,7 +326,8 @@ export default class GameScene extends Phaser.Scene
             loop: true
         });
     }
-    stopMining() {
+    stopMining() 
+    {
         if (this.miningTimer) {
             this.miningTimer.remove(false); // The `false` argument prevents the timer from being automatically destroyed
             if(this.miningCooldown)
@@ -257,7 +340,8 @@ export default class GameScene extends Phaser.Scene
             this.currentMiningDirection = null; // Reset the current mining direction
         }
     }
-    generateRandomTiles(width, height) {
+    generateRandomTiles(width, height) 
+    {
         //Get right frequencies
         let frequencyArr = [
             {
@@ -354,7 +438,6 @@ export default class GameScene extends Phaser.Scene
     }
     updateGold(material)
     {
-        console.log(material)
         let priceChart = {
             "grass": 0,
             "dirt": 0,
