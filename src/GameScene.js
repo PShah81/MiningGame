@@ -1,27 +1,22 @@
 import Phaser from 'phaser'
+import PlayerStates from './PlayerStates';
+import PlayerMovements from './PlayerMovements';
+import PlayerActions from './PlayerActions';
+import TileComponent from './TileComponent';
 
-export default class GameScene extends Phaser.Scene
+class GameScene extends Phaser.Scene
 {
     constructor()
     {
         super('game-scene');
-        this.miningRate = 400;
-        this.miningTimerRate = 200;
-        this.bufferZone = 20;
+        this.miningRate = 750;
         this.gold = 0;
-        this.tileIndexMapping = {
-            0: "grass",
-            1: "dirt",
-            2: "stone",
-            3: "coal",
-            4: "iron",
-            5: "copper",
-            6: "silver",
-            7: "gold",
-            8: "diamond",
-            9: "emerald"
-        }
-        this.lastMovement = null;
+        this.lastActionState = null;
+        this.actionState = null;
+        this.movementState = null;
+        this.miningCooldown = null;
+        this.miningTile = null;
+        this.currentMiningDirection = null;
 
     }
 
@@ -35,6 +30,7 @@ export default class GameScene extends Phaser.Scene
         this.load.spritesheet("walk", '../assets/sprites/3 SteamMan/walk.png', { frameWidth: 48, frameHeight: 48});
         this.load.spritesheet("idle", '../assets/sprites/3 SteamMan/idle.png', { frameWidth: 48, frameHeight: 48});
         this.load.spritesheet("jump", '../assets/sprites/3 SteamMan/jump.png', { frameWidth: 48, frameHeight: 48});
+        this.load.spritesheet("run", '../assets/sprites/3 SteamMan/run.png', { frameWidth: 48, frameHeight: 48});
     }
 
     create ()
@@ -55,7 +51,9 @@ export default class GameScene extends Phaser.Scene
         this.groundLayer.x = 0;
         this.groundLayer.y = 500;
 
-        this.generateRandomTiles(this.map.width, this.map.height);
+        this.TileComponent = new TileComponent(this);
+
+        this.TileComponent.generateRandomTiles(this.map.width, this.map.height);
 
 
         // Gold Bar text
@@ -77,8 +75,9 @@ export default class GameScene extends Phaser.Scene
 
         //Player code
         this.player = this.physics.add.sprite(400, 300, "idle").setScale(1);
-        this.player.body.setSize(28,36);
-        this.player.body.setOffset(11, 12);
+        this.player.body.setSize(26,36);
+        this.player.body.setOffset(12, 12);
+        this.player.setMaxVelocity(250);
 
 
         //Collision Code
@@ -95,134 +94,18 @@ export default class GameScene extends Phaser.Scene
         //Follow the player
         this.cameras.main.startFollow(this.player);
         this.cameras.main.height = 1000;
+
+        this.PlayerStates = new PlayerStates(this);
+        this.PlayerMovements = new PlayerMovements(this);
+        this.PlayerActions = new PlayerActions(this);
     
     }
 
     update () 
     {
-        this.keyDown = null;
-        this.handleArrowKeys();  
-        if(!this.lastMovement)
-        {
-            this.player.anims.play("idle", true);
-        }
-    }
-
-    handleArrowKeys()
-    {
-
-        let keyDown = null;
-        //Handle jump
-        if(this.lastMovement == "jump" && this.player.body.onFloor())
-        {
-            this.lastMovement = "land"
-            this.player.anims.play("land", true).on('animationcomplete-land', this.landedJump, this);
-        }
-
-        //Horizontal Motion
-        if (this.cursors.left.isDown)
-        {
-            this.player.setVelocityX(-160);
-            this.player.setFlipX(true);
-            keyDown = "left"
-            
-        }
-        else if (this.cursors.right.isDown)
-        {
-            this.player.setVelocityX(160);
-            this.player.setFlipX(false);
-            keyDown = "right";
-        }
-        else
-        {
-            this.player.setVelocityX(0);
-        }
-
-        //Vertical Motion
-        if (this.cursors.up.isDown && this.player.body.onFloor() && this.lastMovement != "land" && this.lastMovement != "jump") 
-        {
-            keyDown = "up";
-            this.player.setVelocityY(-310);
-        }
-        else if(this.cursors.down.isDown) {
-            keyDown = "down"; 
-        }
-
-
-        //Mining
-        if(this.lastMovement != "jump" && this.lastMovement != "land")
-        {
-            switch (keyDown) {
-                case "left":
-                    this.startMining("left");   
-                    break;
-                case "right":
-                    this.startMining("right");   
-                    break;
-                case "down":
-                    this.startMining("down");   
-                    break;
-                default:
-                    //If no mining directions occur stop mining
-                    this.stopMining();
-                    break;
-            }
-        }
-
-        
-
-        //Animations
-        if(this.lastMovement != "jump" && this.lastMovement != "land")
-        {
-            switch (keyDown) {
-                case "left":
-                    if(this.miningCooldown && this.currentMiningDirection == "left")
-                    {
-                        this.player.anims.play("mine",true);
-                    }
-                    else
-                    {
-                        this.player.anims.play("walk",true);
-                    }
-                    this.lastMovement = "left";
-                    break;
-                case "right":
-                    if(this.miningCooldown && this.currentMiningDirection == "right")
-                    {
-                        this.player.anims.play("mine",true);
-                    }
-                    else
-                    {
-                        console.log("walk")
-                        this.player.anims.play("walk",true);
-                    }
-                    this.lastMovement = "right";
-                    break;
-                case "down":
-                    if(this.miningCooldown && this.currentMiningDirection == "down")
-                    {
-                        this.player.anims.play("mine", true);
-                        this.lastMovement = "down";
-                    }
-                    else
-                    {
-                        this.lastMovement = null;
-                    }
-                    break;
-                case "up":
-                    this.player.anims.play("jump", true);
-                    this.lastMovement = "jump";
-                    break;
-                default:
-                    this.lastMovement = null;
-                    break;
-            }
-            
-        }
-    }
-    landedJump()
-    {
-        this.lastMovement = null;
+        this.PlayerStates.update();
+        this.PlayerMovements.update();
+        this.PlayerActions.update(); 
     }
     createAnimations()
     {
@@ -262,179 +145,20 @@ export default class GameScene extends Phaser.Scene
                 { key: 'idle', frame: 0, duration: 50}
             ],
             frameRate: 5
-        })
-    }
-    mineBlock(direction) 
-    {
-        if(this.miningCooldown)
-        {
-            return
-        }
-        let tile;
-        //use body more reliable
-        //center body
-        let width = this.player.body.width
-        let height = this.player.body.height
-        let x = this.player.body.x + Math.floor(width/2)
-        let y = this.player.body.y + Math.floor(height/2)
-        if (direction == "left")
-        {
-            tile = this.groundLayer.getTileAtWorldXY(x - width, y);
-        }
-        else if (direction == "right")
-        {
-            tile = this.groundLayer.getTileAtWorldXY(x + width, y);
-        }
-        else
-        {
-            tile = this.groundLayer.getTileAtWorldXY(x, y+height);
-        }
-        if (tile) {
-            this.miningCooldown = this.time.addEvent({
-                args: [tile.x, tile.y, tile.index],
-                callback: (x,y,index) => {
-                    // Remove tile at coords
-                    this.groundLayer.removeTileAt(x,y)
-                    this.updateGold(this.tileIndexMapping[index])
-                    this.miningCooldown = null
-                },
-                callbackScope: this,
-                delay: this.miningRate,
-            });
-        }
-    }
-    startMining(direction) 
-    {
-        
-        if (this.miningTimer) {
-            if(this.currentMiningDirection == direction)
-            {
-                return
-            }
-            else
-            {
-                // Stop current miner if running in wrong direction
-                this.stopMining();
-            }
-        }
-        this.currentMiningDirection = direction;
-        this.miningTimer = this.time.addEvent({
-            args: [direction],
-            callback: this.mineBlock,
-            callbackScope: this,
-            delay: this.miningTimerRate,
-            loop: true
         });
-    }
-    stopMining() 
-    {
-        if (this.miningTimer) {
-            this.miningTimer.remove(false); // The `false` argument prevents the timer from being automatically destroyed
-            if(this.miningCooldown)
-            {
-                console.log("cooldown stopped")
-                this.miningCooldown.remove(false);
-                this.miningCooldown = null;
-            }
-            this.miningTimer = null;
-            this.currentMiningDirection = null; // Reset the current mining direction
-        }
-    }
-    generateRandomTiles(width, height) 
-    {
-        //Get right frequencies
-        let frequencyArr = [
-            {
-                0: 1
-            },
-            {
-                0: 0,
-                1: 1
-            },
-            {
-                0: 0,
-                1: 5,
-                2: 5,
-                3: 2
-            },
-            {
-                0: 0,
-                1: 0,
-                2: 80,
-                3: 20,
-                4: 10,
-                5: 5,
-                6: 3,
-                7: 1
-            },
-            {
-                0: 0,
-                1: 0,
-                2: 200,
-                3: 80,
-                4: 40,
-                5: 20,
-                6: 10,
-                7: 5,
-                8: 3
-            },
-            {
-                0: 0,
-                1: 0,
-                2: 200,
-                3: 40,
-                4: 80,
-                5: 40,
-                6: 20,
-                7: 10,
-                8: 5,
-                9: 1
-            },
-        ]
-        let weightedArray = []
-        for (let y = 0; y < height; y++) {
-            if (y == 0)
-            {
-                weightedArray = this.generateFrequencyArr(frequencyArr[0])
-            }
-            else if (y < 3)
-            {
-                weightedArray = this.generateFrequencyArr(frequencyArr[1])
-            }
-            else if (y < 10)
-            {
-                weightedArray = this.generateFrequencyArr(frequencyArr[2])
-            }
-            else if (y < 40)
-            {
-                weightedArray = this.generateFrequencyArr(frequencyArr[3])
-            }
-            else if(y < 100)
-            {
-                weightedArray = this.generateFrequencyArr(frequencyArr[4])
-            }
-            else
-            {
-                weightedArray = this.generateFrequencyArr(frequencyArr[5])
-            }
-            for (let x = 0; x < width; x++) {
-                // Generate a random tile index
-                let weightedArrayIndex  = Math.floor(Math.random() * weightedArray.length) // Get an index in the weighted array
-                let tileIndex = weightedArray[weightedArrayIndex];
-                this.groundLayer.putTileAt(tileIndex, x, y);
-            }
-        }
-    }
-    generateFrequencyArr(distribution)
-    {
-        let weightedArray = [];
-        for (let number in distribution) {
-            let frequency = distribution[number];
-            for (let i = 0; i < frequency; i++) {
-                weightedArray.push(Number(number));
-            }
-        }
-        return weightedArray;
+        this.anims.create({
+            key: "fall",
+            frames: [
+                { key: 'jump', frame: 3}
+            ],
+            frameRate: 5
+        });
+        this.anims.create({
+            key: 'run',
+            frames: this.anims.generateFrameNumbers('run', { start: 0, end: 5 }),
+            frameRate: 10,
+            repeat: -1
+        });
     }
     updateGold(material)
     {
@@ -454,3 +178,5 @@ export default class GameScene extends Phaser.Scene
         this.goldText.setText(String(this.gold.toFixed(1)))
     }
 }
+
+export default GameScene
