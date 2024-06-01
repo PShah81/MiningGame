@@ -3,6 +3,7 @@ class TileComponent {
         this.scene = scene;
         this.player = this.scene.player;
         this.groundLayer = this.scene.groundLayer;
+        this.itemLayer = this.scene.itemLayer;
         this.tileIndexMapping = {
             0: "grass",
             1: "dirt",
@@ -16,33 +17,41 @@ class TileComponent {
             9: "emerald"
         }
     }
-    checkTileCollision(direction) 
+    getCenter(object)
+    {
+        let width = object.body.width;
+        let height = object.body.height;
+        let x = object.body.x + Math.floor(width/2);
+        let y = object.body.y + Math.floor(height/2);
+        return [x,y];
+    }
+    checkTileCollision(direction, layer) 
     {
         let tile;
-        //use body more reliable
-        //center x on body
-        //keep y at bottom as the swing is more down than to the side
-        let width = this.player.body.width
-        let height = this.player.body.height
-        let x = this.player.body.x + Math.floor(width/2)
-        let y = this.player.body.y + Math.floor(height/2)
+        let width = this.player.body.width;
+        let height = this.player.body.height;
+        let [x,y] = this.getCenter(this.player);
         if (direction == "left")
         {
-            tile = this.groundLayer.getTileAtWorldXY(x - width, y);
+            tile = layer.getTileAtWorldXY(x - width, y);
         }
         else if (direction == "right")
         {
-            tile = this.groundLayer.getTileAtWorldXY(x + width, y);
+            tile = layer.getTileAtWorldXY(x + width, y);
+        }
+        else if(direction == "down")
+        {
+            tile = layer.getTileAtWorldXY(x, y+height);
         }
         else
         {
-            tile = this.groundLayer.getTileAtWorldXY(x, y+height);
+            tile = layer.getTileAtWorldXY(x, y-height);
         }
         return tile;
     }
     mineBlock(direction) 
     {
-        let tile = this.checkTileCollision(direction);
+        let tile = this.checkTileCollision(direction, this.groundLayer);
         if (tile) {
             this.scene.miningTile = tile;
             this.scene.miningCooldown = this.scene.time.addEvent({
@@ -87,6 +96,21 @@ class TileComponent {
             this.scene.miningCooldown = null;
             this.scene.miningTile = null;
             this.scene.currentMiningDirection = null;
+        }
+    }
+    getItemAtPlayer()
+    {
+        let [x,y] = this.getCenter(this.player);
+        let tile = this.itemLayer.getTileAtWorldXY(x, y);
+        return tile
+    }
+    placeItem(tileIndex)
+    {
+        let [x,y] = this.getCenter(this.player);
+        let tile = this.itemLayer.getTileAtWorldXY(x, y);
+        if(!tile)
+        {
+            this.itemLayer.putTileAtWorldXY(tileIndex, x, y);
         }
     }
     generateRandomTiles(width, height) 

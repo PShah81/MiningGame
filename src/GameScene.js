@@ -1,7 +1,5 @@
 import Phaser from 'phaser'
-import PlayerStates from './PlayerStates';
-import PlayerMovements from './PlayerMovements';
-import PlayerActions from './PlayerActions';
+import PlayerStateManager from './PlayerStateManager';
 import TileComponent from './TileComponent';
 
 class GameScene extends Phaser.Scene
@@ -17,12 +15,14 @@ class GameScene extends Phaser.Scene
         this.miningCooldown = null;
         this.miningTile = null;
         this.currentMiningDirection = null;
+        this.lastKeyPressed = null;
 
     }
 
     preload ()
     {
         this.load.spritesheet('tiles', '../assets/sprites/ores.png', { frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet('items', '../assets/sprites/Extras/items.png', { frameWidth: 16, frameHeight: 16});
         this.load.image('sky', '../assets/sprites/sky.png');
         this.load.image('underground', '../assets/sprites/background.png');
         this.load.image('goldImage', '../assets/sprites/gold.png');
@@ -31,6 +31,7 @@ class GameScene extends Phaser.Scene
         this.load.spritesheet("idle", '../assets/sprites/3 SteamMan/idle.png', { frameWidth: 48, frameHeight: 48});
         this.load.spritesheet("jump", '../assets/sprites/3 SteamMan/jump.png', { frameWidth: 48, frameHeight: 48});
         this.load.spritesheet("run", '../assets/sprites/3 SteamMan/run.png', { frameWidth: 48, frameHeight: 48});
+        this.load.spritesheet("climb", '../assets/sprites/3 SteamMan/climb.png', { frameWidth: 48, frameHeight: 48});
     }
 
     create ()
@@ -45,11 +46,23 @@ class GameScene extends Phaser.Scene
 
 
         this.map = this.make.tilemap({ width: 25, height: 200, tileWidth: 16, tileHeight: 16});
-        let tileset = this.map.addTilesetImage('tiles', null, 16, 16);
-        this.groundLayer = this.map.createBlankLayer('groundLayer', tileset);
+
+
+        let itemTileset = this.map.addTilesetImage('items', null, 16, 16);
+        this.itemLayer = this.map.createBlankLayer('itemLayer', itemTileset);
+        this.itemLayer.setScale(2.35,2.35)
+        this.itemLayer.x = 0;
+        this.itemLayer.y = 500;
+
+        this.itemLayer.putTileAt(0, 0, 0);
+
+        let groundTileset = this.map.addTilesetImage('tiles', null, 16, 16);
+        this.groundLayer = this.map.createBlankLayer('groundLayer', groundTileset);
         this.groundLayer.setScale(2.35,2.35);
         this.groundLayer.x = 0;
         this.groundLayer.y = 500;
+
+        
 
         this.TileComponent = new TileComponent(this);
 
@@ -95,17 +108,24 @@ class GameScene extends Phaser.Scene
         this.cameras.main.startFollow(this.player);
         this.cameras.main.height = 1000;
 
-        this.PlayerStates = new PlayerStates(this);
-        this.PlayerMovements = new PlayerMovements(this);
-        this.PlayerActions = new PlayerActions(this);
+
+        this.TileComponent = new TileComponent(this);
+        this.PlayerStateManager = new PlayerStateManager(this, this.player, this.TileComponent);
+
+        //Adding key presses
+        this.input.keyboard.on('keydown', this.handleKeyPress, this);
     
     }
 
     update () 
     {
-        this.PlayerStates.update();
-        this.PlayerMovements.update();
-        this.PlayerActions.update(); 
+        this.PlayerStateManager.update(this.cursors, this.lastKeyPressed);
+        this.lastKeyPressed = null;
+        // Reset the lastKeyPressed after processing
+    }
+    handleKeyPress(event)
+    {
+        this.lastKeyPressed = event.keyCode
     }
     createAnimations()
     {
@@ -154,8 +174,20 @@ class GameScene extends Phaser.Scene
             frameRate: 5
         });
         this.anims.create({
-            key: 'run',
+            key: "run",
             frames: this.anims.generateFrameNumbers('run', { start: 0, end: 5 }),
+            frameRate: 10,
+            repeat: -1
+        });
+        this.anims.create({
+            key: "climbUp",
+            frames: this.anims.generateFrameNumbers('climb', { start: 0, end: 5 }),
+            frameRate: 10,
+            repeat: -1
+        });
+        this.anims.create({
+            key: "climbDown",
+            frames: this.anims.generateFrameNumbers('climb', { start: 5, end: 0 }),
             frameRate: 10,
             repeat: -1
         });
