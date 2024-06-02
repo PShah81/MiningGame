@@ -7,6 +7,7 @@ class PlayerStateManager
         this.player = player;
         this.scene = scene;
         this.acted = false;
+        this.canClimb = false;
         this.states = [
             new Idle(this.player, this.scene, this.TileComponent, this), 
             new Walk(this.player, this.scene, this.TileComponent, this),
@@ -21,18 +22,16 @@ class PlayerStateManager
         this.currentState = this.states[0];
         this.currentDirection = null;
         this.currentState.enter();
+        
     }
     update(cursors, lastKeyPressed)
     {
-        if(!(this.currentState instanceof Idle))
-        {
-            console.log(this.currentState)
-        }
         this.acted = false;
         this.currentState.update(cursors, lastKeyPressed);
     }
-    changeState(state, direction)
+    changeState(state, direction, props)
     {
+        this.canClimb = false;
         this.acted = true;
         let newState = this.states[state];
         newState.direction = direction;
@@ -41,7 +40,7 @@ class PlayerStateManager
             this.currentState.exit(state);
             this.currentState = newState;
             this.currentDirection = direction;
-            this.currentState.enter(direction);
+            this.currentState.enter(direction, props);
         }
 
     }

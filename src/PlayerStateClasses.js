@@ -1,5 +1,5 @@
 import phaser from 'phaser';
-const States = {
+export const States = {
     IDLE: 0,
     WALK: 1,
     RUN: 2,
@@ -10,12 +10,17 @@ const States = {
     CRAFT: 7,
     CLIMB: 8,
 }
-const Directions = {
+export const Directions = {
     LEFT: 0,
     RIGHT: 1,
     UP: 2,
     DOWN: 3,
     IDLE: 4
+}
+export const Items = {
+    LADDER: 0,
+    TORCH: 1,
+    DYNAMITE: 2
 }
 
 
@@ -47,12 +52,25 @@ class PlayerState {
             this.player.setVelocityX(Math.max(100, velocity.x));
         }
     }
+    craft(lastKeyPressed)
+    {
+        //Craft Ladder
+        if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.ONE)
+        {
+            let props = {"itemIndex": Items.LADDER};
+            this.PlayerStateManager.changeState(States.CRAFT, null, props);
+        }
+        else if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.TWO)
+        {
+            let props = {"itemIndex": Items.TORCH};
+            this.PlayerStateManager.changeState(States.CRAFT, null, props);
+        }
+    }
 }
 
 export class Idle extends PlayerState {
     constructor(player, scene, TileComponent, PlayerStateManager) {
         super(player, scene, TileComponent, PlayerStateManager);
-        console.log(TileComponent);
     }
     enter(direction)
     {
@@ -90,8 +108,7 @@ export class Idle extends PlayerState {
         }
         if(cursors.up.isDown)
         {
-            let tile = this.TileComponent.getItemAtPlayer();
-            if(tile && tile.index == 0)
+            if(this.PlayerStateManager.canClimb)
             {
                 this.PlayerStateManager.changeState(States.CLIMB, Directions.UP);
             }
@@ -103,20 +120,16 @@ export class Idle extends PlayerState {
         if(cursors.down.isDown)
         {
             this.TileComponent.startMining("down");
-            let tile = this.TileComponent.getItemAtPlayer();
             if(this.scene.miningCooldown && this.scene.currentMiningDirection == "down" && this.player.body.onFloor())
             {
                 this.PlayerStateManager.changeState(States.MINE, Directions.DOWN);
             }
-            else if(tile && tile.index == 0)
+            else if(this.PlayerStateManager.canClimb)
             {
                 this.PlayerStateManager.changeState(States.CLIMB, Directions.DOWN);
             }
         }
-        if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.Q)
-        {
-            this.PlayerStateManager.changeState(States.CRAFT);
-        }
+        this.craft(lastKeyPressed)
         if(!this.PlayerStateManager.acted)
         {
             this.PlayerStateManager.changeState(States.IDLE, null);
@@ -187,8 +200,7 @@ export class Walk extends PlayerState {
         }
         if(cursors.up.isDown)
         {
-            let tile = this.TileComponent.getItemAtPlayer();
-            if(tile && tile.index == 0)
+            if(this.PlayerStateManager.canClimb)
             {
                 this.PlayerStateManager.changeState(States.CLIMB, Directions.UP);
             }
@@ -200,20 +212,17 @@ export class Walk extends PlayerState {
         if(cursors.down.isDown)
         {
             this.TileComponent.startMining("down");
-            let tile = this.TileComponent.getItemAtPlayer();
+            
             if(this.scene.miningCooldown && this.scene.currentMiningDirection == "down" && this.player.body.onFloor())
             {
                 this.PlayerStateManager.changeState(States.MINE, Directions.DOWN);
             }
-            else if(tile && tile.index == 0)
+            else if(this.PlayerStateManager.canClimb)
             {
                 this.PlayerStateManager.changeState(States.CLIMB, Directions.DOWN);
             }
         }
-        if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.Q)
-        {
-            this.PlayerStateManager.changeState(States.CRAFT);
-        }
+        this.craft(lastKeyPressed)
 
         if(!this.PlayerStateManager.acted)
         {
@@ -291,8 +300,8 @@ export class Run extends PlayerState {
         }
         if(cursors.up.isDown)
         {
-            let tile = this.TileComponent.getItemAtPlayer();
-            if(tile && tile.index == 0)
+            
+            if(this.PlayerStateManager.canClimb)
             {
                 this.PlayerStateManager.changeState(States.CLIMB, Directions.UP);
             }
@@ -304,20 +313,18 @@ export class Run extends PlayerState {
         if(cursors.down.isDown)
         {
             this.TileComponent.startMining("down");
-            let tile = this.TileComponent.getItemAtPlayer();
+            
             if(this.scene.miningCooldown && this.scene.currentMiningDirection == "down" && this.player.body.onFloor())
             {
                 this.PlayerStateManager.changeState(States.MINE, Directions.DOWN);
             }
-            else if(tile && tile.index == 0)
+            else if(this.PlayerStateManager.canClimb)
             {
                 this.PlayerStateManager.changeState(States.CLIMB, Directions.DOWN);
             }
         }
-        if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.Q)
-        {
-            this.PlayerStateManager.changeState(States.CRAFT);
-        }
+        
+        this.craft(lastKeyPressed)
 
         if(!this.PlayerStateManager.acted)
         {
@@ -391,8 +398,8 @@ export class Mine extends PlayerState {
         }
         if(cursors.up.isDown)
         {
-            let tile = this.TileComponent.getItemAtPlayer();
-            if(tile && tile.index == 0)
+            
+            if(this.PlayerStateManager.canClimb)
             {
                 this.PlayerStateManager.changeState(States.CLIMB, Directions.UP);
             }
@@ -403,20 +410,18 @@ export class Mine extends PlayerState {
         }
         if(cursors.down.isDown)
         {
-            let tile = this.TileComponent.getItemAtPlayer();
+            
             if(this.scene.miningCooldown && this.scene.currentMiningDirection == "down" && this.player.body.onFloor())
             {
                 this.PlayerStateManager.changeState(States.MINE, Directions.DOWN);
             }
-            else if(tile && tile.index == 0)
+            else if(this.PlayerStateManager.canClimb)
             {
                 this.PlayerStateManager.changeState(States.CLIMB, Directions.DOWN);
             }
         }
-        if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.Q)
-        {
-            this.PlayerStateManager.changeState(States.CRAFT);
-        }
+        
+        this.craft(lastKeyPressed)
 
         if(!this.PlayerStateManager.acted)
         {
@@ -461,7 +466,7 @@ export class Jump extends PlayerState {
                 this.PlayerStateManager.changeState(States.MINE, Directions.LEFT);
             }
         }
-        if (cursors.right.isDown)
+        else if (cursors.right.isDown)
         {
             this.TileComponent.startMining("right");
             this.moveHorizontally(Directions.RIGHT);
@@ -470,26 +475,31 @@ export class Jump extends PlayerState {
                 this.PlayerStateManager.changeState(States.MINE, Directions.RIGHT);
             }
         }
+        else
+        {
+            //If not left or right are down
+            this.player.setAccelerationX(0);
+            this.player.setVelocityX(0);
+        }
+
         if(cursors.up.isDown)
         {
-            let tile = this.TileComponent.getItemAtPlayer();
-            if(tile && tile.index == 0)
+            
+            if(this.PlayerStateManager.canClimb)
             {
                 this.PlayerStateManager.changeState(States.CLIMB, Directions.UP);
             }
         }
         if(cursors.down.isDown)
         {
-            let tile = this.TileComponent.getItemAtPlayer();
-            if(tile && tile.index == 0)
+            
+            if(this.PlayerStateManager.canClimb)
             {
                 this.PlayerStateManager.changeState(States.CLIMB, Directions.DOWN);
             }
         }
-        if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.Q)
-        {
-            this.PlayerStateManager.changeState(States.CRAFT);
-        }
+        
+        this.craft(lastKeyPressed)
     }
 }
 
@@ -518,7 +528,7 @@ export class Fall extends PlayerState {
                 this.PlayerStateManager.changeState(States.MINE, Directions.LEFT);
             }
         }
-        if (cursors.right.isDown)
+        else if (cursors.right.isDown)
         {
             this.TileComponent.startMining("right");
             this.moveHorizontally(Directions.RIGHT);
@@ -527,26 +537,31 @@ export class Fall extends PlayerState {
                 this.PlayerStateManager.changeState(States.MINE, Directions.RIGHT);
             }
         }
+        else
+        {
+            //If not left or right are down
+            this.player.setAccelerationX(0);
+            this.player.setVelocityX(0);
+        }
+        
         if(cursors.up.isDown)
         {
-            let tile = this.TileComponent.getItemAtPlayer();
-            if(tile && tile.index == 0)
+            
+            if(this.PlayerStateManager.canClimb)
             {
                 this.PlayerStateManager.changeState(States.CLIMB, Directions.UP);
             }
         }
         if(cursors.down.isDown)
         {
-            let tile = this.TileComponent.getItemAtPlayer();
-            if(tile && tile.index == 0)
+            
+            if(this.PlayerStateManager.canClimb)
             {
                 this.PlayerStateManager.changeState(States.CLIMB, Directions.DOWN);
             }
         }
-        if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.Q)
-        {
-            this.PlayerStateManager.changeState(States.CRAFT);
-        }
+        
+        this.craft(lastKeyPressed)
     }
 }
 
@@ -557,10 +572,12 @@ export class Land extends PlayerState {
 
     enter(direction)
     {
+        //Have to store next state until landing animation finishes
         this.nextState = States.IDLE;
         this.nextDirection = null;
+        this.nextProps = {};
         this.player.anims.play("land", true).on('animationcomplete-land', 
-        ()=>{this.PlayerStateManager.changeState(this.nextState, this.nextDirection)}, this);
+        ()=>{this.PlayerStateManager.changeState(this.nextState, this.nextDirection, this.nextProps)}, this);
     }
     update(cursors, lastKeyPressed)
     {
@@ -594,8 +611,8 @@ export class Land extends PlayerState {
         }
         if(cursors.up.isDown)
         {
-            let tile = this.TileComponent.getItemAtPlayer();
-            if(tile && tile.index == 0)
+            
+            if(this.PlayerStateManager.canClimb)
             {
                 this.nextState = States.CLIMB;
                 this.nextDirection = Directions.UP;
@@ -609,23 +626,33 @@ export class Land extends PlayerState {
         if(cursors.down.isDown)
         {
             this.TileComponent.startMining("down");
-            let tile = this.TileComponent.getItemAtPlayer();
+            
             if(this.scene.miningCooldown && this.scene.currentMiningDirection == "down" && this.player.body.onFloor())
             {
                 this.nextState = States.MINE;
                 this.nextDirection = Directions.DOWN;
             }
-            else if(tile && tile.index == 0)
+            else if(this.PlayerStateManager.canClimb)
             {
                 this.nextState = States.CLIMB;
                 this.nextDirection = Directions.DOWN;
             }
         }
-        if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.Q)
+        //CRAFT LADDER
+        if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.ONE)
         {
             this.nextState = States.CRAFT;
             this.nextDirection = null;
+            this.nextProps.itemIndex = Items.LADDER;
         }
+        else if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.TWO)
+        {
+            this.nextState = States.CRAFT;
+            this.nextDirection = null;
+            this.nextProps.itemIndex = Items.TORCH;
+        }
+
+
         if(this.nextState == States.IDLE)
         {
             if(!this.player.body.onFloor())
@@ -644,9 +671,9 @@ export class Land extends PlayerState {
 }
 
 export class Craft extends PlayerState {
-    enter()
+    enter(direction, props)
     {
-        this.TileComponent.placeItem(0);
+        this.TileComponent.placeItem(props.itemIndex);
     }
     update(cursors, lastKeyPressed)
     {
@@ -691,8 +718,8 @@ export class Craft extends PlayerState {
         }
         if(cursors.up.isDown)
         {
-            let tile = this.TileComponent.getItemAtPlayer();
-            if(tile && tile.index == 0)
+            
+            if(this.PlayerStateManager.canClimb)
             {
                 this.PlayerStateManager.changeState(States.CLIMB, Directions.UP);
             }
@@ -704,30 +731,33 @@ export class Craft extends PlayerState {
         if(cursors.down.isDown)
         {
             this.TileComponent.startMining("down");
-            let tile = this.TileComponent.getItemAtPlayer();
+            
             if(this.scene.miningCooldown && this.scene.currentMiningDirection == "down" && this.player.body.onFloor())
             {
                 this.PlayerStateManager.changeState(States.MINE, Directions.DOWN);
             }
-            else if(tile && tile.index == 0)
+            else if(this.PlayerStateManager.canClimb)
             {
                 this.PlayerStateManager.changeState(States.CLIMB, Directions.DOWN);
             }
         }
 
-        if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.Q)
-        {
-            this.PlayerStateManager.changeState(States.CRAFT);
-        }
+        this.craft(lastKeyPressed)
+
         if(!this.PlayerStateManager.acted)
         {
-            if(!this.player.body.onFloor())
+            
+            if(this.PlayerStateManager.canClimb && !this.player.body.onFloor())
             {
-                this.PlayerStateManager.changeState(States.FALL);
+                this.PlayerStateManager.changeState(States.CLIMB, Directions.IDLE);
+            }
+            else if(this.player.body.onFloor())
+            {
+                this.PlayerStateManager.changeState(States.IDLE);
             }
             else
             {
-                this.PlayerStateManager.changeState(States.IDLE);
+                this.PlayerStateManager.changeState(States.FALL);
             }
         }
         
@@ -771,8 +801,15 @@ export class Climb extends PlayerState {
         }
         else
         {
-            this.currentFrame = this.player.anims.currentFrame;
-            this.player.anims.pause();
+            if(["climbUp", "climbDown"].includes(this.player.anims.currentAnim.key))
+            {
+                this.currentFrame = this.player.anims.currentFrame;
+                this.player.anims.pause();
+            }
+            else
+            {
+                this.player.anims.play("climbIdle")
+            }
             this.player.setVelocityY(0);
         }
     }
@@ -799,7 +836,7 @@ export class Climb extends PlayerState {
                 }
             }
         }
-        if (cursors.right.isDown)
+        else if (cursors.right.isDown)
         {
             this.moveHorizontally(Directions.RIGHT);
             this.TileComponent.startMining("right");
@@ -819,10 +856,17 @@ export class Climb extends PlayerState {
                 }
             }
         }
+        else
+        {
+            //If not left or right are down
+            this.player.setAccelerationX(0);
+            this.player.setVelocityX(0);
+        }
+
         if(cursors.up.isDown)
         {
-            let tile = this.TileComponent.getItemAtPlayer();
-            if(tile && tile.index == 0)
+            
+            if(this.PlayerStateManager.canClimb)
             {
                 this.PlayerStateManager.changeState(States.CLIMB, Directions.UP);
             }
@@ -833,7 +877,7 @@ export class Climb extends PlayerState {
         }
         if(cursors.down.isDown)
         {
-            let tile = this.TileComponent.getItemAtPlayer();
+            
             if(this.player.body.onFloor())
             {
                 this.TileComponent.startMining("down");
@@ -842,20 +886,16 @@ export class Climb extends PlayerState {
                     this.PlayerStateManager.changeState(States.MINE, Directions.DOWN);
                 }
             }
-            if(tile && tile.index == 0)
+            if(this.PlayerStateManager.canClimb)
             {
                 this.PlayerStateManager.changeState(States.CLIMB, Directions.DOWN);
             }
         }
-        if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.Q)
-        {
-            this.PlayerStateManager.changeState(States.CRAFT);
-        }
-
+        this.craft(lastKeyPressed)
         if(!this.PlayerStateManager.acted)
         {
-            let tile = this.TileComponent.getItemAtPlayer();
-            if(tile && tile.index == 0 && !this.player.body.onFloor())
+            
+            if(this.PlayerStateManager.canClimb && !this.player.body.onFloor())
             {
                 this.PlayerStateManager.changeState(States.CLIMB, Directions.IDLE);
             }
@@ -879,3 +919,4 @@ export class Climb extends PlayerState {
         }
     }
 }
+

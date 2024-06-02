@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import PlayerStateManager from './PlayerStateManager';
 import TileComponent from './TileComponent';
+import {Items} from './PlayerStateClasses';
 
 class GameScene extends Phaser.Scene
 {
@@ -53,8 +54,6 @@ class GameScene extends Phaser.Scene
         this.itemLayer.setScale(2.35,2.35)
         this.itemLayer.x = 0;
         this.itemLayer.y = 500;
-
-        this.itemLayer.putTileAt(0, 0, 0);
 
         let groundTileset = this.map.addTilesetImage('tiles', null, 16, 16);
         this.groundLayer = this.map.createBlankLayer('groundLayer', groundTileset);
@@ -114,14 +113,36 @@ class GameScene extends Phaser.Scene
 
         //Adding key presses
         this.input.keyboard.on('keydown', this.handleKeyPress, this);
+
+        //Items player overlap
+        this.physics.add.overlap(this.player, this.itemLayer, this.canClimb, null, this);
     
     }
 
     update () 
     {
         this.PlayerStateManager.update(this.cursors, this.lastKeyPressed);
-        this.lastKeyPressed = null;
         // Reset the lastKeyPressed after processing
+        this.lastKeyPressed = null;
+    }
+    canClimb(player, tile)
+    {
+        let vec = this.itemLayer.tileToWorldXY(tile.x, tile.y);
+        let width = this.itemLayer.tileToWorldX(1) - this.itemLayer.tileToWorldX(0);
+        let height = this.itemLayer.tileToWorldY(1) - this.itemLayer.tileToWorldY(0);
+        let left = vec.x;
+        let right = vec.x + width;
+        let top = vec.y;
+        let bottom = top + height;
+        if(tile.index == Items.LADDER &&
+            this.player.body.left>=left && 
+            this.player.body.right<= right &&
+            this.player.body.bottom - Math.floor(this.player.body.height/3) > top &&
+            this.player.body.top + Math.floor(this.player.body.height/3) < bottom)
+        {
+            
+            this.PlayerStateManager.canClimb = true;
+        }
     }
     handleKeyPress(event)
     {
@@ -190,6 +211,13 @@ class GameScene extends Phaser.Scene
             frames: this.anims.generateFrameNumbers('climb', { start: 5, end: 0 }),
             frameRate: 10,
             repeat: -1
+        });
+        this.anims.create({
+            key: "climbIdle",
+            frames: [
+                { key: 'climb', frame: 0}
+            ],
+            frameRate: 5
         });
     }
     updateGold(material)
