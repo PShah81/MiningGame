@@ -131,7 +131,8 @@ class GameScene extends Phaser.Scene
 
         this.physics.add.collider(this.dynamiteColliderGroup, this.groundLayer);
 
-        this.physics.add.overlap(this.explosionOverlapGroup, this.groundLayer, this.removeTiles, null, this);
+        this.physics.add.overlap(this.explosionOverlapGroup, this.groundLayer, this.removeGround, null, this);
+        this.physics.add.overlap(this.explosionOverlapGroup, this.itemLayer, this.removeItems, null, this);
     }
 
     update () 
@@ -159,9 +160,13 @@ class GameScene extends Phaser.Scene
             this.PlayerStateManager.canClimb = true;
         }
     }
-    removeTiles(explosion, tile)
+    removeGround(explosion, groundTile)
     {
-        this.groundLayer.removeTileAt(tile.x,tile.y)
+        this.groundLayer.removeTileAt(groundTile.x,groundTile.y);
+    }
+    removeItems(explosion, itemsTile)
+    {
+        this.itemLayer.removeTileAt(itemsTile.x,itemsTile.y);
     }
     handleKeyPress(event)
     {
