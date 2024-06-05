@@ -7,8 +7,7 @@ export const States = {
     JUMP: 4,
     FALL: 5,
     LAND: 6,
-    CRAFT: 7,
-    CLIMB: 8,
+    CLIMB: 7,
 }
 export const Directions = {
     LEFT: 0,
@@ -54,17 +53,46 @@ class PlayerState {
     }
     craft(lastKeyPressed)
     {
-        //Craft Ladder
+        let itemIndex = -1;
         if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.ONE)
         {
-            let props = {"itemIndex": Items.LADDER};
-            this.PlayerStateManager.changeState(States.CRAFT, null, props);
+            itemIndex = Items.LADDER;
         }
         else if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.TWO)
         {
-            let props = {"itemIndex": Items.TORCH};
-            this.PlayerStateManager.changeState(States.CRAFT, null, props);
+            itemIndex = Items.TORCH;
         }
+        if(itemIndex != -1)
+        {
+            this.TileComponent.placeItem(itemIndex);
+        }
+    }
+    dropDynamite(lastKeyPressed)
+    {
+        if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.THREE)
+        {
+            let [x,y] = this.TileComponent.getCenter(this.player);
+            let dynamite = this.scene.physics.add.sprite(x, y, "dynamite");
+            this.scene.dynamiteColliderGroup.add(dynamite);
+            dynamite.anims.play("dynamite", true);
+            let explosion;
+            
+            dynamite.on('animationcomplete-dynamite', () =>{
+                let x = dynamite.x;
+                let y = dynamite.y;
+                dynamite.destroy();
+                explosion = this.scene.physics.add.sprite(x, y, "explosion");
+                this.scene.explosionOverlapGroup.add(explosion);
+                explosion.body.setAllowGravity(false);
+                explosion.body.setVelocityY(0);
+                explosion.setScale(3);
+                explosion.anims.play("explosion", true);
+                explosion.on('animationcomplete-explosion', function() {
+                    explosion.destroy()
+                });
+            });
+        }
+        
     }
 }
 
@@ -129,7 +157,8 @@ export class Idle extends PlayerState {
                 this.PlayerStateManager.changeState(States.CLIMB, Directions.DOWN);
             }
         }
-        this.craft(lastKeyPressed)
+        this.craft(lastKeyPressed);
+        this.dropDynamite(lastKeyPressed);
         if(!this.PlayerStateManager.acted)
         {
             this.PlayerStateManager.changeState(States.IDLE, null);
@@ -222,7 +251,8 @@ export class Walk extends PlayerState {
                 this.PlayerStateManager.changeState(States.CLIMB, Directions.DOWN);
             }
         }
-        this.craft(lastKeyPressed)
+        this.craft(lastKeyPressed);
+        this.dropDynamite(lastKeyPressed);
 
         if(!this.PlayerStateManager.acted)
         {
@@ -324,7 +354,8 @@ export class Run extends PlayerState {
             }
         }
         
-        this.craft(lastKeyPressed)
+        this.craft(lastKeyPressed);
+        this.dropDynamite(lastKeyPressed);
 
         if(!this.PlayerStateManager.acted)
         {
@@ -420,8 +451,6 @@ export class Mine extends PlayerState {
                 this.PlayerStateManager.changeState(States.CLIMB, Directions.DOWN);
             }
         }
-        
-        this.craft(lastKeyPressed)
 
         if(!this.PlayerStateManager.acted)
         {
@@ -500,6 +529,7 @@ export class Jump extends PlayerState {
         }
         
         this.craft(lastKeyPressed)
+        this.dropDynamite(lastKeyPressed);
     }
 }
 
@@ -562,6 +592,7 @@ export class Fall extends PlayerState {
         }
         
         this.craft(lastKeyPressed)
+        this.dropDynamite(lastKeyPressed);
     }
 }
 
@@ -578,6 +609,7 @@ export class Land extends PlayerState {
         this.nextProps = {};
         this.player.anims.play("land", true).on('animationcomplete-land', 
         ()=>{this.PlayerStateManager.changeState(this.nextState, this.nextDirection, this.nextProps)}, this);
+        console.log("here")
     }
     update(cursors, lastKeyPressed)
     {
@@ -638,20 +670,8 @@ export class Land extends PlayerState {
                 this.nextDirection = Directions.DOWN;
             }
         }
-        //CRAFT LADDER
-        if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.ONE)
-        {
-            this.nextState = States.CRAFT;
-            this.nextDirection = null;
-            this.nextProps.itemIndex = Items.LADDER;
-        }
-        else if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.TWO)
-        {
-            this.nextState = States.CRAFT;
-            this.nextDirection = null;
-            this.nextProps.itemIndex = Items.TORCH;
-        }
-
+        this.craft(lastKeyPressed)
+        this.dropDynamite(lastKeyPressed);
 
         if(this.nextState == States.IDLE)
         {
@@ -668,100 +688,6 @@ export class Land extends PlayerState {
         }
     }
 
-}
-
-export class Craft extends PlayerState {
-    enter(direction, props)
-    {
-        this.TileComponent.placeItem(props.itemIndex);
-    }
-    update(cursors, lastKeyPressed)
-    {
-        let velocity = this.player.body.velocity;
-        if (cursors.left.isDown)
-        {
-            this.TileComponent.startMining("left");
-            if(this.scene.miningCooldown && this.scene.currentMiningDirection == "left")
-            {
-                this.PlayerStateManager.changeState(States.MINE, Directions.LEFT);
-            }
-            else if(this.player.body.onFloor())
-            {
-                if(velocity.x < -200)
-                {
-                    this.PlayerStateManager.changeState(States.RUN, Directions.LEFT);
-                }
-                else
-                {
-                    this.PlayerStateManager.changeState(States.WALK, Directions.LEFT);
-                }
-            }
-        }
-        if (cursors.right.isDown)
-        {
-            this.TileComponent.startMining("right");
-            if(this.scene.miningCooldown && this.scene.currentMiningDirection == "right")
-            {
-                this.PlayerStateManager.changeState(States.MINE, Directions.RIGHT);
-            }
-            else if(this.player.body.onFloor())
-            {
-                if(velocity.x > 200)
-                {
-                    this.PlayerStateManager.changeState(States.RUN, Directions.RIGHT);
-                }
-                else
-                {
-                    this.PlayerStateManager.changeState(States.WALK, Directions.RIGHT);
-                }
-            }
-        }
-        if(cursors.up.isDown)
-        {
-            
-            if(this.PlayerStateManager.canClimb)
-            {
-                this.PlayerStateManager.changeState(States.CLIMB, Directions.UP);
-            }
-            else if(this.player.body.onFloor())
-            {
-                this.PlayerStateManager.changeState(States.JUMP);
-            }
-        }
-        if(cursors.down.isDown)
-        {
-            this.TileComponent.startMining("down");
-            
-            if(this.scene.miningCooldown && this.scene.currentMiningDirection == "down" && this.player.body.onFloor())
-            {
-                this.PlayerStateManager.changeState(States.MINE, Directions.DOWN);
-            }
-            else if(this.PlayerStateManager.canClimb)
-            {
-                this.PlayerStateManager.changeState(States.CLIMB, Directions.DOWN);
-            }
-        }
-
-        this.craft(lastKeyPressed)
-
-        if(!this.PlayerStateManager.acted)
-        {
-            
-            if(this.PlayerStateManager.canClimb && !this.player.body.onFloor())
-            {
-                this.PlayerStateManager.changeState(States.CLIMB, Directions.IDLE);
-            }
-            else if(this.player.body.onFloor())
-            {
-                this.PlayerStateManager.changeState(States.IDLE);
-            }
-            else
-            {
-                this.PlayerStateManager.changeState(States.FALL);
-            }
-        }
-        
-    }
 }
 
 export class Climb extends PlayerState {
@@ -892,6 +818,7 @@ export class Climb extends PlayerState {
             }
         }
         this.craft(lastKeyPressed)
+        this.dropDynamite(lastKeyPressed);
         if(!this.PlayerStateManager.acted)
         {
             
@@ -919,4 +846,3 @@ export class Climb extends PlayerState {
         }
     }
 }
-

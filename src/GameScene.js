@@ -24,6 +24,8 @@ class GameScene extends Phaser.Scene
     {
         this.load.spritesheet('tiles', '../assets/sprites/ores.png', { frameWidth: 16, frameHeight: 16});
         this.load.spritesheet('items', '../assets/sprites/Extras/items.png', { frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet('dynamite', '../assets/sprites/Extras/dynamite.png', {frameWidth: 22, frameHeight: 24});
+        this.load.spritesheet('explosion', '../assets/sprites/Extras/explosion.png', {frameWidth: 32, frameHeight: 32})
         this.load.image('sky', '../assets/sprites/sky.png');
         this.load.image('underground', '../assets/sprites/background.png');
         this.load.image('goldImage', '../assets/sprites/gold.png');
@@ -117,6 +119,19 @@ class GameScene extends Phaser.Scene
         //Items player overlap
         this.physics.add.overlap(this.player, this.itemLayer, this.canClimb, null, this);
     
+        this.dynamiteColliderGroup = this.physics.add.group({
+            defaultKey: 'dynamite',
+            collideWorldBounds: true
+        })
+
+        this.explosionOverlapGroup = this.physics.add.group({
+            defaultKey: 'explosion',
+            collideWorldBounds: true
+        })
+
+        this.physics.add.collider(this.dynamiteColliderGroup, this.groundLayer);
+
+        this.physics.add.overlap(this.explosionOverlapGroup, this.groundLayer, this.removeTiles, null, this);
     }
 
     update () 
@@ -137,12 +152,16 @@ class GameScene extends Phaser.Scene
         if(tile.index == Items.LADDER &&
             this.player.body.left>=left && 
             this.player.body.right<= right &&
-            this.player.body.bottom - Math.floor(this.player.body.height/3) > top &&
-            this.player.body.top + Math.floor(this.player.body.height/3) < bottom)
+            this.player.body.bottom - Math.floor(this.player.body.height/4) > top &&
+            this.player.body.top + Math.floor(this.player.body.height/4) < bottom)
         {
             
             this.PlayerStateManager.canClimb = true;
         }
+    }
+    removeTiles(explosion, tile)
+    {
+        this.groundLayer.removeTileAt(tile.x,tile.y)
     }
     handleKeyPress(event)
     {
@@ -218,6 +237,16 @@ class GameScene extends Phaser.Scene
                 { key: 'climb', frame: 0}
             ],
             frameRate: 5
+        });
+        this.anims.create({
+            key: "dynamite",
+            frames: this.anims.generateFrameNumbers('dynamite', { start: 0, end: 4 }),
+            frameRate: 3
+        });
+        this.anims.create({
+            key: "explosion",
+            frames: this.anims.generateFrameNumbers('explosion', { start: 0, end: 4 }),
+            frameRate: 3
         });
     }
     updateGold(material)
