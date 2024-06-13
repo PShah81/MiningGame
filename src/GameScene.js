@@ -35,6 +35,7 @@ class GameScene extends Phaser.Scene
         this.load.spritesheet("jump", '../assets/sprites/3 SteamMan/jump.png', { frameWidth: 48, frameHeight: 48});
         this.load.spritesheet("run", '../assets/sprites/3 SteamMan/run.png', { frameWidth: 48, frameHeight: 48});
         this.load.spritesheet("climb", '../assets/sprites/3 SteamMan/climb.png', { frameWidth: 48, frameHeight: 48});
+        this.load.spritesheet("attack", '../assets/sprites/3 SteamMan/attack.png', { frameWidth: 48, frameHeight: 48});
     }
 
     create ()
@@ -101,6 +102,7 @@ class GameScene extends Phaser.Scene
 
         //  Input Events
         this.cursors = this.input.keyboard.createCursorKeys();
+        this.cursors.SPACE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
         // Create Animations
         this.createAnimations();
@@ -195,12 +197,12 @@ class GameScene extends Phaser.Scene
         this.anims.create({
             key: "jump",
             frames: [
-                { key: 'jump', frame: 0, duration: 30 },
-                { key: 'jump', frame: 1, duration: 50 }, 
-                { key: 'jump', frame: 2, duration: 50 }, 
-                { key: 'jump', frame: 3, duration: 1000 }
+                { key: 'jump', frame: 0},
+                { key: 'jump', frame: 1}, 
+                { key: 'jump', frame: 2},
+                { key: 'jump', frame: 3}
             ],
-            frameRate: 5
+            frameRate: 20
         });
         this.anims.create({
             key: "land",
@@ -253,6 +255,11 @@ class GameScene extends Phaser.Scene
             frames: this.anims.generateFrameNumbers('explosion', { start: 0, end: 4 }),
             frameRate: 3
         });
+        this.anims.create({
+            key: "attack",
+            frames: this.anims.generateFrameNumbers('attack', { start: 0, end: 5 }),
+            frameRate: 10
+        })
     }
     updateGold(material)
     {

@@ -1,4 +1,4 @@
-import {Idle, Walk, Run, Mine, Jump, Fall, Land, Climb} from './PlayerStateClasses';
+import {Idle, Walk, Run, Mine, Jump, Fall, Land, Climb, Attack} from './PlayerStateClasses';
 class PlayerStateManager
 {
     constructor(scene, player, TileComponent)
@@ -16,7 +16,8 @@ class PlayerStateManager
             new Jump(this.player, this.scene, this.TileComponent, this), 
             new Fall(this.player, this.scene, this.TileComponent, this),
             new Land(this.player, this.scene, this.TileComponent, this),
-            new Climb(this.player, this.scene, this.TileComponent, this)
+            new Climb(this.player, this.scene, this.TileComponent, this),
+            new Attack(this.player, this.scene, this.TileComponent, this)
         ];
         this.currentState = this.states[0];
         this.currentDirection = null;
