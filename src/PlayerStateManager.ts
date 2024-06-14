@@ -1,12 +1,20 @@
-import {Idle, Walk, Run, Mine, Jump, Fall, Land, Climb, Attack} from './PlayerStateClasses';
+import GameScene from './GameScene';
+import {PlayerState, Idle, Walk, Run, Mine, Jump, Fall, Land, Climb, Attack, Directions} from './PlayerStateClasses';
+import TileComponent from './TileComponent';
 class PlayerStateManager
 {
+    scene: GameScene
+    player: Phaser.Physics.Arcade.Sprite | null
+    TileComponent: TileComponent | null
+    canClimb: boolean
+    states: PlayerState[]
+    currentState: PlayerState
+    currentDirection: Directions | null
     constructor(scene, player, TileComponent)
     {
         this.TileComponent = TileComponent;
         this.player = player;
         this.scene = scene;
-        this.acted = false;
         this.canClimb = false;
         this.states = [
             new Idle(this.player, this.scene, this.TileComponent, this), 
@@ -21,18 +29,16 @@ class PlayerStateManager
         ];
         this.currentState = this.states[0];
         this.currentDirection = null;
-        this.currentState.enter();
+        this.currentState.enter(this.currentDirection);
         
     }
     update(cursors, lastKeyPressed)
     {
-        this.acted = false;
         this.currentState.update(cursors, lastKeyPressed);
     }
-    changeState(state, direction, props)
+    changeState(state, direction)
     {
         this.canClimb = false;
-        this.acted = true;
         let newState = this.states[state];
         newState.direction = direction;
         if(newState != this.currentState || direction != this.currentDirection)
@@ -40,7 +46,7 @@ class PlayerStateManager
             this.currentState.exit(state);
             this.currentState = newState;
             this.currentDirection = direction;
-            this.currentState.enter(direction, props);
+            this.currentState.enter(direction);
         }
 
     }

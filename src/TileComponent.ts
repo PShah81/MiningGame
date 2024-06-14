@@ -1,21 +1,28 @@
+import GameScene from "./GameScene";
+import { Directions } from "./PlayerStateClasses";
+
+export enum oreMapping {
+    GRASS = 0,
+    DIRT = 1,
+    STONE = 2,
+    COAL = 3,
+    IRON = 4,
+    COPPER = 5,
+    SILVER = 6,
+    GOLD = 7,
+    DIAMOND = 8,
+    EMERALD = 9
+}
 class TileComponent {
+    scene: GameScene
+    player: Phaser.Physics.Arcade.Sprite | null
+    itemLayer: Phaser.Tilemaps.TilemapLayer | null
+    groundLayer: Phaser.Tilemaps.TilemapLayer | null
     constructor(scene) {
         this.scene = scene;
         this.player = this.scene.player;
         this.groundLayer = this.scene.groundLayer;
         this.itemLayer = this.scene.itemLayer;
-        this.tileIndexMapping = {
-            0: "grass",
-            1: "dirt",
-            2: "stone",
-            3: "coal",
-            4: "iron",
-            5: "copper",
-            6: "silver",
-            7: "gold",
-            8: "diamond",
-            9: "emerald"
-        }
     }
     getCenter(object)
     {
@@ -28,8 +35,13 @@ class TileComponent {
     checkTileCollision(direction, layer) 
     {
         let tile;
-        let width = this.player.body.width;
-        let height = this.player.body.height;
+        let width;
+        let height;
+        if(this.player && this.player.body)
+        {
+            width = this.player.body.width;
+            height = this.player.body.height;
+        }
         let [x,y] = this.getCenter(this.player);
         if (direction == "left")
         {
@@ -58,8 +70,11 @@ class TileComponent {
                 args: [tile.x, tile.y, tile.index],
                 callback: (x,y,index) => {
                     // Remove tile at coords
-                    this.groundLayer.removeTileAt(x,y)
-                    this.scene.updateGold(this.tileIndexMapping[index])
+                    if(this.groundLayer)
+                    {
+                        this.groundLayer.removeTileAt(x,y)
+                    }
+                    this.scene.updateGold(oreMapping[index])
                     this.scene.miningCooldown = null
                     this.scene.miningTile = null
                 },
@@ -91,7 +106,7 @@ class TileComponent {
     {
         if(this.scene.miningCooldown)
         {
-            console.log("cooldown stopped")
+            console.log("cooldown stopped");
             this.scene.miningCooldown.remove(false);
             this.scene.miningCooldown = null;
             this.scene.miningTile = null;
@@ -101,14 +116,22 @@ class TileComponent {
     getItemAtPlayer()
     {
         let [x,y] = this.getCenter(this.player);
-        let tile = this.itemLayer.getTileAtWorldXY(x, y);
+        let tile;
+        if(this.itemLayer)
+        {
+            tile = this.itemLayer.getTileAtWorldXY(x, y);
+        }
         return tile
     }
     placeItem(tileIndex)
     {
         let [x,y] = this.getCenter(this.player);
-        let tile = this.itemLayer.getTileAtWorldXY(x, y);
-        if(!tile)
+        let tile;
+        if(this.itemLayer)
+        {
+            tile = this.itemLayer.getTileAtWorldXY(x, y);
+        }
+        if(!tile && this.itemLayer)
         {
             this.itemLayer.putTileAtWorldXY(tileIndex, x, y);
         }
@@ -164,7 +187,7 @@ class TileComponent {
                 9: 1
             },
         ]
-        let weightedArray = []
+        let weightedArray: integer[] = [];
         for (let y = 0; y < height; y++) {
             if (y == 0)
             {
@@ -194,17 +217,20 @@ class TileComponent {
                 // Generate a random tile index
                 let weightedArrayIndex  = Math.floor(Math.random() * weightedArray.length) // Get an index in the weighted array
                 let tileIndex = weightedArray[weightedArrayIndex];
-                this.groundLayer.putTileAt(tileIndex, x, y);
+                if(this.groundLayer)
+                {
+                    this.groundLayer.putTileAt(tileIndex, x, y);
+                }
             }
         }
     }
     generateFrequencyArr(distribution)
     {
-        let weightedArray = [];
+        let weightedArray: integer[] = [];
         for (let number in distribution) {
             let frequency = distribution[number];
             for (let i = 0; i < frequency; i++) {
-                weightedArray.push(Number(number));
+                weightedArray.push(parseInt(number));
             }
         }
         return weightedArray;

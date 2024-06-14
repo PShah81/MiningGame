@@ -2,22 +2,55 @@ import Phaser from 'phaser'
 import PlayerStateManager from './PlayerStateManager';
 import TileComponent from './TileComponent';
 import {Items} from './PlayerStateClasses';
-
+enum orePrices {
+    GRASS = 0,
+    DIRT = 0,
+    STONE = 0,
+    COAL = 0.1,
+    IRON = 0.3,
+    COPPER = 0.4,
+    SILVER = 0.5,
+    GOLD = 1,
+    DIAMOND = 3,
+    EMERALD = 10
+}
 class GameScene extends Phaser.Scene
 {
+    miningRate: integer
+    gold: integer
+    goldText: Phaser.GameObjects.Text | null
+    miningCooldown: Phaser.Time.TimerEvent | null
+    miningTile: Phaser.Tilemaps.Tile | null
+    currentMiningDirection: string | null
+    lastKeyPressed: Phaser.Input.Keyboard.Key | null
+    map: Phaser.Tilemaps.Tilemap | null
+    itemLayer: Phaser.Tilemaps.TilemapLayer | null
+    groundLayer: Phaser.Tilemaps.TilemapLayer | null
+    TileComponent: TileComponent | null
+    player: Phaser.Physics.Arcade.Sprite | null
+    cursors: Phaser.Types.Input.Keyboard.CursorKeys | null
+    dynamiteColliderGroup: Phaser.Physics.Arcade.Group | null
+    explosionOverlapGroup: Phaser.Physics.Arcade.Group | null
+    PlayerStateManager: PlayerStateManager | null
     constructor()
     {
         super('game-scene');
         this.miningRate = 750;
         this.gold = 0;
-        this.lastActionState = null;
-        this.actionState = null;
-        this.movementState = null;
+        this.goldText = null;
         this.miningCooldown = null;
         this.miningTile = null;
         this.currentMiningDirection = null;
         this.lastKeyPressed = null;
-
+        this.map = null;
+        this.itemLayer = null;
+        this.groundLayer = null;
+        this.TileComponent = null;
+        this.player = null;
+        this.cursors = null;
+        this.dynamiteColliderGroup = null;
+        this.explosionOverlapGroup = null;
+        this.PlayerStateManager = null;
     }
 
     preload ()
@@ -52,19 +85,34 @@ class GameScene extends Phaser.Scene
         this.map = this.make.tilemap({ width: 25, height: 200, tileWidth: 16, tileHeight: 16});
 
 
-        let itemTileset = this.map.addTilesetImage('items', null, 16, 16);
-        this.itemLayer = this.map.createBlankLayer('itemLayer', itemTileset);
-        this.itemLayer.setScale(2.35,2.35)
-        this.itemLayer.x = 0;
-        this.itemLayer.y = 500;
+        let itemTileset = this.map.addTilesetImage('items', undefined, 16, 16);
+        if(itemTileset)
+        {
+            this.itemLayer = this.map.createBlankLayer('itemLayer', itemTileset);
+        }
+        else
+        {
+            console.log("Failed to load the tileset image");
+        }
+        if(this.itemLayer)
+        {
+            this.itemLayer.setScale(2.35,2.35);
+            this.itemLayer.x = 0;
+            this.itemLayer.y = 500;
+        }
+       
 
-        let groundTileset = this.map.addTilesetImage('tiles', null, 16, 16);
-        this.groundLayer = this.map.createBlankLayer('groundLayer', groundTileset);
-        this.groundLayer.setScale(2.35,2.35);
-        this.groundLayer.x = 0;
-        this.groundLayer.y = 500;
-
-        
+        let groundTileset = this.map.addTilesetImage('tiles', undefined, 16, 16);
+        if(groundTileset)
+        {
+            this.groundLayer = this.map.createBlankLayer('groundLayer', groundTileset);
+        }
+        if(this.groundLayer)
+        {
+            this.groundLayer.setScale(2.35,2.35);
+            this.groundLayer.x = 0;
+            this.groundLayer.y = 500;    
+        }
 
         this.TileComponent = new TileComponent(this);
 
@@ -73,8 +121,7 @@ class GameScene extends Phaser.Scene
 
         // Gold Bar text
         this.goldText = this.add.text(this.game.canvas.width-50, 5, String(this.gold.toFixed(1)), {
-            fontSize: '32px',
-            fill: '#ffffff'
+            fontSize: '32px'
         });
         this.goldText.setOrigin(1, 0);
         //Keep it in the same position relative to the viewport
@@ -90,19 +137,46 @@ class GameScene extends Phaser.Scene
 
         //Player code
         this.player = this.physics.add.sprite(400, 300, "idle").setScale(1);
-        this.player.body.setSize(26,36);
-        this.player.body.setOffset(12, 12);
-        this.player.setMaxVelocity(250);
+        if(this.player.body)
+        {
+            this.player.body.setSize(26,36);
+            this.player.body.setOffset(12, 12);
+            this.player.setMaxVelocity(250);
+        }
 
 
-        //Collision Code
+        ////Collision Code
         this.player.setCollideWorldBounds(true);
-        this.groundLayer.setCollisionByExclusion([-1]);
-        this.physics.add.collider(this.player, this.groundLayer);
+        this.dynamiteColliderGroup = this.physics.add.group({
+            defaultKey: 'dynamite',
+            collideWorldBounds: true
+        })
 
-        //  Input Events
-        this.cursors = this.input.keyboard.createCursorKeys();
-        this.cursors.SPACE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        this.explosionOverlapGroup = this.physics.add.group({
+            defaultKey: 'explosion',
+            collideWorldBounds: true
+        })
+        if(this.groundLayer)
+        {
+            this.groundLayer.setCollisionByExclusion([-1]);
+            this.physics.add.collider(this.player, this.groundLayer);
+            this.physics.add.collider(this.dynamiteColliderGroup, this.groundLayer);
+            this.physics.add.overlap(this.explosionOverlapGroup, this.groundLayer, this.removeGround, undefined, this);
+        }
+        if(this.itemLayer)
+        {
+            this.physics.add.overlap(this.player, this.itemLayer, this.canClimb, undefined, this);
+            this.physics.add.overlap(this.explosionOverlapGroup, this.itemLayer, this.removeItems, undefined, this);
+        }
+
+
+        ////Input Events
+        if(this.input && this.input.keyboard)
+        {
+            this.cursors = this.input.keyboard.createCursorKeys();
+            //Adding key presses
+            this.input.keyboard.on('keydown', this.handleKeyPress, this);
+        }
 
         // Create Animations
         this.createAnimations();
@@ -114,61 +188,56 @@ class GameScene extends Phaser.Scene
 
         this.TileComponent = new TileComponent(this);
         this.PlayerStateManager = new PlayerStateManager(this, this.player, this.TileComponent);
-
-        //Adding key presses
-        this.input.keyboard.on('keydown', this.handleKeyPress, this);
-
-        //Items player overlap
-        this.physics.add.overlap(this.player, this.itemLayer, this.canClimb, null, this);
-    
-        this.dynamiteColliderGroup = this.physics.add.group({
-            defaultKey: 'dynamite',
-            collideWorldBounds: true
-        })
-
-        this.explosionOverlapGroup = this.physics.add.group({
-            defaultKey: 'explosion',
-            collideWorldBounds: true
-        })
-
-        this.physics.add.collider(this.dynamiteColliderGroup, this.groundLayer);
-
-        this.physics.add.overlap(this.explosionOverlapGroup, this.groundLayer, this.removeGround, null, this);
-        this.physics.add.overlap(this.explosionOverlapGroup, this.itemLayer, this.removeItems, null, this);
     }
 
     update () 
     {
-        this.PlayerStateManager.update(this.cursors, this.lastKeyPressed);
+        if(this.PlayerStateManager)
+        {
+            this.PlayerStateManager.update(this.cursors, this.lastKeyPressed);
+        }
         // Reset the lastKeyPressed after processing
         this.lastKeyPressed = null;
     }
     canClimb(player, tile)
     {
-        let vec = this.itemLayer.tileToWorldXY(tile.x, tile.y);
-        let width = this.itemLayer.tileToWorldX(1) - this.itemLayer.tileToWorldX(0);
-        let height = this.itemLayer.tileToWorldY(1) - this.itemLayer.tileToWorldY(0);
-        let left = vec.x;
-        let right = vec.x + width;
-        let top = vec.y;
-        let bottom = top + height;
-        if(tile.index == Items.LADDER &&
-            this.player.body.left>=left && 
-            this.player.body.right<= right &&
-            this.player.body.bottom - Math.floor(this.player.body.height/4) > top &&
-            this.player.body.top + Math.floor(this.player.body.height/4) < bottom)
+        if(this.itemLayer)
         {
-            
-            this.PlayerStateManager.canClimb = true;
+            let vec = this.itemLayer.tileToWorldXY(tile.x, tile.y);
+            let width = this.itemLayer.tileToWorldX(1) - this.itemLayer.tileToWorldX(0);
+            let height = this.itemLayer.tileToWorldY(1) - this.itemLayer.tileToWorldY(0);
+            let left = vec.x;
+            let right = vec.x + width;
+            let top = vec.y;
+            let bottom = top + height;
+            if(tile.index == Items.LADDER &&
+                this.PlayerStateManager &&
+                this.player &&
+                this.player.body &&
+                this.player.body.left>=left && 
+                this.player.body.right<= right &&
+                this.player.body.bottom - Math.floor(this.player.body.height/4) > top &&
+                this.player.body.top + Math.floor(this.player.body.height/4) < bottom)
+            {
+                
+                this.PlayerStateManager.canClimb = true;
+            }
         }
+        
     }
     removeGround(explosion, groundTile)
     {
-        this.groundLayer.removeTileAt(groundTile.x,groundTile.y);
+        if(this.groundLayer)
+        {
+            this.groundLayer.removeTileAt(groundTile.x,groundTile.y);
+        }
     }
     removeItems(explosion, itemsTile)
     {
-        this.itemLayer.removeTileAt(itemsTile.x,itemsTile.y);
+        if(this.itemLayer)
+        {
+            this.itemLayer.removeTileAt(itemsTile.x,itemsTile.y);
+        }
     }
     handleKeyPress(event)
     {
@@ -263,20 +332,12 @@ class GameScene extends Phaser.Scene
     }
     updateGold(material)
     {
-        let priceChart = {
-            "grass": 0,
-            "dirt": 0,
-            "stone": 0,
-            "coal" : 0.1,
-            "iron" : 0.2,
-            "copper": 0.3,
-            "silver": 0.5,
-            "gold": 1,
-            "diamond": 3,
-            "emerald": 10
+        let price = orePrices[material];
+        this.gold += parseInt(price);
+        if(this.goldText)
+        {
+            this.goldText.setText(this.gold.toFixed(1));
         }
-        this.gold += (priceChart[material]);
-        this.goldText.setText(String(this.gold.toFixed(1)))
     }
 }
 

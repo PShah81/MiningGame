@@ -1,44 +1,55 @@
-import phaser from 'phaser';
-export const States = {
-    IDLE: 0,
-    WALK: 1,
-    RUN: 2,
-    MINE: 3,
-    JUMP: 4,
-    FALL: 5,
-    LAND: 6,
-    CLIMB: 7,
-    ATTACK: 8
+import TileComponent from "./TileComponent";
+import PlayerStateManager from "./PlayerStateManager";
+import GameScene from "./GameScene";
+export enum States{
+    IDLE = 0,
+    WALK = 1,
+    RUN = 2,
+    MINE = 3,
+    JUMP = 4,
+    FALL = 5,
+    LAND = 6,
+    CLIMB = 7,
+    ATTACK = 8
 }
-export const Directions = {
-    LEFT: 0,
-    RIGHT: 1,
-    UP: 2,
-    DOWN: 3,
-    IDLE: 4
+export enum Directions {
+    LEFT = 0,
+    RIGHT = 1,
+    UP = 2,
+    DOWN = 3,
+    IDLE = 4
 }
-export const Items = {
-    LADDER: 0,
-    TORCH: 1,
-    DYNAMITE: 2
+export enum Items {
+    LADDER = 0,
+    TORCH = 1,
+    DYNAMITE = 2
 }
 
 
 
-class PlayerState {
+export class PlayerState {
+
+    scene: GameScene
+    player: Phaser.Physics.Arcade.Sprite & {body: Phaser.Physics.Arcade.Body}
+    TileComponent: TileComponent
+    PlayerStateManager: PlayerStateManager
+    direction: Directions | null
+    finishedAnimation: Boolean
     constructor(player, scene, TileComponent, PlayerStateManager) {
         this.player = player;
         this.scene = scene;
         this.TileComponent = TileComponent;
         this.PlayerStateManager = PlayerStateManager;
+        this.direction = null;
+        this.finishedAnimation = false;
     }
 
-    enter() {}
-    exit() {}
-    update(cursors) {}
+    enter(direction) {}
+    exit(exitState) {}
+    update(cursors, lastKeyPressed) {}
     moveHorizontally(direction)
     {
-        let velocity = this.player.body.velocity;
+        let velocity = this.getPlayerVelocity();
         this.player.setAccelerationX(0);
         if(direction == Directions.LEFT)
         {
@@ -73,7 +84,10 @@ class PlayerState {
         {
             let [x,y] = this.TileComponent.getCenter(this.player);
             let dynamite = this.scene.physics.add.sprite(x, y, "dynamite");
-            this.scene.dynamiteColliderGroup.add(dynamite);
+            if(this.scene.dynamiteColliderGroup)
+            {
+                this.scene.dynamiteColliderGroup.add(dynamite);
+            }
             dynamite.anims.play("dynamite", true);
             let explosion;
             
@@ -82,7 +96,10 @@ class PlayerState {
                 let y = dynamite.y;
                 dynamite.destroy();
                 explosion = this.scene.physics.add.sprite(x, y, "explosion");
-                this.scene.explosionOverlapGroup.add(explosion);
+                if(this.scene.explosionOverlapGroup)
+                {
+                    this.scene.explosionOverlapGroup.add(explosion);
+                }
                 explosion.body.setAllowGravity(false);
                 explosion.body.setVelocityY(0);
                 explosion.setScale(3);
@@ -93,6 +110,21 @@ class PlayerState {
             });
         }
         
+    }
+    playerOnFloor()
+    {
+        if(this.player.body.onFloor())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    getPlayerVelocity()
+    {
+        return this.player.body.velocity
     }
 }
 
@@ -124,7 +156,7 @@ export class Idle extends PlayerState {
                 newState = States.MINE;
                 newDirection = Directions.LEFT;
             }
-            else if(this.player.body.onFloor())
+            else if(this.playerOnFloor())
             {
                 newState = States.WALK;
                 newDirection = Directions.LEFT;
@@ -138,14 +170,14 @@ export class Idle extends PlayerState {
                 newState = States.MINE;
                 newDirection = Directions.RIGHT;
             }
-            else if(this.player.body.onFloor())
+            else if(this.playerOnFloor())
             {
                 newState = States.WALK;
                 newDirection = Directions.RIGHT;
             }
         }
 
-        if(cursors.SPACE.isDown)
+        if(cursors.space.isDown)
         {
             newState = States.ATTACK;
         }
@@ -157,7 +189,7 @@ export class Idle extends PlayerState {
                 newState = States.CLIMB;
                 newDirection = Directions.UP;
             }
-            else if(this.player.body.onFloor())
+            else if(this.playerOnFloor())
             {
                 newState = States.JUMP;
             }
@@ -165,7 +197,7 @@ export class Idle extends PlayerState {
         if(cursors.down.isDown)
         {
             this.TileComponent.startMining("down");
-            if(this.scene.miningCooldown && this.scene.currentMiningDirection == "down" && this.player.body.onFloor())
+            if(this.scene.miningCooldown && this.scene.currentMiningDirection == "down" && this.playerOnFloor())
             {
                 newState = States.MINE;
                 newDirection = Directions.DOWN;
@@ -210,7 +242,7 @@ export class Walk extends PlayerState {
     {
         let newState;
         let newDirection;
-        let velocity = this.player.body.velocity;
+        let velocity = this.getPlayerVelocity();
 
         this.craft(lastKeyPressed);
         this.dropDynamite(lastKeyPressed);
@@ -223,7 +255,7 @@ export class Walk extends PlayerState {
                 newState = States.MINE;
                 newDirection = Directions.LEFT;
             }
-            else if(this.player.body.onFloor())
+            else if(this.playerOnFloor())
             {
                 if(velocity.x < -200)
                 {
@@ -245,7 +277,7 @@ export class Walk extends PlayerState {
                 newState = States.MINE;
                 newDirection = Directions.RIGHT;
             }
-            else if(this.player.body.onFloor())
+            else if(this.playerOnFloor())
             {
                 if(velocity.x > 200)
                 {
@@ -260,7 +292,7 @@ export class Walk extends PlayerState {
             }
         }
 
-        if(cursors.SPACE.isDown)
+        if(cursors.space.isDown)
         {
             newState = States.ATTACK;
         }
@@ -272,7 +304,7 @@ export class Walk extends PlayerState {
                 newState = States.CLIMB;
                 newDirection = Directions.UP;
             }
-            else if(this.player.body.onFloor())
+            else if(this.playerOnFloor())
             {
                 newState = States.JUMP;
             }
@@ -281,7 +313,7 @@ export class Walk extends PlayerState {
         {
             this.TileComponent.startMining("down");
             
-            if(this.scene.miningCooldown && this.scene.currentMiningDirection == "down" && this.player.body.onFloor())
+            if(this.scene.miningCooldown && this.scene.currentMiningDirection == "down" && this.playerOnFloor())
             {
                 newState = States.MINE;
                 newDirection = Directions.DOWN;
@@ -295,7 +327,7 @@ export class Walk extends PlayerState {
 
         if(!newState)
         {
-            if(!this.player.body.onFloor())
+            if(!this.playerOnFloor())
             {
                 newState = States.FALL;
             }
@@ -331,7 +363,7 @@ export class Run extends PlayerState {
     {
         let newState;
         let newDirection;
-        let velocity = this.player.body.velocity;
+        let velocity = this.getPlayerVelocity();
 
         this.craft(lastKeyPressed);
         this.dropDynamite(lastKeyPressed);
@@ -344,7 +376,7 @@ export class Run extends PlayerState {
                 newState = States.MINE;
                 newDirection = Directions.LEFT;
             }
-            else if(this.player.body.onFloor())
+            else if(this.playerOnFloor())
             {
                 if(velocity.x < -200)
                 {
@@ -366,7 +398,7 @@ export class Run extends PlayerState {
                 newState = States.MINE;
                 newDirection = Directions.RIGHT;
             }
-            else if(this.player.body.onFloor())
+            else if(this.playerOnFloor())
             {
                 if(velocity.x > 200)
                 {
@@ -381,7 +413,7 @@ export class Run extends PlayerState {
             }
         }
 
-        if(cursors.SPACE.isDown)
+        if(cursors.space.isDown)
         {
             newState = States.ATTACK;
         }
@@ -393,7 +425,7 @@ export class Run extends PlayerState {
                 newState = States.CLIMB;
                 newDirection = Directions.UP;
             }
-            else if(this.player.body.onFloor())
+            else if(this.playerOnFloor())
             {
                 newState = States.JUMP;
             }
@@ -402,7 +434,7 @@ export class Run extends PlayerState {
         {
             this.TileComponent.startMining("down");
             
-            if(this.scene.miningCooldown && this.scene.currentMiningDirection == "down" && this.player.body.onFloor())
+            if(this.scene.miningCooldown && this.scene.currentMiningDirection == "down" && this.playerOnFloor())
             {
                 newState = States.MINE;
                 newDirection = Directions.DOWN;
@@ -416,7 +448,7 @@ export class Run extends PlayerState {
 
         if(!newState)
         {
-            if(!this.player.body.onFloor())
+            if(!this.playerOnFloor())
             {
                 newState = States.FALL;
             }
@@ -477,7 +509,7 @@ export class Mine extends PlayerState {
                 newState = States.MINE;
                 newDirection = Directions.LEFT;
             }
-            else if(this.player.body.onFloor())
+            else if(this.playerOnFloor())
             {
                 newState = States.WALK;
                 newDirection = Directions.LEFT;
@@ -490,14 +522,14 @@ export class Mine extends PlayerState {
                 newState = States.MINE;
                 newDirection = Directions.RIGHT;
             }
-            else if(this.player.body.onFloor())
+            else if(this.playerOnFloor())
             {
                 newState = States.WALK;
                 newDirection = Directions.RIGHT;
             }
         }
 
-        if(cursors.SPACE.isDown)
+        if(cursors.space.isDown)
         {
             newState = States.ATTACK;
         }
@@ -509,14 +541,14 @@ export class Mine extends PlayerState {
                 newState = States.CLIMB;
                 newDirection = Directions.UP;
             }
-            else if(this.player.body.onFloor())
+            else if(this.playerOnFloor())
             {
                 newState = States.JUMP;
             }
         }
         if(cursors.down.isDown)
         {
-            if(this.scene.miningCooldown && this.scene.currentMiningDirection == "down" && this.player.body.onFloor())
+            if(this.scene.miningCooldown && this.scene.currentMiningDirection == "down" && this.playerOnFloor())
             {
                 newState = States.MINE;
                 newDirection = Directions.DOWN;
@@ -530,7 +562,7 @@ export class Mine extends PlayerState {
 
         if(!newState)
         {
-            if(!this.player.body.onFloor())
+            if(!this.playerOnFloor())
             {
                 newState = States.FALL;
             }
@@ -571,7 +603,7 @@ export class Jump extends PlayerState {
 
         if(this.finishedAnimation)
         {
-            if(this.player.body.onFloor())
+            if(this.playerOnFloor())
             {
                 newState = States.LAND;
             }
@@ -602,7 +634,7 @@ export class Jump extends PlayerState {
                 this.player.setVelocityX(0);
             }
 
-            if(cursors.SPACE.isDown)
+            if(cursors.space.isDown)
             {
                 newState = States.ATTACK;
             }
@@ -626,7 +658,7 @@ export class Jump extends PlayerState {
 
             if(!newState)
             {
-                if(!this.player.body.onFloor())
+                if(!this.playerOnFloor())
                 {
                     newState = States.FALL;
                 }
@@ -653,7 +685,6 @@ export class Fall extends PlayerState {
 
         this.craft(lastKeyPressed)
         this.dropDynamite(lastKeyPressed);
-
         if (cursors.left.isDown)
         {
             this.TileComponent.startMining("left");
@@ -681,7 +712,7 @@ export class Fall extends PlayerState {
             this.player.setVelocityX(0);
         }
 
-        if(cursors.SPACE.isDown)
+        if(cursors.space.isDown)
         {
             newState = States.ATTACK;
         }
@@ -703,13 +734,13 @@ export class Fall extends PlayerState {
             }
         }
 
-        if(this.player.body.onFloor())
+        if(this.playerOnFloor())
         {
             newState = States.LAND;
         }
         if(!newState)
         {
-            if(!this.player.body.onFloor())
+            if(!this.playerOnFloor())
             {
                 newState = States.FALL;
             }
@@ -747,7 +778,7 @@ export class Land extends PlayerState {
                     newState = States.MINE;
                     newDirection = Directions.LEFT;
                 }
-                else if(this.player.body.onFloor())
+                else if(this.playerOnFloor())
                 {
                     newState = States.WALK;
                     newDirection = Directions.LEFT;
@@ -761,14 +792,14 @@ export class Land extends PlayerState {
                     newState = States.MINE;
                     newDirection = Directions.RIGHT;
                 }
-                else if(this.player.body.onFloor())
+                else if(this.playerOnFloor())
                 {
                     newState = States.WALK;
                     newDirection = Directions.RIGHT;
                 }
             }
 
-            if(cursors.SPACE.isDown)
+            if(cursors.space.isDown)
             {
                 newState = States.ATTACK;
             }
@@ -781,7 +812,7 @@ export class Land extends PlayerState {
                     newState = States.CLIMB;
                     newDirection = Directions.UP;
                 }
-                else if(this.player.body.onFloor())
+                else if(this.playerOnFloor())
                 {
                     newState = States.JUMP;
                 }
@@ -790,7 +821,7 @@ export class Land extends PlayerState {
             {
                 this.TileComponent.startMining("down");
                 
-                if(this.scene.miningCooldown && this.scene.currentMiningDirection == "down" && this.player.body.onFloor())
+                if(this.scene.miningCooldown && this.scene.currentMiningDirection == "down" && this.playerOnFloor())
                 {
                     newState = States.MINE;
                     newDirection = Directions.DOWN;
@@ -804,7 +835,7 @@ export class Land extends PlayerState {
 
             if(!newState)
             {
-                if(!this.player.body.onFloor())
+                if(!this.playerOnFloor())
                 {
                     newState = States.FALL;
                 }
@@ -820,8 +851,10 @@ export class Land extends PlayerState {
 }
 
 export class Climb extends PlayerState {
+    currentFrame: integer | null
     constructor(player, scene, TileComponent, PlayerStateManager) {
         super(player, scene, TileComponent, PlayerStateManager);
+        this.currentFrame = null;
     }
 
     enter(direction)
@@ -833,7 +866,8 @@ export class Climb extends PlayerState {
         {
             if(this.currentFrame)
             {
-                this.player.anims.play({key:"climbUp", frame: this.currentFrame}, true);
+                
+                this.player.anims.play({key:"climbUp", startFrame: this.currentFrame}, true);
             }
             else
             {
@@ -846,7 +880,7 @@ export class Climb extends PlayerState {
         {
             if(this.currentFrame)
             {
-                this.player.anims.play({key:"climbDown", frame: this.currentFrame}, true);
+                this.player.anims.play({key:"climbDown", startFrame: this.currentFrame}, true);
             }
             else
             {
@@ -856,9 +890,9 @@ export class Climb extends PlayerState {
         }
         else
         {
-            if(["climbUp", "climbDown"].includes(this.player.anims.currentAnim.key))
+            if(this.player.anims.currentAnim && this.player.anims.currentFrame && ["climbUp", "climbDown"].includes(this.player.anims.currentAnim.key))
             {
-                this.currentFrame = this.player.anims.currentFrame;
+                this.currentFrame = this.player.anims.currentFrame.index;
                 this.player.anims.pause();
             }
             else
@@ -870,7 +904,7 @@ export class Climb extends PlayerState {
     }
     update(cursors, lastKeyPressed)
     {
-        let velocity = this.player.body.velocity;
+        let velocity = this.getPlayerVelocity();
         let newState;
         let newDirection;
 
@@ -886,7 +920,7 @@ export class Climb extends PlayerState {
                 newState = States.MINE;
                 newDirection = Directions.LEFT;
             }
-            else if(this.player.body.onFloor())
+            else if(this.playerOnFloor())
             {
                 if(velocity.x < -200)
                 {
@@ -909,7 +943,7 @@ export class Climb extends PlayerState {
                 newState = States.MINE;
                 newDirection = Directions.RIGHT;
             }
-            else if(this.player.body.onFloor())
+            else if(this.playerOnFloor())
             {
                 if(velocity.x > 200)
                 {
@@ -930,7 +964,7 @@ export class Climb extends PlayerState {
             this.player.setVelocityX(0);
         }
         
-        if(cursors.SPACE.isDown)
+        if(cursors.space.isDown)
         {
             newState = States.ATTACK;
         }
@@ -943,7 +977,7 @@ export class Climb extends PlayerState {
                 newState = States.CLIMB;
                 newDirection = Directions.UP;
             }
-            else if(this.player.body.onFloor())
+            else if(this.playerOnFloor())
             {
                 newState = States.JUMP;
             }
@@ -951,7 +985,7 @@ export class Climb extends PlayerState {
         if(cursors.down.isDown)
         {
             
-            if(this.player.body.onFloor())
+            if(this.playerOnFloor())
             {
                 this.TileComponent.startMining("down");
                 if(this.scene.miningCooldown && this.scene.currentMiningDirection == "down")
@@ -969,12 +1003,12 @@ export class Climb extends PlayerState {
         if(!newState)
         {
             
-            if(this.PlayerStateManager.canClimb && !this.player.body.onFloor())
+            if(this.PlayerStateManager.canClimb && !this.playerOnFloor())
             {
                 newState = States.CLIMB;
                 newDirection = Directions.IDLE;
             }
-            else if(this.player.body.onFloor())
+            else if(this.playerOnFloor())
             {
                 newState = States.IDLE;
             }
@@ -987,9 +1021,9 @@ export class Climb extends PlayerState {
         
     }
 
-    exit(enumState)
+    exit(exitState)
     {
-        if(enumState != States.CLIMB)
+        if(exitState != States.CLIMB)
         {
             this.player.body.setAllowGravity(true);
         }
@@ -1011,7 +1045,7 @@ export class Attack extends PlayerState {
     {
         let newState;
         let newDirection;
-        let velocity = this.player.body.velocity;
+        let velocity = this.getPlayerVelocity();
 
         if(this.finishedAnimation)
         {
@@ -1024,7 +1058,7 @@ export class Attack extends PlayerState {
                     newState = States.MINE;
                     newDirection = Directions.LEFT;
                 }
-                else if(this.player.body.onFloor())
+                else if(this.playerOnFloor())
                 {
                     if(velocity.x < -200)
                     {
@@ -1047,7 +1081,7 @@ export class Attack extends PlayerState {
                     newState = States.MINE;
                     newDirection = Directions.RIGHT;
                 }
-                else if(this.player.body.onFloor())
+                else if(this.playerOnFloor())
                 {
                     if(velocity.x > 200)
                     {
@@ -1067,7 +1101,7 @@ export class Attack extends PlayerState {
                 this.player.setVelocityX(0);
             }
     
-            if(cursors.SPACE.isDown)
+            if(cursors.space.isDown)
             {
                 newState = States.ATTACK;
             }
@@ -1080,7 +1114,7 @@ export class Attack extends PlayerState {
                     newState = States.CLIMB;
                     newDirection = Directions.UP;
                 }
-                else if(this.player.body.onFloor())
+                else if(this.playerOnFloor())
                 {
                     newState = States.JUMP;
                 }
@@ -1089,7 +1123,7 @@ export class Attack extends PlayerState {
             {
                 this.TileComponent.startMining("down");
                 
-                if(this.scene.miningCooldown && this.scene.currentMiningDirection == "down" && this.player.body.onFloor())
+                if(this.scene.miningCooldown && this.scene.currentMiningDirection == "down" && this.playerOnFloor())
                 {
                     newState = States.MINE;
                     newDirection = Directions.DOWN;
@@ -1103,7 +1137,7 @@ export class Attack extends PlayerState {
     
             if(!newState)
             {
-                if(!this.player.body.onFloor())
+                if(!this.playerOnFloor())
                 {
                     newState = States.FALL;
                 }

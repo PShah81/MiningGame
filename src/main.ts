@@ -1,14 +1,14 @@
 import Phaser from 'phaser'
 
 import GameScene from './GameScene'
-const config = {
+const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     width: 800,
     height: 6000,
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { y: 300 },
+            gravity: { x: 0, y: 300 },
             debug: true
         }
     },
