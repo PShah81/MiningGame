@@ -1,5 +1,4 @@
-import GameScene from "./GameScene";
-import { Directions } from "./PlayerStateClasses";
+import BaseLayer from "./BaseLayer";
 
 export enum oreMapping {
     GRASS = 0,
@@ -13,127 +12,67 @@ export enum oreMapping {
     DIAMOND = 8,
     EMERALD = 9
 }
-class TileComponent {
-    scene: GameScene
-    player: Phaser.Physics.Arcade.Sprite | null
-    itemLayer: Phaser.Tilemaps.TilemapLayer | null
-    groundLayer: Phaser.Tilemaps.TilemapLayer | null
-    constructor(scene) {
-        this.scene = scene;
-        this.player = this.scene.player;
-        this.groundLayer = this.scene.groundLayer;
-        this.itemLayer = this.scene.itemLayer;
-    }
-    getCenter(object)
+export default class GroundLayer extends BaseLayer
+{
+    miningCooldown?: Phaser.Time.TimerEvent
+    miningTile?: Phaser.Tilemaps.Tile
+    miningRate: integer
+    currentMiningDirection?: string
+    constructor(scene, layer, x, y)
     {
-        let width = object.body.width;
-        let height = object.body.height;
-        let x = object.body.x + Math.floor(width/2);
-        let y = object.body.y + Math.floor(height/2);
-        return [x,y];
-    }
-    checkTileCollision(direction, layer) 
-    {
-        let tile;
-        let width;
-        let height;
-        if(this.player && this.player.body)
-        {
-            width = this.player.body.width;
-            height = this.player.body.height;
-        }
-        let [x,y] = this.getCenter(this.player);
-        if (direction == "left")
-        {
-            tile = layer.getTileAtWorldXY(x - width, y);
-        }
-        else if (direction == "right")
-        {
-            tile = layer.getTileAtWorldXY(x + width, y);
-        }
-        else if(direction == "down")
-        {
-            tile = layer.getTileAtWorldXY(x, y+height);
-        }
-        else
-        {
-            tile = layer.getTileAtWorldXY(x, y-height);
-        }
-        return tile;
+        super(scene, layer, x, y);
+        this.miningRate = 750;
+        this.layer.setScale(2.35,2.35);
+        this.generateRandomTiles(this.layer.tilemap.width, this.layer.tilemap.height);
+        this.layer.setCollisionByExclusion([-1]);
     }
     mineBlock(direction) 
     {
-        let tile = this.checkTileCollision(direction, this.groundLayer);
+        let tile = this.checkTileCollision(direction, this.scene.player);
         if (tile) {
-            this.scene.miningTile = tile;
-            this.scene.miningCooldown = this.scene.time.addEvent({
+            this.miningTile = tile;
+            this.miningCooldown = this.scene.time.addEvent({
                 args: [tile.x, tile.y, tile.index],
                 callback: (x,y,index) => {
                     // Remove tile at coords
-                    if(this.groundLayer)
-                    {
-                        this.groundLayer.removeTileAt(x,y)
-                    }
+                    this.layer.removeTileAt(x,y)
                     this.scene.updateGold(oreMapping[index])
-                    this.scene.miningCooldown = null
-                    this.scene.miningTile = null
+                    this.miningCooldown = undefined;
+                    this.miningTile = undefined;
                 },
                 callbackScope: this,
-                delay: this.scene.miningRate,
+                delay: this.miningRate,
             });
         }
     }
     startMining(direction) 
     {
-        if(this.scene.miningCooldown)
+        if(this.miningCooldown)
         {
-            if(this.scene.currentMiningDirection != direction)
+            if(this.currentMiningDirection != direction)
             {
                 // Stop current mining if in wrong direction
                 this.stopMining();
-                this.scene.currentMiningDirection = direction;
+                this.currentMiningDirection = direction;
                 this.mineBlock(direction);
             }
             //else don't do anything, already started mining in the right direction
         }
         else
         {
-            this.scene.currentMiningDirection = direction;
+            this.currentMiningDirection = direction;
             this.mineBlock(direction);
         }
     }
     stopMining() 
     {
-        if(this.scene.miningCooldown)
+        if(this.miningCooldown)
         {
             console.log("cooldown stopped");
-            this.scene.miningCooldown.remove(false);
-            this.scene.miningCooldown = null;
-            this.scene.miningTile = null;
-            this.scene.currentMiningDirection = null;
-        }
-    }
-    getItemAtPlayer()
-    {
-        let [x,y] = this.getCenter(this.player);
-        let tile;
-        if(this.itemLayer)
-        {
-            tile = this.itemLayer.getTileAtWorldXY(x, y);
-        }
-        return tile
-    }
-    placeItem(tileIndex)
-    {
-        let [x,y] = this.getCenter(this.player);
-        let tile;
-        if(this.itemLayer)
-        {
-            tile = this.itemLayer.getTileAtWorldXY(x, y);
-        }
-        if(!tile && this.itemLayer)
-        {
-            this.itemLayer.putTileAtWorldXY(tileIndex, x, y);
+            this.miningCooldown.remove(false);
+            this.miningCooldown = undefined;
+            this.miningTile = undefined;
+            this.currentMiningDirection = undefined;
         }
     }
     generateRandomTiles(width, height) 
@@ -217,10 +156,7 @@ class TileComponent {
                 // Generate a random tile index
                 let weightedArrayIndex  = Math.floor(Math.random() * weightedArray.length) // Get an index in the weighted array
                 let tileIndex = weightedArray[weightedArrayIndex];
-                if(this.groundLayer)
-                {
-                    this.groundLayer.putTileAt(tileIndex, x, y);
-                }
+                this.layer.putTileAt(tileIndex, x, y);
             }
         }
     }
@@ -235,6 +171,7 @@ class TileComponent {
         }
         return weightedArray;
     }
+    removeGround = (explosion, groundTile) => {
+        this.layer.removeTileAt(groundTile.x,groundTile.y);
+    }
 }
-
-export default TileComponent
