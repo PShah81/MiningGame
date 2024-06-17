@@ -102,6 +102,16 @@ export class PlayerState {
     {
         return this.player.body.velocity
     }
+    stopMineCheck(cursors, newState)
+    {
+        if(cursors.left.isDown || cursors.right.isDown || cursors.down.isDown)
+        {
+            if(newState != States.MINE)
+            {
+                this.GroundLayer.stopMining();
+            }
+        }
+    }
 }
 
 export class Idle extends PlayerState {
@@ -184,6 +194,8 @@ export class Idle extends PlayerState {
                 newDirection = Directions.DOWN;
             }
         }
+
+        this.stopMineCheck(cursors,newState);
 
         if(!newState)
         {
@@ -300,6 +312,8 @@ export class Walk extends PlayerState {
                 newDirection = Directions.DOWN;
             }
         }
+
+        this.stopMineCheck(cursors,newState);
 
         if(!newState)
         {
@@ -422,6 +436,8 @@ export class Run extends PlayerState {
             }
         }
 
+        this.stopMineCheck(cursors,newState);
+
         if(!newState)
         {
             if(!this.playerOnFloor())
@@ -536,6 +552,8 @@ export class Mine extends PlayerState {
             }
         }
 
+        this.stopMineCheck(cursors,newState);
+
         if(!newState)
         {
             if(!this.playerOnFloor())
@@ -632,6 +650,8 @@ export class Jump extends PlayerState {
                 }
             }
 
+            this.stopMineCheck(cursors,newState);
+
             if(!newState)
             {
                 if(!this.playerOnFloor())
@@ -714,6 +734,9 @@ export class Fall extends PlayerState {
         {
             newState = States.LAND;
         }
+
+        this.stopMineCheck(cursors,newState);
+
         if(!newState)
         {
             if(!this.playerOnFloor())
@@ -809,6 +832,8 @@ export class Land extends PlayerState {
                 }
             }
 
+            this.stopMineCheck(cursors,newState);
+            
             if(!newState)
             {
                 if(!this.playerOnFloor())
@@ -975,6 +1000,9 @@ export class Climb extends PlayerState {
                 newDirection = Directions.DOWN;
             }
         }
+
+        this.stopMineCheck(cursors, newState);
+
         if(!newState)
         {
             
@@ -1075,12 +1103,7 @@ export class Attack extends PlayerState {
                 this.player.setAccelerationX(0);
                 this.player.setVelocityX(0);
             }
-    
-            if(cursors.space.isDown)
-            {
-                newState = States.ATTACK;
-            }
-    
+
             if(cursors.up.isDown)
             {
                 
@@ -1110,6 +1133,8 @@ export class Attack extends PlayerState {
                 }
             }
     
+            this.stopMineCheck(cursors, newState);
+
             if(!newState)
             {
                 if(!this.playerOnFloor())
