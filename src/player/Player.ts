@@ -7,6 +7,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
 {
     playerStateManager?: PlayerStateManager
     canClimb: boolean
+    attackHitBox: Phaser.Types.Physics.Arcade.ImageWithDynamicBody
     constructor(scene: GameScene, x:integer, y: integer, texture: string, GroundLayer: GroundLayer, ItemLayer: ItemLayer)
     {
         super(scene, x, y, texture);
@@ -24,6 +25,9 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         this.setMaxVelocity(250);
         this.setCollideWorldBounds(true);
         this.canClimb = false;
+        this.attackHitBox = scene.add.rectangle(this.x, this.y, 16, 16, 0xffffff, 0) as unknown as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
+        scene.physics.add.existing(this.attackHitBox);
+        this.attackHitBox.body.setAllowGravity(false);
         this.playerStateManager = new PlayerStateManager(this, GroundLayer, ItemLayer)
     }
 

@@ -17,16 +17,10 @@ enum orePrices {
 }
 class GameScene extends Phaser.Scene
 {
-    miningRate: integer
     gold: integer
     goldText?: Phaser.GameObjects.Text
-    miningCooldown?: Phaser.Time.TimerEvent
-    miningTile?: Phaser.Tilemaps.Tile
-    currentMiningDirection?: string
     lastKeyPressed?: Phaser.Input.Keyboard.Key
     map?: Phaser.Tilemaps.Tilemap
-    itemLayer: Phaser.Tilemaps.TilemapLayer | null
-    groundLayer: Phaser.Tilemaps.TilemapLayer | null
     ItemLayer?: ItemLayer
     GroundLayer?: GroundLayer
     player?: Player
@@ -37,10 +31,7 @@ class GameScene extends Phaser.Scene
     constructor()
     {
         super('game-scene');
-        this.miningRate = 750;
         this.gold = 0;
-        this.itemLayer = null;
-        this.groundLayer = null;
     }
 
     preload ()

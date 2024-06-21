@@ -34,9 +34,11 @@ class PlayerStateManager
     update(cursors, lastKeyPressed)
     {
         this.currentState.update(cursors, lastKeyPressed);
+        this.updateHitboxPosition();
     }
     changeState(state, direction)
     {
+        this.updateHitboxPosition();
         this.player.canClimb = false;
         let newState = this.states[state];
         newState.direction = direction;
@@ -48,6 +50,17 @@ class PlayerStateManager
             this.currentState.enter(direction);
         }
 
+    }
+    updateHitboxPosition = () => 
+    {
+        if(this.player.body)
+        {
+            this.player.attackHitBox.x = this.player.flipX
+            ? this.player.body.x - this.player.body.width * 0.55
+            : this.player.body.x + this.player.body.width * 1.5 
+            this.player.attackHitBox.y = this.player.body.y + this.player.body.height * 0.5;
+        }
+        
     }
 }
 

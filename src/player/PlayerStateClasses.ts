@@ -1041,8 +1041,11 @@ export class Attack extends PlayerState {
     enter(direction)
     {
         this.finishedAnimation = false;
+        this.player.setAccelerationX(0);
+        this.player.attackHitBox.body.enable = true;
         this.player.anims.play("attack", true).on('animationcomplete-attack', 
         ()=>{this.finishedAnimation = true}, this);
+        
     }
     update(cursors, lastKeyPressed)
     {
@@ -1149,5 +1152,8 @@ export class Attack extends PlayerState {
             this.PlayerStateManager.changeState(newState, newDirection);
         }
         
+    }
+    exit(exitState) {
+        this.player.attackHitBox.body.enable = false;
     }
 }
