@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import PlayerStateManager from './player/PlayerStateManager';
+import Slime from './enemy/Slime';
 import Player from './player/Player';
 import GroundLayer from './map/GroundLayer';
 import ItemLayer from './map/ItemLayer';
@@ -28,6 +29,7 @@ class GameScene extends Phaser.Scene
     dynamiteColliderGroup?: Phaser.Physics.Arcade.Group
     explosionOverlapGroup?: Phaser.Physics.Arcade.Group
     PlayerStateManager?: PlayerStateManager
+    slime?: Slime
     constructor()
     {
         super('game-scene');
@@ -50,6 +52,7 @@ class GameScene extends Phaser.Scene
         this.load.spritesheet("run", '../assets/sprites/3 SteamMan/run.png', { frameWidth: 48, frameHeight: 48});
         this.load.spritesheet("climb", '../assets/sprites/3 SteamMan/climb.png', { frameWidth: 48, frameHeight: 48});
         this.load.spritesheet("attack", '../assets/sprites/3 SteamMan/attack.png', { frameWidth: 48, frameHeight: 48});
+        this.load.spritesheet("slime_idle", '../assets/sprites/Slime/slime_idle_spritesheet.png', { frameWidth: 16, frameHeight: 16});
     }
 
     create ()
@@ -112,6 +115,7 @@ class GameScene extends Phaser.Scene
         if(this.GroundLayer && this.ItemLayer)
         {
             this.player = new Player(this, 400, 300, "idle", this.GroundLayer, this.ItemLayer);
+            this.slime = new Slime(this, 500, 300, "slime_idle", this.GroundLayer);
         }
 
 
@@ -128,13 +132,11 @@ class GameScene extends Phaser.Scene
         })
         if(this.GroundLayer && this.player)
         {
-            this.physics.add.collider(this.player, this.GroundLayer.layer);
             this.physics.add.collider(this.dynamiteColliderGroup, this.GroundLayer.layer);
             this.physics.add.overlap(this.explosionOverlapGroup, this.GroundLayer.layer, this.GroundLayer?.removeGround, undefined, this);
         }
         if(this.ItemLayer && this.player)
         {
-            this.physics.add.overlap(this.player, this.ItemLayer.layer, this.ItemLayer.canClimb, undefined, this);
             this.physics.add.overlap(this.explosionOverlapGroup, this.ItemLayer.layer, this.ItemLayer?.removeItems, undefined, this);
         }
 
