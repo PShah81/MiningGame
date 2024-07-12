@@ -2,7 +2,6 @@ import PlayerStateManager from "./PlayerStateManager";
 import Player from "./Player";
 import GroundLayer from "../map/GroundLayer";
 import ItemLayer from "../map/ItemLayer";
-import { Vector } from "matter";
 
 export enum States{
     IDLE = 0,
@@ -612,27 +611,121 @@ export class Jump extends PlayerState {
         super(player, PlayerStateManager, GroundLayer, ItemLayer);
     }
 
-    enter(direction)
+    enter(direction: Directions)
     {
         this.player.setVelocityY(-250);
         this.finishedAnimation = false;
         this.player.anims.play("jump", true).on('animationcomplete-jump', 
         ()=>{this.finishedAnimation = true}, this);
     }
-    update(cursors, lastKeyPressed)
+    update(cursors: Phaser.Types.Input.Keyboard.CursorKeys | undefined, lastKeyPressed: number | undefined)
     {
-        let newState;
-        let newDirection;
+        let newState = States.IDLE;
+        let newDirection = Directions.IDLE;
 
-        this.craft(lastKeyPressed)
-        this.dropDynamite(lastKeyPressed);
+        if(lastKeyPressed)
+        {
+            this.craft(lastKeyPressed);
+            this.dropDynamite(lastKeyPressed);
+        }
 
         if(this.finishedAnimation)
         {
-            if(this.playerOnFloor())
+            if(cursors)
             {
-                newState = States.LAND;
+                if(cursors.left.isDown)
+                {
+                    this.GroundLayer.startMining("left");
+                    this.moveHorizontally(Directions.LEFT);
+                    if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "left")
+                    {
+                        newState = States.MINE;
+                        newDirection = Directions.LEFT;
+                    }
+                }
+                else if(cursors.right.isDown)
+                {
+                    this.GroundLayer.startMining("right");
+                    this.moveHorizontally(Directions.RIGHT);
+                    if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "right")
+                    {
+                        newState = States.MINE;
+                        newDirection = Directions.RIGHT;
+                    }
+                }
+                else
+                {
+                    //If not left or right
+                    this.player.setAccelerationX(0);
+                    this.player.setVelocityX(0);
+                }
+    
+                if(cursors.space.isDown)
+                {
+                    newState = States.ATTACK;
+                }
+        
+                if(cursors.up.isDown)
+                {
+                    if(this.player.canClimb)
+                    {
+                        newState = States.CLIMB;
+                        newDirection = Directions.UP;
+                    }
+                }
+                if(cursors.down.isDown)
+                {
+                    if(this.player.canClimb)
+                    {
+                        newState = States.CLIMB;
+                        newDirection = Directions.DOWN;
+                    }
+                }
+    
+                this.stopMineCheck(cursors,newState);
             }
+            
+            
+
+            if(newState == States.IDLE)
+            {
+                if(!this.playerOnFloor())
+                {
+                    newState = States.FALL;
+                }
+                else
+                {
+                    newState = States.LAND;
+                }
+            }
+            this.PlayerStateManager.changeState(newState, newDirection);
+        }
+    }
+}
+
+export class Fall extends PlayerState {
+    constructor(player: Player, PlayerStateManager: PlayerStateManager, 
+        GroundLayer: GroundLayer, ItemLayer: ItemLayer) {
+        super(player, PlayerStateManager, GroundLayer, ItemLayer);
+    }
+
+    enter(direction: Directions)
+    {
+        this.player.setAccelerationX(0);
+        this.player.anims.play("fall", true);
+    }
+    update(cursors: Phaser.Types.Input.Keyboard.CursorKeys | undefined, lastKeyPressed: number | undefined)
+    {
+        let newState = States.IDLE;
+        let newDirection = Directions.IDLE;
+
+        if(lastKeyPressed)
+        {
+            this.craft(lastKeyPressed)
+            this.dropDynamite(lastKeyPressed);
+        }
+        if(cursors)
+        {
             if (cursors.left.isDown)
             {
                 this.GroundLayer.startMining("left");
@@ -659,7 +752,7 @@ export class Jump extends PlayerState {
                 this.player.setAccelerationX(0);
                 this.player.setVelocityX(0);
             }
-
+    
             if(cursors.space.isDown)
             {
                 newState = States.ATTACK;
@@ -681,96 +774,17 @@ export class Jump extends PlayerState {
                     newDirection = Directions.DOWN;
                 }
             }
-
+    
+            if(this.playerOnFloor())
+            {
+                newState = States.LAND;
+            }
+    
             this.stopMineCheck(cursors,newState);
-
-            if(!newState)
-            {
-                if(!this.playerOnFloor())
-                {
-                    newState = States.FALL;
-                }
-            }
-            this.PlayerStateManager.changeState(newState, newDirection);
         }
-    }
-}
+        
 
-export class Fall extends PlayerState {
-    constructor(player: Player, PlayerStateManager: PlayerStateManager, 
-        GroundLayer: GroundLayer, ItemLayer: ItemLayer) {
-        super(player, PlayerStateManager, GroundLayer, ItemLayer);
-    }
-
-    enter(direction)
-    {
-        this.player.setAccelerationX(0);
-        this.player.anims.play("fall", true);
-    }
-    update(cursors, lastKeyPressed)
-    {
-        let newState;
-        let newDirection;
-
-        this.craft(lastKeyPressed)
-        this.dropDynamite(lastKeyPressed);
-        if (cursors.left.isDown)
-        {
-            this.GroundLayer.startMining("left");
-            this.moveHorizontally(Directions.LEFT);
-            if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "left")
-            {
-                newState = States.MINE;
-                newDirection = Directions.LEFT;
-            }
-        }
-        else if (cursors.right.isDown)
-        {
-            this.GroundLayer.startMining("right");
-            this.moveHorizontally(Directions.RIGHT);
-            if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "right")
-            {
-                newState = States.MINE;
-                newDirection = Directions.RIGHT;
-            }
-        }
-        else
-        {
-            //If not left or right
-            this.player.setAccelerationX(0);
-            this.player.setVelocityX(0);
-        }
-
-        if(cursors.space.isDown)
-        {
-            newState = States.ATTACK;
-        }
-
-        if(cursors.up.isDown)
-        {
-            if(this.player.canClimb)
-            {
-                newState = States.CLIMB;
-                newDirection = Directions.UP;
-            }
-        }
-        if(cursors.down.isDown)
-        {
-            if(this.player.canClimb)
-            {
-                newState = States.CLIMB;
-                newDirection = Directions.DOWN;
-            }
-        }
-
-        if(this.playerOnFloor())
-        {
-            newState = States.LAND;
-        }
-
-        this.stopMineCheck(cursors,newState);
-
-        if(!newState)
+        if(newState == States.IDLE)
         {
             if(!this.playerOnFloor())
             {
@@ -787,88 +801,95 @@ export class Land extends PlayerState {
         super(player, PlayerStateManager, GroundLayer, ItemLayer);
     }
 
-    enter(direction)
+    enter(direction: Directions)
     {
         this.finishedAnimation = false;
         this.player.anims.play("land", true).on('animationcomplete-land', 
         ()=>{this.finishedAnimation = true}, this);
     }
-    update(cursors, lastKeyPressed)
+    update(cursors: Phaser.Types.Input.Keyboard.CursorKeys | undefined, lastKeyPressed: number | undefined)
     {
-        let newState;
-        let newDirection;
+        let newState = States.IDLE;
+        let newDirection = Directions.IDLE;
 
-        this.craft(lastKeyPressed)
-        this.dropDynamite(lastKeyPressed);
+        if(lastKeyPressed)
+        {
+            this.craft(lastKeyPressed);
+            this.dropDynamite(lastKeyPressed);
+        }
 
         if(this.finishedAnimation)
         {
-            if (cursors.left.isDown)
+            if(cursors)
             {
-                this.GroundLayer.startMining("left");
-                if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "left")
+                if (cursors.left.isDown)
                 {
-                    newState = States.MINE;
-                    newDirection = Directions.LEFT;
+                    this.GroundLayer.startMining("left");
+                    if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "left")
+                    {
+                        newState = States.MINE;
+                        newDirection = Directions.LEFT;
+                    }
+                    else if(this.playerOnFloor())
+                    {
+                        newState = States.WALK;
+                        newDirection = Directions.LEFT;
+                    }
                 }
-                else if(this.playerOnFloor())
+                if (cursors.right.isDown)
                 {
-                    newState = States.WALK;
-                    newDirection = Directions.LEFT;
+                    this.GroundLayer.startMining("right");
+                    if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "right")
+                    {
+                        newState = States.MINE;
+                        newDirection = Directions.RIGHT;
+                    }
+                    else if(this.playerOnFloor())
+                    {
+                        newState = States.WALK;
+                        newDirection = Directions.RIGHT;
+                    }
                 }
+    
+                if(cursors.space.isDown)
+                {
+                    newState = States.ATTACK;
+                }
+    
+                if(cursors.up.isDown)
+                {
+                    
+                    if(this.player.canClimb)
+                    {
+                        newState = States.CLIMB;
+                        newDirection = Directions.UP;
+                    }
+                    else if(this.playerOnFloor())
+                    {
+                        newState = States.JUMP;
+                    }
+                }
+                if(cursors.down.isDown)
+                {
+                    this.GroundLayer.startMining("down");
+                    
+                    if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "down" && this.playerOnFloor())
+                    {
+                        newState = States.MINE;
+                        newDirection = Directions.DOWN;
+                    }
+                    else if(this.player.canClimb)
+                    {
+                        newState = States.CLIMB;
+                        newDirection = Directions.DOWN;
+                    }
+                }
+    
+                this.stopMineCheck(cursors,newState);
             }
-            if (cursors.right.isDown)
-            {
-                this.GroundLayer.startMining("right");
-                if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "right")
-                {
-                    newState = States.MINE;
-                    newDirection = Directions.RIGHT;
-                }
-                else if(this.playerOnFloor())
-                {
-                    newState = States.WALK;
-                    newDirection = Directions.RIGHT;
-                }
-            }
-
-            if(cursors.space.isDown)
-            {
-                newState = States.ATTACK;
-            }
-
-            if(cursors.up.isDown)
-            {
-                
-                if(this.player.canClimb)
-                {
-                    newState = States.CLIMB;
-                    newDirection = Directions.UP;
-                }
-                else if(this.playerOnFloor())
-                {
-                    newState = States.JUMP;
-                }
-            }
-            if(cursors.down.isDown)
-            {
-                this.GroundLayer.startMining("down");
-                
-                if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "down" && this.playerOnFloor())
-                {
-                    newState = States.MINE;
-                    newDirection = Directions.DOWN;
-                }
-                else if(this.player.canClimb)
-                {
-                    newState = States.CLIMB;
-                    newDirection = Directions.DOWN;
-                }
-            }
-
-            this.stopMineCheck(cursors,newState);
             
-            if(!newState)
+            
+            if(newState == States.IDLE)
             {
                 if(!this.playerOnFloor())
                 {
@@ -893,7 +914,7 @@ export class Climb extends PlayerState {
         this.currentFrame = null;
     }
 
-    enter(direction)
+    enter(direction: Directions)
     {
         this.direction = direction;
         if(this.player.body && this.player.body instanceof Phaser.Physics.Arcade.Body)
@@ -940,167 +961,24 @@ export class Climb extends PlayerState {
             this.player.setVelocityY(0);
         }
     }
-    update(cursors, lastKeyPressed)
+    update(cursors: Phaser.Types.Input.Keyboard.CursorKeys | undefined, lastKeyPressed: number | undefined)
     {
         let velocity = this.getPlayerVelocity();
-        let newState;
-        let newDirection;
+        let newState = States.IDLE;
+        let newDirection = Directions.IDLE;
 
-        this.craft(lastKeyPressed)
-        this.dropDynamite(lastKeyPressed);
-
-        if (cursors.left.isDown)
+        if(lastKeyPressed)
         {
-            this.moveHorizontally(Directions.LEFT);
-            this.GroundLayer.startMining("left");
-            if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "left")
-            {
-                newState = States.MINE;
-                newDirection = Directions.LEFT;
-            }
-            else if(this.playerOnFloor())
-            {
-                if(velocity.x < -200)
-                {
-                    newState = States.RUN;
-                    newDirection = Directions.LEFT;
-                }
-                else
-                {
-                    newState = States.WALK;
-                    newDirection = Directions.LEFT;
-                }
-            }
-        }
-        else if (cursors.right.isDown)
-        {
-            this.moveHorizontally(Directions.RIGHT);
-            this.GroundLayer.startMining("right");
-            if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "right")
-            {
-                newState = States.MINE;
-                newDirection = Directions.RIGHT;
-            }
-            else if(this.playerOnFloor())
-            {
-                if(velocity.x > 200)
-                {
-                    newState = States.RUN;
-                    newDirection = Directions.RIGHT;
-                }
-                else
-                {
-                    newState = States.WALK;
-                    newDirection = Directions.RIGHT;
-                }
-            }
-        }
-        else
-        {
-            //If not left or right are down
-            this.player.setAccelerationX(0);
-            this.player.setVelocityX(0);
-        }
-        
-        if(cursors.space.isDown)
-        {
-            newState = States.ATTACK;
+            this.craft(lastKeyPressed);
+            this.dropDynamite(lastKeyPressed);
         }
 
-        if(cursors.up.isDown)
-        {
-            if(this.player.canClimb)
-            {
-                newState = States.CLIMB;
-                newDirection = Directions.UP;
-            }
-            else if(this.playerOnFloor())
-            {
-                newState = States.JUMP;
-            }
-        }
-        if(cursors.down.isDown)
-        {
-            
-            if(this.playerOnFloor())
-            {
-                this.GroundLayer.startMining("down");
-                if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "down")
-                {
-                    console.log("state");
-                    newState = States.MINE;
-                    newDirection = Directions.DOWN;
-                }
-            }
-            else if(this.player.canClimb)
-            {
-                newState = States.CLIMB;
-                newDirection = Directions.DOWN;
-            }
-        }
-
-        this.stopMineCheck(cursors, newState);
-
-        if(!newState)
-        {
-            
-            if(this.player.canClimb && !this.playerOnFloor())
-            {
-                newState = States.CLIMB;
-                newDirection = Directions.IDLE;
-            }
-            else if(this.playerOnFloor())
-            {
-                newState = States.IDLE;
-            }
-            else
-            {
-                newState = States.FALL;
-            }
-        }
-        this.PlayerStateManager.changeState(newState, newDirection)
-        
-    }
-
-    exit(exitState)
-    {
-        if(exitState != States.CLIMB)
-        {
-            if(this.player.body && this.player.body instanceof Phaser.Physics.Arcade.Body)
-            {
-                this.player.body.setAllowGravity(true);
-            }
-        }
-    }
-}
-
-export class Attack extends PlayerState {
-    constructor(player: Player, PlayerStateManager: PlayerStateManager, 
-        GroundLayer: GroundLayer, ItemLayer: ItemLayer) {
-        super(player, PlayerStateManager, GroundLayer, ItemLayer);
-    }
-
-    enter(direction)
-    {
-        this.finishedAnimation = false;
-        this.player.setAccelerationX(0);
-        this.player.attackHitBox.body.enable = true;
-        this.player.anims.play("attack", true).on('animationcomplete-attack', 
-        ()=>{this.finishedAnimation = true}, this);
-        
-    }
-    update(cursors, lastKeyPressed)
-    {
-        let newState;
-        let newDirection;
-        let velocity = this.getPlayerVelocity();
-
-        if(this.finishedAnimation)
+        if(cursors)
         {
             if (cursors.left.isDown)
             {
-                this.GroundLayer.startMining("left");
                 this.moveHorizontally(Directions.LEFT);
+                this.GroundLayer.startMining("left");
                 if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "left")
                 {
                     newState = States.MINE;
@@ -1122,8 +1000,8 @@ export class Attack extends PlayerState {
             }
             else if (cursors.right.isDown)
             {
-                this.GroundLayer.startMining("right");
                 this.moveHorizontally(Directions.RIGHT);
+                this.GroundLayer.startMining("right");
                 if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "right")
                 {
                     newState = States.MINE;
@@ -1145,13 +1023,18 @@ export class Attack extends PlayerState {
             }
             else
             {
+                //If not left or right are down
                 this.player.setAccelerationX(0);
                 this.player.setVelocityX(0);
             }
-
+            
+            if(cursors.space.isDown)
+            {
+                newState = States.ATTACK;
+            }
+    
             if(cursors.up.isDown)
             {
-                
                 if(this.player.canClimb)
                 {
                     newState = States.CLIMB;
@@ -1164,12 +1047,16 @@ export class Attack extends PlayerState {
             }
             if(cursors.down.isDown)
             {
-                this.GroundLayer.startMining("down");
                 
-                if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "down" && this.playerOnFloor())
+                if(this.playerOnFloor())
                 {
-                    newState = States.MINE;
-                    newDirection = Directions.DOWN;
+                    this.GroundLayer.startMining("down");
+                    if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "down")
+                    {
+                        console.log("state");
+                        newState = States.MINE;
+                        newDirection = Directions.DOWN;
+                    }
                 }
                 else if(this.player.canClimb)
                 {
@@ -1179,8 +1066,151 @@ export class Attack extends PlayerState {
             }
     
             this.stopMineCheck(cursors, newState);
+        }
+        
 
-            if(!newState)
+        if(newState == States.IDLE)
+        {
+            if(this.player.canClimb && !this.playerOnFloor())
+            {
+                newState = States.CLIMB;
+                newDirection = Directions.IDLE;
+            }
+            else if(this.playerOnFloor())
+            {
+                newState = States.IDLE;
+            }
+            else
+            {
+                newState = States.FALL;
+            }
+        }
+        this.PlayerStateManager.changeState(newState, newDirection)
+        
+    }
+
+    exit(exitState: States)
+    {
+        if(exitState != States.CLIMB)
+        {
+            if(this.player.body && this.player.body instanceof Phaser.Physics.Arcade.Body)
+            {
+                this.player.body.setAllowGravity(true);
+            }
+        }
+    }
+}
+
+export class Attack extends PlayerState {
+    constructor(player: Player, PlayerStateManager: PlayerStateManager, 
+        GroundLayer: GroundLayer, ItemLayer: ItemLayer) {
+        super(player, PlayerStateManager, GroundLayer, ItemLayer);
+    }
+
+    enter(direction: Directions)
+    {
+        this.finishedAnimation = false;
+        this.player.setAccelerationX(0);
+        this.player.attackHitBox.body.enable = true;
+        this.player.anims.play("attack", true).on('animationcomplete-attack', 
+        ()=>{this.finishedAnimation = true}, this);
+        
+    }
+    update(cursors: Phaser.Types.Input.Keyboard.CursorKeys | undefined, lastKeyPressed: number | undefined)
+    {
+        let newState = States.IDLE;
+        let newDirection = Directions.IDLE;
+        let velocity = this.getPlayerVelocity();
+
+        if(this.finishedAnimation)
+        {
+            if(cursors)
+            {
+                if (cursors.left.isDown)
+                {
+                    this.GroundLayer.startMining("left");
+                    this.moveHorizontally(Directions.LEFT);
+                    if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "left")
+                    {
+                        newState = States.MINE;
+                        newDirection = Directions.LEFT;
+                    }
+                    else if(this.playerOnFloor())
+                    {
+                        if(velocity.x < -200)
+                        {
+                            newState = States.RUN;
+                            newDirection = Directions.LEFT;
+                        }
+                        else
+                        {
+                            newState = States.WALK;
+                            newDirection = Directions.LEFT;
+                        }
+                    }
+                }
+                else if (cursors.right.isDown)
+                {
+                    this.GroundLayer.startMining("right");
+                    this.moveHorizontally(Directions.RIGHT);
+                    if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "right")
+                    {
+                        newState = States.MINE;
+                        newDirection = Directions.RIGHT;
+                    }
+                    else if(this.playerOnFloor())
+                    {
+                        if(velocity.x > 200)
+                        {
+                            newState = States.RUN;
+                            newDirection = Directions.RIGHT;
+                        }
+                        else
+                        {
+                            newState = States.WALK;
+                            newDirection = Directions.RIGHT;
+                        }
+                    }
+                }
+                else
+                {
+                    this.player.setAccelerationX(0);
+                    this.player.setVelocityX(0);
+                }
+    
+                if(cursors.up.isDown)
+                {
+                    
+                    if(this.player.canClimb)
+                    {
+                        newState = States.CLIMB;
+                        newDirection = Directions.UP;
+                    }
+                    else if(this.playerOnFloor())
+                    {
+                        newState = States.JUMP;
+                    }
+                }
+                if(cursors.down.isDown)
+                {
+                    this.GroundLayer.startMining("down");
+                    
+                    if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "down" && this.playerOnFloor())
+                    {
+                        newState = States.MINE;
+                        newDirection = Directions.DOWN;
+                    }
+                    else if(this.player.canClimb)
+                    {
+                        newState = States.CLIMB;
+                        newDirection = Directions.DOWN;
+                    }
+                }
+        
+                this.stopMineCheck(cursors, newState);
+            }
+            
+            if(newState == States.IDLE)
             {
                 if(!this.playerOnFloor())
                 {
@@ -1195,7 +1225,7 @@ export class Attack extends PlayerState {
         }
         
     }
-    exit(exitState) {
+    exit(exitState: States) {
         this.player.attackHitBox.body.enable = false;
     }
 }
