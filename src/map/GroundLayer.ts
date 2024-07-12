@@ -1,3 +1,4 @@
+import GameScene from "~/GameScene";
 import BaseLayer from "./BaseLayer";
 
 export enum oreMapping {
@@ -18,7 +19,7 @@ export default class GroundLayer extends BaseLayer
     miningTile?: Phaser.Tilemaps.Tile
     miningRate: integer
     currentMiningDirection?: string
-    constructor(scene, layer, x, y)
+    constructor(scene: GameScene, layer: Phaser.Tilemaps.TilemapLayer, x: integer, y: integer)
     {
         super(scene, layer, x, y);
         this.miningRate = 750;
@@ -26,7 +27,7 @@ export default class GroundLayer extends BaseLayer
         this.generateRandomTiles(this.layer.tilemap.width, this.layer.tilemap.height);
         this.layer.setCollisionByExclusion([-1]);
     }
-    mineBlock(direction) 
+    mineBlock(direction: string) 
     {
         let tile = this.checkTileCollision(direction, this.scene.player);
         if (tile) {
@@ -45,7 +46,7 @@ export default class GroundLayer extends BaseLayer
             });
         }
     }
-    startMining(direction) 
+    startMining(direction: string) 
     {
         if(this.miningCooldown)
         {
@@ -75,22 +76,45 @@ export default class GroundLayer extends BaseLayer
             this.currentMiningDirection = undefined;
         }
     }
-    generateRandomTiles(width, height) 
+    generateRandomTiles(width: integer, height: integer) 
     {
         //Get right frequencies
         let frequencyArr = [
             {
-                0: 1
+                0: 1,
+                1: 0,
+                2: 0,
+                3: 0,
+                4: 0,
+                5: 0,
+                6: 0,
+                7: 0,
+                8: 0,
+                9: 0
             },
             {
                 0: 0,
-                1: 1
+                1: 1,
+                2: 0,
+                3: 0,
+                4: 0,
+                5: 0,
+                6: 0,
+                7: 0,
+                8: 0,
+                9: 0
             },
             {
                 0: 0,
                 1: 5,
                 2: 5,
-                3: 2
+                3: 2,
+                4: 0,
+                5: 0,
+                6: 0,
+                7: 0,
+                8: 0,
+                9: 0
             },
             {
                 0: 0,
@@ -100,7 +124,9 @@ export default class GroundLayer extends BaseLayer
                 4: 10,
                 5: 5,
                 6: 3,
-                7: 1
+                7: 1,
+                8: 0,
+                9: 0
             },
             {
                 0: 0,
@@ -111,7 +137,8 @@ export default class GroundLayer extends BaseLayer
                 5: 20,
                 6: 10,
                 7: 5,
-                8: 3
+                8: 3,
+                9: 0
             },
             {
                 0: 0,
@@ -160,7 +187,7 @@ export default class GroundLayer extends BaseLayer
             }
         }
     }
-    generateFrequencyArr(distribution)
+    generateFrequencyArr(distribution: Record<integer,integer>)
     {
         let weightedArray: integer[] = [];
         for (let number in distribution) {
@@ -171,7 +198,14 @@ export default class GroundLayer extends BaseLayer
         }
         return weightedArray;
     }
-    removeGround = (explosion, groundTile) => {
-        this.layer.removeTileAt(groundTile.x,groundTile.y);
+    removeGround = (explosion, groundTile: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject) => {
+        if(groundTile instanceof Phaser.Tilemaps.Tile)
+        {
+            this.layer.removeTileAt(groundTile.x,groundTile.y);
+        }
+        else
+        {
+            console.log("Got game object instead of tile");
+        }
     }
 }

@@ -2,7 +2,7 @@ import GameScene from '../GameScene';
 import GroundLayer from '../map/GroundLayer';
 import ItemLayer from '../map/ItemLayer';
 import Player from './Player';
-import {PlayerState, Idle, Walk, Run, Mine, Jump, Fall, Land, Climb, Attack, Directions} from './PlayerStateClasses';
+import {PlayerState, Idle, Walk, Run, Mine, Jump, Fall, Land, Climb, Attack, Directions, States} from './PlayerStateClasses';
 class PlayerStateManager
 {
     player: Player
@@ -11,13 +11,13 @@ class PlayerStateManager
     currentDirection?: Directions
     GroundLayer: GroundLayer
     ItemLayer: ItemLayer
-    constructor(player, GroundLayer, ItemLayer)
+    constructor(player: Player, GroundLayer: GroundLayer, ItemLayer: ItemLayer)
     {
         this.GroundLayer = GroundLayer;
         this.ItemLayer = ItemLayer;
         this.player = player;
         this.states = [
-            new Idle(this.player,this, this.GroundLayer, this.ItemLayer), 
+            new Idle(this.player, this, this.GroundLayer, this.ItemLayer), 
             new Walk(this.player, this, this.GroundLayer, this.ItemLayer),
             new Run(this.player, this, this.GroundLayer, this.ItemLayer), 
             new Mine(this.player, this, this.GroundLayer, this.ItemLayer),
@@ -28,15 +28,15 @@ class PlayerStateManager
             new Attack(this.player, this, this.GroundLayer, this.ItemLayer)
         ];
         this.currentState = this.states[0];
-        this.currentState.enter(this.currentDirection);
+        this.currentState.enter(Directions.IDLE);
         
     }
-    update(cursors, lastKeyPressed)
+    update(cursors: Phaser.Types.Input.Keyboard.CursorKeys | undefined, lastKeyPressed: number | undefined)
     {
         this.currentState.update(cursors, lastKeyPressed);
         this.updateHitboxPosition();
     }
-    changeState(state, direction)
+    changeState(state: States, direction: Directions)
     {
         this.updateHitboxPosition();
         this.player.canClimb = false;

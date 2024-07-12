@@ -1,14 +1,17 @@
 import BaseLayer from "./BaseLayer";
 import {Items} from '../player/PlayerStateClasses';
+import GameScene from "~/GameScene";
+import Player from "../player/Player";
+import { GameObjects } from "phaser";
 
 export default class ItemLayer extends BaseLayer
 {
-    constructor(scene, layer, x, y)
+    constructor(scene: GameScene, layer: Phaser.Tilemaps.TilemapLayer, x: integer, y: integer)
     {
         super(scene, layer, x, y);
         this.layer.setScale(2.35,2.35);
     }
-    placeItem(tileIndex, object)
+    placeItem(tileIndex: integer, object: Phaser.Physics.Arcade.Sprite)
     {
         let [x,y] = this.getCenterOfObject(object);
         let tile = this.layer.getTileAtWorldXY(x, y);
@@ -17,28 +20,39 @@ export default class ItemLayer extends BaseLayer
             this.layer.putTileAtWorldXY(tileIndex, x, y);
         }
     }
-    removeItems = (explosion, itemsTile) => {
-        this.layer.removeTileAt(itemsTile.x,itemsTile.y);
-    }
-    canClimb = (player, tile) =>
-    {
-        let vec = this.layer.tileToWorldXY(tile.x, tile.y);
-        let width = this.layer.tileToWorldX(1) - this.layer.tileToWorldX(0);
-        let height = this.layer.tileToWorldY(1) - this.layer.tileToWorldY(0);
-        let left = vec.x;
-        let right = vec.x + width;
-        let top = vec.y;
-        let bottom = top + height;
-        if(tile.index == Items.LADDER &&
-            player &&
-            player.body &&
-            player.body.left>=left && 
-            player.body.right<= right &&
-            player.body.bottom - Math.floor(player.body.height/4) > top &&
-            player.body.top + Math.floor(player.body.height/4) < bottom)
+    removeItems = (explosion, itemsTile: Phaser.Tilemaps.Tile | GameObjects.GameObject) => {
+        if(itemsTile instanceof Phaser.Tilemaps.Tile)
         {
-            player.canClimb = true;
+            this.layer.removeTileAt(itemsTile.x,itemsTile.y);
         }
-        
+        else
+        {
+            console.log("Got game object instead of tile");
+        }
+    }
+    canClimb = (player: Phaser.Tilemaps.Tile | GameObjects.GameObject, tile: Phaser.Tilemaps.Tile | GameObjects.GameObject) =>
+    {
+        if(tile instanceof Phaser.Tilemaps.Tile)
+        {
+            let vec = this.layer.tileToWorldXY(tile.x, tile.y);
+            let width = this.layer.tileToWorldX(1) - this.layer.tileToWorldX(0);
+            let height = this.layer.tileToWorldY(1) - this.layer.tileToWorldY(0);
+            let left = vec.x;
+            let right = vec.x + width;
+            let top = vec.y;
+            let bottom = top + height;
+            
+            if(tile.index == Items.LADDER &&
+                player &&
+                player instanceof Player &&
+                player.body &&
+                player.body.left>=left && 
+                player.body.right<= right &&
+                player.body.bottom - Math.floor(player.body.height/4) > top &&
+                player.body.top + Math.floor(player.body.height/4) < bottom)
+            {
+                player.canClimb = true;
+            }
+        }
     }
 }

@@ -44,7 +44,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         
     }
 
-    update(cursors, lastKeyPressed)
+    update(cursors: Phaser.Types.Input.Keyboard.CursorKeys | undefined, lastKeyPressed: number | undefined)
     {
         if(this.playerStateManager)
         {

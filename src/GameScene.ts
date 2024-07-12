@@ -20,7 +20,7 @@ class GameScene extends Phaser.Scene
 {
     gold: integer
     goldText?: Phaser.GameObjects.Text
-    lastKeyPressed?: Phaser.Input.Keyboard.Key
+    lastKeyPressed?: number
     map?: Phaser.Tilemaps.Tilemap
     ItemLayer?: ItemLayer
     GroundLayer?: GroundLayer
@@ -65,15 +65,25 @@ class GameScene extends Phaser.Scene
         underground.setOrigin(0,0)
         underground.setDisplaySize(this.game.canvas.width, this.game.canvas.height - 500)
 
+        // Create Animations
+        this.createAnimations();
+
+        // #region Map
 
         this.map = this.make.tilemap({ width: 25, height: 200, tileWidth: 16, tileHeight: 16});
 
-        //Initialize map layers
         let itemTileset = this.map.addTilesetImage('items', undefined, 16, 16);
         if(itemTileset)
         {
             let itemLayer = this.map.createBlankLayer('itemLayer', itemTileset);
-            this.ItemLayer = new ItemLayer(this, itemLayer, 0, 500);
+            if(itemLayer)
+            {
+                this.ItemLayer = new ItemLayer(this, itemLayer, 0, 500);
+            }
+            else
+            {
+                console.log("itemLayer does not exist");
+            }
         }
         else
         {
@@ -84,14 +94,22 @@ class GameScene extends Phaser.Scene
         if(groundTileset)
         {
             let groundLayer = this.map.createBlankLayer('groundLayer', groundTileset);
-            this.GroundLayer = new GroundLayer(this, groundLayer, 0, 500);
+            if(groundLayer)
+            {
+                this.GroundLayer = new GroundLayer(this, groundLayer, 0, 500);
+            }
+            else
+            {
+                console.log("groundLayer does not exist");
+            }
         }
         else
         {
             console.log("Failed to load the tileset image");
         }
+        // #endregion Map
 
-
+        // #region Gold Bar
         // Gold Bar text
         this.goldText = this.add.text(this.game.canvas.width-50, 5, String(this.gold.toFixed(1)), {
             fontSize: '32px'
@@ -108,19 +126,17 @@ class GameScene extends Phaser.Scene
         goldImage.scrollFactorX = 0;
         goldImage.scrollFactorY = 0;
 
-        // Create Animations
-        this.createAnimations();
+        // #endregion Gold Bar
         
-        //Player code
+        // #region Sprites
         if(this.GroundLayer && this.ItemLayer)
         {
             this.player = new Player(this, 400, 300, "idle", this.GroundLayer, this.ItemLayer);
             this.slime = new Slime(this, 500, 300, "slime_idle", this.GroundLayer);
         }
-
-
-
-        ////Collision Code
+        // #endregion Sprites
+    
+        // #region Collision Code
         this.dynamiteColliderGroup = this.physics.add.group({
             defaultKey: 'dynamite',
             collideWorldBounds: true
@@ -139,22 +155,24 @@ class GameScene extends Phaser.Scene
         {
             this.physics.add.overlap(this.explosionOverlapGroup, this.ItemLayer.layer, this.ItemLayer?.removeItems, undefined, this);
         }
+        // #endregion Collision Code
 
-
-        ////Input Events
+        // #region Input Events
         if(this.input && this.input.keyboard)
         {
             this.cursors = this.input.keyboard.createCursorKeys();
             //Adding key presses
             this.input.keyboard.on('keydown', this.handleKeyPress, this);
         }
+        // #endregion Input Events
 
-        //Follow the player
+        // #region Camera
         if(this.player)
         {
             this.cameras.main.startFollow(this.player);
         }
         this.cameras.main.height = 1000;
+        // #endregion Camera
 
 
     }
@@ -168,10 +186,12 @@ class GameScene extends Phaser.Scene
         // Reset the lastKeyPressed after processing
         this.lastKeyPressed = undefined;
     }
-    handleKeyPress(event)
+
+    handleKeyPress(event: KeyboardEvent)
     {
         this.lastKeyPressed = event.keyCode
     }
+
     createAnimations()
     {
         this.anims.create({
@@ -259,6 +279,7 @@ class GameScene extends Phaser.Scene
             frameRate: 10
         })
     }
+    
     updateGold(material)
     {
         let price = orePrices[material];
