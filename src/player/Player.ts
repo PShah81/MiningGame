@@ -1,3 +1,4 @@
+import Enemy from "../enemy/Enemy";
 import GameScene from "../GameScene";
 import GroundLayer from "../map/GroundLayer";
 import ItemLayer from "../map/ItemLayer";
@@ -5,7 +6,7 @@ import PlayerStateManager from "./PlayerStateManager";
 
 export default class Player extends Phaser.Physics.Arcade.Sprite
 {
-    playerStateManager?: PlayerStateManager
+    playerStateManager: PlayerStateManager
     canClimb: boolean
     attackHitBox: Phaser.Types.Physics.Arcade.ImageWithDynamicBody
     constructor(scene: GameScene, x:integer, y: integer, texture: string, GroundLayer: GroundLayer, ItemLayer: ItemLayer)
@@ -30,7 +31,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         }
         else
         {
-            console.log("No Body??");
+            console.error("No Body");
         }
 
         //Misc
@@ -41,18 +42,24 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         this.attackHitBox = scene.add.rectangle(this.x, this.y, 16, 16, 0xffffff, 0) as unknown as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
         scene.physics.add.existing(this.attackHitBox);
         this.attackHitBox.body.setAllowGravity(false);
-        
+        this.attackHitBox.body.enable = false;
+        scene.physics.add.overlap(this.attackHitBox, scene.enemyGroup, this.handleDamage, undefined, this);     
     }
 
-    update(cursors: Phaser.Types.Input.Keyboard.CursorKeys | undefined, lastKeyPressed: number | undefined)
+    update(cursors: Phaser.Types.Input.Keyboard.CursorKeys, lastKeyPressed?: integer)
     {
-        if(this.playerStateManager)
+        this.playerStateManager.update(cursors, lastKeyPressed);
+    }
+
+    handleDamage(hitbox: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject, enemy: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject)
+    {
+        if(enemy instanceof Enemy)
         {
-            this.playerStateManager.update(cursors, lastKeyPressed)
+            console.log(enemy);
         }
         else
         {
-            console.log("No State Manager");
+            console.error("Not of type Enemy");
         }
     }
 }

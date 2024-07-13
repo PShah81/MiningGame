@@ -8,7 +8,7 @@ class PlayerStateManager
     player: Player
     states: PlayerState[]
     currentState: PlayerState
-    currentDirection?: Directions
+    currentDirection: Directions
     GroundLayer: GroundLayer
     ItemLayer: ItemLayer
     constructor(player: Player, GroundLayer: GroundLayer, ItemLayer: ItemLayer)
@@ -27,11 +27,12 @@ class PlayerStateManager
             new Climb(this.player, this, this.GroundLayer, this.ItemLayer),
             new Attack(this.player, this, this.GroundLayer, this.ItemLayer)
         ];
+        this.currentDirection = Directions.IDLE;
         this.currentState = this.states[0];
         this.currentState.enter(Directions.IDLE);
         
     }
-    update(cursors: Phaser.Types.Input.Keyboard.CursorKeys | undefined, lastKeyPressed: number | undefined)
+    update(cursors: Phaser.Types.Input.Keyboard.CursorKeys, lastKeyPressed?: integer)
     {
         this.currentState.update(cursors, lastKeyPressed);
         this.updateHitboxPosition();

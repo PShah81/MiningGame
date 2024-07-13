@@ -74,10 +74,7 @@ export default class BaseLayer
     {
         let [x,y] = this.getCenterOfObject(this.scene.player);
         let dynamite = this.scene.physics.add.sprite(x, y, "dynamite");
-        if(this.scene.dynamiteColliderGroup)
-        {
-            this.scene.dynamiteColliderGroup.add(dynamite);
-        }
+        this.scene.dynamiteColliderGroup.add(dynamite);
         dynamite.anims.play("dynamite", true);
         
         dynamite.on('animationcomplete-dynamite', () =>{
@@ -85,10 +82,7 @@ export default class BaseLayer
             let y = dynamite.y;
             dynamite.destroy();
             let explosion = this.scene.physics.add.sprite(x, y, "explosion");
-            if(this.scene.explosionOverlapGroup)
-            {
-                this.scene.explosionOverlapGroup.add(explosion);
-            }
+            this.scene.explosionOverlapGroup.add(explosion);
             explosion.body.setAllowGravity(false);
             explosion.body.setVelocityY(0);
             explosion.setScale(3);

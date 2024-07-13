@@ -20,14 +20,14 @@ export default class ItemLayer extends BaseLayer
             this.layer.putTileAtWorldXY(tileIndex, x, y);
         }
     }
-    removeItems = (explosion, itemsTile: Phaser.Tilemaps.Tile | GameObjects.GameObject) => {
+    removeItems = (explosion: Phaser.Tilemaps.Tile | GameObjects.GameObject, itemsTile: Phaser.Tilemaps.Tile | GameObjects.GameObject) => {
         if(itemsTile instanceof Phaser.Tilemaps.Tile)
         {
             this.layer.removeTileAt(itemsTile.x,itemsTile.y);
         }
         else
         {
-            console.log("Got game object instead of tile");
+            console.error("Got game object instead of tile");
         }
     }
     canClimb = (player: Phaser.Tilemaps.Tile | GameObjects.GameObject, tile: Phaser.Tilemaps.Tile | GameObjects.GameObject) =>

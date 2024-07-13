@@ -19,16 +19,17 @@ enum orePrices {
 class GameScene extends Phaser.Scene
 {
     gold: integer
-    goldText?: Phaser.GameObjects.Text
-    lastKeyPressed?: number
-    map?: Phaser.Tilemaps.Tilemap
-    ItemLayer?: ItemLayer
-    GroundLayer?: GroundLayer
-    player?: Player
-    cursors?: Phaser.Types.Input.Keyboard.CursorKeys
-    dynamiteColliderGroup?: Phaser.Physics.Arcade.Group
-    explosionOverlapGroup?: Phaser.Physics.Arcade.Group
-    PlayerStateManager?: PlayerStateManager
+    goldText!: Phaser.GameObjects.Text
+    lastKeyPressed?: integer
+    map!: Phaser.Tilemaps.Tilemap
+    ItemLayer!: ItemLayer
+    GroundLayer!: GroundLayer
+    player!: Player
+    cursors!: Phaser.Types.Input.Keyboard.CursorKeys
+    dynamiteColliderGroup!: Phaser.Physics.Arcade.Group
+    explosionOverlapGroup!: Phaser.Physics.Arcade.Group
+    enemyGroup!: Phaser.Physics.Arcade.Group
+    PlayerStateManager!: PlayerStateManager
     slime?: Slime
     constructor()
     {
@@ -57,7 +58,6 @@ class GameScene extends Phaser.Scene
 
     create ()
     {
-        
         this.add.image(400,300, 'sky');
 
         // Background that shows after a block has been mined
@@ -67,6 +67,21 @@ class GameScene extends Phaser.Scene
 
         // Create Animations
         this.createAnimations();
+
+        // Collider Group
+        this.dynamiteColliderGroup = this.physics.add.group({
+            defaultKey: 'dynamite',
+            collideWorldBounds: true
+        })
+
+        this.explosionOverlapGroup = this.physics.add.group({
+            defaultKey: 'explosion',
+            collideWorldBounds: true
+        })
+
+        this.enemyGroup = this.physics.add.group({
+            collideWorldBounds: true
+        })
 
         // #region Map
 
@@ -82,12 +97,12 @@ class GameScene extends Phaser.Scene
             }
             else
             {
-                console.log("itemLayer does not exist");
+                console.error("itemLayer does not exist");
             }
         }
         else
         {
-            console.log("Failed to load the tileset image");
+            console.error("Failed to load the tileset image");
         }
        
         let groundTileset = this.map.addTilesetImage('tiles', undefined, 16, 16);
@@ -100,12 +115,12 @@ class GameScene extends Phaser.Scene
             }
             else
             {
-                console.log("groundLayer does not exist");
+                console.error("groundLayer does not exist");
             }
         }
         else
         {
-            console.log("Failed to load the tileset image");
+            console.error("Failed to load the tileset image");
         }
         // #endregion Map
 
@@ -128,61 +143,33 @@ class GameScene extends Phaser.Scene
 
         // #endregion Gold Bar
         
-        // #region Sprites
-        if(this.GroundLayer && this.ItemLayer)
-        {
-            this.player = new Player(this, 400, 300, "idle", this.GroundLayer, this.ItemLayer);
-            this.slime = new Slime(this, 500, 300, "slime_idle", this.GroundLayer);
-        }
-        // #endregion Sprites
+        // Sprites
+        this.player = new Player(this, 400, 300, "idle", this.GroundLayer, this.ItemLayer);
+        this.slime = new Slime(this, 500, 300, "slime_idle", this.GroundLayer);
     
-        // #region Collision Code
-        this.dynamiteColliderGroup = this.physics.add.group({
-            defaultKey: 'dynamite',
-            collideWorldBounds: true
-        })
+        // Collision 
+        this.physics.add.collider(this.dynamiteColliderGroup, this.GroundLayer.layer);
+        this.physics.add.overlap(this.explosionOverlapGroup, this.GroundLayer.layer, this.GroundLayer.removeGround, undefined, this);
+        this.physics.add.overlap(this.explosionOverlapGroup, this.ItemLayer.layer, this.ItemLayer?.removeItems, undefined, this);
 
-        this.explosionOverlapGroup = this.physics.add.group({
-            defaultKey: 'explosion',
-            collideWorldBounds: true
-        })
-        if(this.GroundLayer && this.player)
-        {
-            this.physics.add.collider(this.dynamiteColliderGroup, this.GroundLayer.layer);
-            this.physics.add.overlap(this.explosionOverlapGroup, this.GroundLayer.layer, this.GroundLayer?.removeGround, undefined, this);
-        }
-        if(this.ItemLayer && this.player)
-        {
-            this.physics.add.overlap(this.explosionOverlapGroup, this.ItemLayer.layer, this.ItemLayer?.removeItems, undefined, this);
-        }
-        // #endregion Collision Code
-
-        // #region Input Events
-        if(this.input && this.input.keyboard)
+        // Input Events
+        if(this.input.keyboard)
         {
             this.cursors = this.input.keyboard.createCursorKeys();
             //Adding key presses
             this.input.keyboard.on('keydown', this.handleKeyPress, this);
         }
-        // #endregion Input Events
 
-        // #region Camera
-        if(this.player)
-        {
-            this.cameras.main.startFollow(this.player);
-        }
+        // Camera
+        this.cameras.main.startFollow(this.player);
         this.cameras.main.height = 1000;
-        // #endregion Camera
 
 
     }
 
     update () 
     {
-        if(this.player)
-        {
-            this.player.update(this.cursors, this.lastKeyPressed)
-        }
+        this.player.update(this.cursors, this.lastKeyPressed);
         // Reset the lastKeyPressed after processing
         this.lastKeyPressed = undefined;
     }
@@ -280,15 +267,13 @@ class GameScene extends Phaser.Scene
         })
     }
     
-    updateGold(material)
+    updateGold(material: integer)
     {
         let price = orePrices[material];
         this.gold += parseInt(price);
-        if(this.goldText)
-        {
-            this.goldText.setText(this.gold.toFixed(1));
-        }
+        this.goldText.setText(this.gold.toFixed(1));
     }
+    
 }
 
 export default GameScene

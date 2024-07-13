@@ -34,10 +34,18 @@ export default class GroundLayer extends BaseLayer
             this.miningTile = tile;
             this.miningCooldown = this.scene.time.addEvent({
                 args: [tile.x, tile.y, tile.index],
-                callback: (x,y,index) => {
+                callback: (x: integer, y: integer, index: integer) => {
                     // Remove tile at coords
                     this.layer.removeTileAt(x,y)
-                    this.scene.updateGold(oreMapping[index])
+                    let key = Object.keys(oreMapping)[index];
+                    if(key in oreMapping)
+                    {
+                        this.scene.updateGold(oreMapping[key as keyof typeof oreMapping])
+                    }
+                    else
+                    {
+                        console.error("Invalid Key");
+                    }
                     this.miningCooldown = undefined;
                     this.miningTile = undefined;
                 },
@@ -198,7 +206,7 @@ export default class GroundLayer extends BaseLayer
         }
         return weightedArray;
     }
-    removeGround = (explosion, groundTile: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject) => {
+    removeGround = (explosion: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject, groundTile: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject) => {
         if(groundTile instanceof Phaser.Tilemaps.Tile)
         {
             this.layer.removeTileAt(groundTile.x,groundTile.y);
