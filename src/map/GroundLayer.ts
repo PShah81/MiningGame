@@ -213,7 +213,7 @@ export default class GroundLayer extends BaseLayer
         }
         else
         {
-            console.log("Got game object instead of tile");
+            console.error("Got game object instead of tile");
         }
     }
 }

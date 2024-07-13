@@ -76,7 +76,6 @@ export class PlayerState {
         }
         if(itemIndex != -1)
         {
-            console.log(this.ItemLayer)
             this.ItemLayer.placeItem(itemIndex, this.player);
         }
     }
@@ -515,7 +514,6 @@ export class Mine extends PlayerState {
 
         if (cursors.left.isDown)
         {
-            console.log(this.GroundLayer.currentMiningDirection);
             if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "left")
             {
                 newState = States.MINE;
@@ -1036,7 +1034,6 @@ export class Climb extends PlayerState {
                 this.GroundLayer.startMining("down");
                 if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "down")
                 {
-                    console.log("state");
                     newState = States.MINE;
                     newDirection = Directions.DOWN;
                 }

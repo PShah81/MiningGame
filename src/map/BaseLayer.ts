@@ -11,7 +11,7 @@ export default class BaseLayer
         this.layer.x = x;
         this.layer.y = y;
     }
-    getCenterOfObject(object?: Phaser.Physics.Arcade.Sprite)
+    getCenterOfObject(object: Phaser.Physics.Arcade.Sprite)
     {
         if(object && object.body)
         {
@@ -23,11 +23,11 @@ export default class BaseLayer
         }
         else
         {
-            console.log("No Sprite or Body");
+            console.error("No Sprite or Body");
             return [0,0];
         }
     }
-    checkTileCollision(direction: string, object?: Phaser.Physics.Arcade.Sprite) 
+    checkTileCollision(direction: string, object: Phaser.Physics.Arcade.Sprite) 
     {
 
         if(object && object.body)
@@ -59,12 +59,12 @@ export default class BaseLayer
         }
         else
         {
-            console.log("No Sprite or Body");
+            console.error("No Sprite or Body");
 
             return null;
         }
     }
-    getTileAtObject(object?: Phaser.Physics.Arcade.Sprite)
+    getTileAtObject(object: Phaser.Physics.Arcade.Sprite)
     {
         let [x,y] = this.getCenterOfObject(object);
         let tile = this.layer.getTileAtWorldXY(x, y);

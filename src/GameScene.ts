@@ -30,7 +30,7 @@ class GameScene extends Phaser.Scene
     explosionOverlapGroup!: Phaser.Physics.Arcade.Group
     enemyGroup!: Phaser.Physics.Arcade.Group
     PlayerStateManager!: PlayerStateManager
-    slime?: Slime
+    slime!: Slime
     constructor()
     {
         super('game-scene');
@@ -150,7 +150,7 @@ class GameScene extends Phaser.Scene
         // Collision 
         this.physics.add.collider(this.dynamiteColliderGroup, this.GroundLayer.layer);
         this.physics.add.overlap(this.explosionOverlapGroup, this.GroundLayer.layer, this.GroundLayer.removeGround, undefined, this);
-        this.physics.add.overlap(this.explosionOverlapGroup, this.ItemLayer.layer, this.ItemLayer?.removeItems, undefined, this);
+        this.physics.add.overlap(this.explosionOverlapGroup, this.ItemLayer.layer, this.ItemLayer.removeItems, undefined, this);
 
         // Input Events
         if(this.input.keyboard)
