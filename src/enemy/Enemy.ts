@@ -3,24 +3,23 @@ import GameScene from "../GameScene";
 
 export default class Enemy extends Phaser.Physics.Arcade.Sprite
 {
+    static currentId: integer = 0
+    health: number
+    id: integer
     constructor(scene: GameScene, x:integer, y: integer, texture: string, GroundLayer: GroundLayer)
     {
         super(scene, x, y, texture);
-
+        this.health = 10;
+        this.id = Enemy.currentId;
+        Enemy.currentId += 1;
         //Add Enemy to Game Scene
         scene.add.existing(this);
         scene.physics.add.existing(this);
         
         //Collision Logic
         scene.physics.add.collider(this, GroundLayer.layer);
-        if(scene.enemyGroup)
-        {
-            scene.enemyGroup.add(this);
-        }
-        else
-        {
-            console.error("No Enemy Group");
-        }
+        this.setPushable(false);
+        scene.enemyGroup.add(this);
         
     }
 
@@ -29,8 +28,9 @@ export default class Enemy extends Phaser.Physics.Arcade.Sprite
         
     }
 
-    handleDamage(hitbox: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject, enemy: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject)
+    handleDamage(damage: number)
     {
-        console.log("hey");
+        this.health -= damage;
+        console.log(this.health);
     }
 }

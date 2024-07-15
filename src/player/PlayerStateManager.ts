@@ -56,10 +56,11 @@ class PlayerStateManager
     {
         if(this.player.body)
         {
+            let centerVec = this.player.body.center; 
             this.player.attackHitBox.x = this.player.flipX
-            ? this.player.body.x - this.player.body.width * 0.55
-            : this.player.body.x + this.player.body.width * 1.5 
-            this.player.attackHitBox.y = this.player.body.y + this.player.body.height * 0.5;
+            ? centerVec.x - this.player.body.width * 0.75
+            : centerVec.x + this.player.body.width * 0.75 
+            this.player.attackHitBox.y = centerVec.y; 
         }
         
     }

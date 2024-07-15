@@ -54,6 +54,11 @@ class GameScene extends Phaser.Scene
         this.load.spritesheet("climb", '../assets/sprites/3 SteamMan/climb.png', { frameWidth: 48, frameHeight: 48});
         this.load.spritesheet("attack", '../assets/sprites/3 SteamMan/attack.png', { frameWidth: 48, frameHeight: 48});
         this.load.spritesheet("slime_idle", '../assets/sprites/Slime/slime_idle_spritesheet.png', { frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet("slime_walk", '../assets/sprites/Slime/slime_walk_spritesheet.png', { frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet("slime_death", '../assets/sprites/Slime/slime_death_spritesheet.png', { frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet("slime_attack", '../assets/sprites/Slime/slime_attack_spritesheet.png', { frameWidth: 32, frameHeight: 24});
+        this.load.spritesheet("slime_jump", '../assets/sprites/Slime/slime_jump_spritesheet.png', { frameWidth: 16, frameHeight: 16});
+
     }
 
     create ()
@@ -66,7 +71,8 @@ class GameScene extends Phaser.Scene
         underground.setDisplaySize(this.game.canvas.width, this.game.canvas.height - 500)
 
         // Create Animations
-        this.createAnimations();
+        this.createPlayerAnimations();
+        this.createEnemyAnimations();
 
         // Collider Group
         this.dynamiteColliderGroup = this.physics.add.group({
@@ -145,7 +151,7 @@ class GameScene extends Phaser.Scene
         
         // Sprites
         this.player = new Player(this, 400, 300, "idle", this.GroundLayer, this.ItemLayer);
-        this.slime = new Slime(this, 500, 300, "slime_idle", this.GroundLayer);
+        this.slime = new Slime(this, 500, 300, "slime_idle", this.GroundLayer, this.player);
     
         // Collision 
         this.physics.add.collider(this.dynamiteColliderGroup, this.GroundLayer.layer);
@@ -170,6 +176,7 @@ class GameScene extends Phaser.Scene
     update () 
     {
         this.player.update(this.cursors, this.lastKeyPressed);
+        this.slime.update();
         // Reset the lastKeyPressed after processing
         this.lastKeyPressed = undefined;
     }
@@ -179,7 +186,7 @@ class GameScene extends Phaser.Scene
         this.lastKeyPressed = event.keyCode
     }
 
-    createAnimations()
+    createPlayerAnimations()
     {
         this.anims.create({
             key: 'walk',
@@ -267,6 +274,48 @@ class GameScene extends Phaser.Scene
         })
     }
     
+    createEnemyAnimations()
+    {
+        this.anims.create({
+            key: 'slime_idle',
+            frames: this.anims.generateFrameNumbers('slime_idle', { start: 0, end: 4 }),
+            frameRate: 5,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'slime_walk',
+            frames: this.anims.generateFrameNumbers('slime_walk', { start: 0, end: 6 }),
+            frameRate: 10,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'slime_attack',
+            frames: this.anims.generateFrameNumbers('slime_attack', { start: 0, end: 4}),
+            frameRate: 10
+        });
+        this.anims.create({
+            key: 'slime_death',
+            frames: this.anims.generateFrameNumbers('slime_death', { start: 0, end: 4}),
+            frameRate: 10
+        });
+        this.anims.create({
+            key: 'slime_jump',
+            frames: this.anims.generateFrameNumbers('slime_jump', { start: 0, end: 2}),
+            frameRate: 30
+        });
+        this.anims.create({
+            key: 'slime_fall',
+            frames: this.anims.generateFrameNumbers('slime_jump', { start: 3, end: 6}),
+            frameRate: 30
+        });
+        this.anims.create({
+            key: 'slime_land',
+            frames: this.anims.generateFrameNumbers('slime_jump', { start: 7, end: 9}),
+            frameRate: 15
+        });
+        
+    }
+
     updateGold(material: integer)
     {
         let price = orePrices[material];

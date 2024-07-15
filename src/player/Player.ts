@@ -8,6 +8,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
 {
     playerStateManager: PlayerStateManager
     canClimb: boolean
+    enemiesHit: Set<integer>
     attackHitBox: Phaser.Types.Physics.Arcade.ImageWithDynamicBody
     constructor(scene: GameScene, x:integer, y: integer, texture: string, GroundLayer: GroundLayer, ItemLayer: ItemLayer)
     {
@@ -22,6 +23,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         this.canClimb = false;
         scene.physics.add.overlap(this, ItemLayer.layer, ItemLayer.canClimb, undefined, this);
         this.setCollideWorldBounds(true);
+        scene.physics.add.collider(this, scene.enemyGroup);
+        this.setPushable(false);
 
         //Adjust body to map and spritesheet
         if(this.body)
@@ -39,11 +42,12 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         this.playerStateManager = new PlayerStateManager(this, GroundLayer, ItemLayer);
 
         //Attack Logic
-        this.attackHitBox = scene.add.rectangle(this.x, this.y, 16, 16, 0xffffff, 0) as unknown as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
+        this.attackHitBox = scene.add.rectangle(this.x, this.y, 12, 12, 0xffffff, 0) as unknown as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
         scene.physics.add.existing(this.attackHitBox);
         this.attackHitBox.body.setAllowGravity(false);
-        this.attackHitBox.body.enable = false;
-        scene.physics.add.overlap(this.attackHitBox, scene.enemyGroup, this.handleDamage, undefined, this);     
+        this.attackHitBox.body.enable = false; 
+        scene.physics.add.overlap(this.attackHitBox, scene.enemyGroup, this.handleDamage, undefined, this);
+        this.enemiesHit = new Set<integer>();  
     }
 
     update(cursors: Phaser.Types.Input.Keyboard.CursorKeys, lastKeyPressed?: integer)
@@ -55,7 +59,11 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
     {
         if(enemy instanceof Enemy)
         {
-            console.log(enemy);
+            if(!this.enemiesHit.has(enemy.id))
+            {
+                enemy.handleDamage(5);
+            }
+            this.enemiesHit.add(enemy.id);
         }
         else
         {

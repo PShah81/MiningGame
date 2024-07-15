@@ -1205,5 +1205,6 @@ export class Attack extends PlayerState {
     }
     exit(exitState: States) {
         this.player.attackHitBox.body.enable = false;
+        this.player.enemiesHit.clear();
     }
 }
