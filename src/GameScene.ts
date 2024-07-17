@@ -53,6 +53,9 @@ class GameScene extends Phaser.Scene
         this.load.spritesheet("run", '../assets/sprites/3 SteamMan/run.png', { frameWidth: 48, frameHeight: 48});
         this.load.spritesheet("climb", '../assets/sprites/3 SteamMan/climb.png', { frameWidth: 48, frameHeight: 48});
         this.load.spritesheet("attack", '../assets/sprites/3 SteamMan/attack.png', { frameWidth: 48, frameHeight: 48});
+        this.load.spritesheet("hurt", '../assets/sprites/3 SteamMan/hurt.png', { frameWidth: 48, frameHeight: 48});
+        this.load.spritesheet("death", '../assets/sprites/3 SteamMan/death.png', { frameWidth: 48, frameHeight: 48});
+
         this.load.spritesheet("slime_idle", '../assets/sprites/Slime/slime_idle_spritesheet.png', { frameWidth: 16, frameHeight: 16});
         this.load.spritesheet("slime_walk", '../assets/sprites/Slime/slime_walk_spritesheet.png', { frameWidth: 16, frameHeight: 16});
         this.load.spritesheet("slime_death", '../assets/sprites/Slime/slime_death_spritesheet.png', { frameWidth: 16, frameHeight: 16});
@@ -271,6 +274,16 @@ class GameScene extends Phaser.Scene
             key: "attack",
             frames: this.anims.generateFrameNumbers('attack', { start: 0, end: 5 }),
             frameRate: 10
+        })
+        this.anims.create({
+            key: "hurt",
+            frames: this.anims.generateFrameNumbers('hurt', { start: 0, end: 2}),
+            frameRate: 10
+        })
+        this.anims.create({
+            key: "death",
+            frames: this.anims.generateFrameNumbers('death', { start: 0, end: 5}),
+            frameRate: 5
         })
     }
     

@@ -8,8 +8,10 @@ export default class SlimeStateManager
     states: SlimeState[]
     currentState: SlimeState
     currentDirection: Directions
+    canAttack: boolean
     constructor(slime: Slime, player: Player)
     {
+        this.canAttack = true;
         this.slime = slime;
         this.player = player;
         this.states = [
@@ -43,10 +45,22 @@ export default class SlimeStateManager
         newState.direction = direction;
         if(newState != this.currentState || direction != this.currentDirection)
         {
+            if(state == States.ATTACK)
+            {
+                this.canAttack = false;
+                this.player.scene.time.addEvent({
+                    callback: () => {
+                        this.canAttack = true;
+                    },
+                    callbackScope: this,
+                    delay: 4000
+                })
+            }
             this.currentState.exit(state);
             this.currentState = newState;
             this.currentDirection = direction;
             this.currentState.enter(direction);
+
         }
 
     }

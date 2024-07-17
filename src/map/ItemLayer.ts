@@ -9,7 +9,6 @@ export default class ItemLayer extends BaseLayer
     constructor(scene: GameScene, layer: Phaser.Tilemaps.TilemapLayer, x: integer, y: integer)
     {
         super(scene, layer, x, y);
-        this.layer.setScale(2.35,2.35);
     }
     placeItem(tileIndex: integer, object: Phaser.Physics.Arcade.Sprite)
     {

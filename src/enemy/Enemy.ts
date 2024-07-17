@@ -6,10 +6,12 @@ export default class Enemy extends Phaser.Physics.Arcade.Sprite
     static currentId: integer = 0
     health: number
     id: integer
+    attack: number
     constructor(scene: GameScene, x:integer, y: integer, texture: string, GroundLayer: GroundLayer)
     {
         super(scene, x, y, texture);
         this.health = 10;
+        this.attack = 5;
         this.id = Enemy.currentId;
         Enemy.currentId += 1;
         //Add Enemy to Game Scene

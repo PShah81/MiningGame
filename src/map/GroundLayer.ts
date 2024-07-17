@@ -23,7 +23,6 @@ export default class GroundLayer extends BaseLayer
     {
         super(scene, layer, x, y);
         this.miningRate = 750;
-        this.layer.setScale(2.35,2.35);
         this.generateRandomTiles(this.layer.tilemap.width, this.layer.tilemap.height);
         this.layer.setCollisionByExclusion([-1]);
     }

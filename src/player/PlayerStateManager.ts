@@ -2,7 +2,7 @@ import GameScene from '../GameScene';
 import GroundLayer from '../map/GroundLayer';
 import ItemLayer from '../map/ItemLayer';
 import Player from './Player';
-import {PlayerState, Idle, Walk, Run, Mine, Jump, Fall, Land, Climb, Attack, Directions, States} from './PlayerStateClasses';
+import {PlayerState, Idle, Walk, Run, Mine, Jump, Fall, Land, Climb, Attack, Hurt, Directions, States, Death} from './PlayerStateClasses';
 class PlayerStateManager
 {
     player: Player
@@ -25,7 +25,9 @@ class PlayerStateManager
             new Fall(this.player, this, this.GroundLayer, this.ItemLayer),
             new Land(this.player, this, this.GroundLayer, this.ItemLayer),
             new Climb(this.player, this, this.GroundLayer, this.ItemLayer),
-            new Attack(this.player, this, this.GroundLayer, this.ItemLayer)
+            new Attack(this.player, this, this.GroundLayer, this.ItemLayer),
+            new Hurt(this.player, this, this.GroundLayer, this.ItemLayer),
+            new Death(this.player, this, this.GroundLayer, this.ItemLayer)
         ];
         this.currentDirection = Directions.IDLE;
         this.currentState = this.states[0];
@@ -43,12 +45,17 @@ class PlayerStateManager
         this.player.canClimb = false;
         let newState = this.states[state];
         newState.direction = direction;
+        // As long as something is different allow state change
         if(newState != this.currentState || direction != this.currentDirection)
         {
-            this.currentState.exit(state);
-            this.currentState = newState;
-            this.currentDirection = direction;
-            this.currentState.enter(direction);
+            // If in death state nothing can be changed
+            if(this.currentState != this.states[States.DEATH])
+            {          
+                this.currentState.exit(state);
+                this.currentState = newState;
+                this.currentDirection = direction;
+                this.currentState.enter(direction);
+            }
         }
 
     }
@@ -58,8 +65,8 @@ class PlayerStateManager
         {
             let centerVec = this.player.body.center; 
             this.player.attackHitBox.x = this.player.flipX
-            ? centerVec.x - this.player.body.width * 0.75
-            : centerVec.x + this.player.body.width * 0.75 
+            ? centerVec.x - this.player.body.width * 0.9
+            : centerVec.x + this.player.body.width * 0.9
             this.player.attackHitBox.y = centerVec.y; 
         }
         

@@ -10,6 +10,7 @@ export default class BaseLayer
         this.scene = scene;
         this.layer.x = x;
         this.layer.y = y;
+        this.layer.setScale(3,3);
     }
     getCenterOfObject(object: Phaser.Physics.Arcade.Sprite)
     {
@@ -74,6 +75,7 @@ export default class BaseLayer
     {
         let [x,y] = this.getCenterOfObject(this.scene.player);
         let dynamite = this.scene.physics.add.sprite(x, y, "dynamite");
+        dynamite.setScale(1.2,1.2);
         this.scene.dynamiteColliderGroup.add(dynamite);
         dynamite.anims.play("dynamite", true);
         
@@ -85,7 +87,7 @@ export default class BaseLayer
             this.scene.explosionOverlapGroup.add(explosion);
             explosion.body.setAllowGravity(false);
             explosion.body.setVelocityY(0);
-            explosion.setScale(3);
+            explosion.setScale(3.5,3.5);
             explosion.anims.play("explosion", true);
             explosion.on('animationcomplete-explosion', function() {
                 explosion.destroy()

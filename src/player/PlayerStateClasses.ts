@@ -12,7 +12,9 @@ export enum States{
     FALL = 5,
     LAND = 6,
     CLIMB = 7,
-    ATTACK = 8
+    ATTACK = 8,
+    HURT = 9,
+    DEATH = 10
 }
 export enum Directions {
     LEFT = 0,
@@ -1090,6 +1092,7 @@ export class Attack extends PlayerState {
     enter(direction: Directions)
     {
         this.finishedAnimation = false;
+        this.player.setVelocityX(0);
         this.player.setAccelerationX(0);
         this.player.attackHitBox.body.enable = true;
         this.player.anims.play("attack", true).on('animationcomplete-attack', 
@@ -1100,14 +1103,12 @@ export class Attack extends PlayerState {
     {
         let newState = States.IDLE;
         let newDirection = Directions.IDLE;
-        let velocity = this.getPlayerVelocity();
 
         if(this.finishedAnimation)
         {
             if (cursors.left.isDown)
             {
                 this.GroundLayer.startMining("left");
-                this.moveHorizontally(Directions.LEFT);
                 if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "left")
                 {
                     newState = States.MINE;
@@ -1115,22 +1116,13 @@ export class Attack extends PlayerState {
                 }
                 else if(this.playerOnFloor())
                 {
-                    if(velocity.x < -200)
-                    {
-                        newState = States.RUN;
-                        newDirection = Directions.LEFT;
-                    }
-                    else
-                    {
-                        newState = States.WALK;
-                        newDirection = Directions.LEFT;
-                    }
+                    newState = States.WALK;
+                    newDirection = Directions.LEFT;
                 }
             }
             else if (cursors.right.isDown)
             {
                 this.GroundLayer.startMining("right");
-                this.moveHorizontally(Directions.RIGHT);
                 if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "right")
                 {
                     newState = States.MINE;
@@ -1138,27 +1130,13 @@ export class Attack extends PlayerState {
                 }
                 else if(this.playerOnFloor())
                 {
-                    if(velocity.x > 200)
-                    {
-                        newState = States.RUN;
-                        newDirection = Directions.RIGHT;
-                    }
-                    else
-                    {
-                        newState = States.WALK;
-                        newDirection = Directions.RIGHT;
-                    }
+                    newState = States.WALK;
+                    newDirection = Directions.RIGHT;
                 }
-            }
-            else
-            {
-                this.player.setAccelerationX(0);
-                this.player.setVelocityX(0);
             }
 
             if(cursors.up.isDown)
             {
-                
                 if(this.player.canClimb)
                 {
                     newState = States.CLIMB;
@@ -1207,4 +1185,135 @@ export class Attack extends PlayerState {
         this.player.attackHitBox.body.enable = false;
         this.player.enemiesHit.clear();
     }
+}
+
+export class Hurt extends PlayerState {
+    constructor(player: Player, PlayerStateManager: PlayerStateManager, 
+        GroundLayer: GroundLayer, ItemLayer: ItemLayer) {
+        super(player, PlayerStateManager, GroundLayer, ItemLayer);
+    }
+
+    enter(direction: Directions)
+    {
+        this.finishedAnimation = false;
+        this.player.setVelocityX(0);
+        this.player.setAccelerationX(0);
+        this.player.anims.play("hurt", true).on('animationcomplete-hurt', 
+        this.handleHurtEnd, this);    
+    }
+    update(cursors: Phaser.Types.Input.Keyboard.CursorKeys, lastKeyPressed?: integer)
+    {
+        let newState = States.IDLE;
+        let newDirection = Directions.IDLE;
+
+        if(this.finishedAnimation)
+        {
+            if (cursors.left.isDown)
+            {
+                this.GroundLayer.startMining("left");
+                if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "left")
+                {
+                    newState = States.MINE;
+                    newDirection = Directions.LEFT;
+                }
+                else if(this.playerOnFloor())
+                {
+                    newState = States.WALK;
+                    newDirection = Directions.LEFT;
+                }
+            }
+            else if (cursors.right.isDown)
+            {
+                this.GroundLayer.startMining("right");
+                if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "right")
+                {
+                    newState = States.MINE;
+                    newDirection = Directions.RIGHT;
+                }
+                else if(this.playerOnFloor())
+                {
+                    newState = States.WALK;
+                    newDirection = Directions.RIGHT;
+                }
+            }
+
+            if(cursors.space.isDown)
+            {
+                newState = States.ATTACK;
+            }
+
+            if(cursors.up.isDown)
+            {
+                if(this.player.canClimb)
+                {
+                    newState = States.CLIMB;
+                    newDirection = Directions.UP;
+                }
+                else if(this.playerOnFloor())
+                {
+                    newState = States.JUMP;
+                }
+            }
+            if(cursors.down.isDown)
+            {
+                this.GroundLayer.startMining("down");
+                
+                if(this.GroundLayer.miningCooldown && this.GroundLayer.currentMiningDirection == "down" && this.playerOnFloor())
+                {
+                    newState = States.MINE;
+                    newDirection = Directions.DOWN;
+                }
+                else if(this.player.canClimb)
+                {
+                    newState = States.CLIMB;
+                    newDirection = Directions.DOWN;
+                }
+            }
+    
+            this.stopMineCheck(cursors, newState);
+        
+            
+            if(newState == States.IDLE)
+            {
+                if(!this.playerOnFloor())
+                {
+                    newState = States.FALL;
+                }
+                else
+                {
+                    newState = States.IDLE;
+                }
+            }
+            this.PlayerStateManager.changeState(newState, newDirection);
+        }
+        
+    }
+
+    handleHurtEnd()
+    {
+        if(this.player.health <= 0)
+        {
+            this.PlayerStateManager.changeState(States.DEATH, Directions.IDLE);
+        }
+        else
+        {
+            this.finishedAnimation = true
+        }
+    }
+}
+
+export class Death extends PlayerState {
+    constructor(player: Player, PlayerStateManager: PlayerStateManager, 
+        GroundLayer: GroundLayer, ItemLayer: ItemLayer) {
+        super(player, PlayerStateManager, GroundLayer, ItemLayer);
+    }
+
+    enter(direction: Directions)
+    {
+        this.player.setVelocityX(0);
+        this.player.setAccelerationX(0);
+        this.player.anims.play("death", true).on('animationcomplete-death', 
+        ()=>{this.player.destroy()}, this);    
+    }
+
 }

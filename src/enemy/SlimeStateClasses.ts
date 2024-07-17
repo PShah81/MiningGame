@@ -27,10 +27,7 @@ export class SlimeState {
         this.slime = slime;
         this.SlimeStateManager = SlimeStateManager;
     }
-    enter(direction: Directions)
-    {
-
-    }
+    enter(direction: Directions){}
     update() {}
     exit(exitState: States) {}
     findFollowDirection()
@@ -92,12 +89,12 @@ export class SlimeState {
         if(direction == Directions.RIGHT)
         {
             this.slime.setFlipX(true);
-            this.slime.setVelocityX(50);
+            this.slime.setVelocityX(30);
         }
         else if(direction == Directions.LEFT)
         {
             this.slime.setFlipX(false);
-            this.slime.setVelocityX(-50);
+            this.slime.setVelocityX(-30);
         }
         else
         {
@@ -111,7 +108,7 @@ export class SlimeState {
             let playerPos = this.player.body.center;
             let slimePos = this.slime.body.center;
             let distancePlayerAndSlime = Phaser.Math.Distance.Between(playerPos.x, playerPos.y, slimePos.x, slimePos.y);
-            if(distancePlayerAndSlime < 40)
+            if(distancePlayerAndSlime < 40 && this.SlimeStateManager.canAttack)
             {
                 return true;
             }
@@ -174,7 +171,7 @@ export class Walk extends SlimeState {
         }
         else if(direction != Directions.IDLE)
         {
-            if(Math.random()*10 < 2 && this.slimeOnFloor())
+            if(Math.random()*10 < 0.5 && this.slimeOnFloor())
             {
                 state = States.JUMP;
             }
@@ -340,9 +337,5 @@ export class Death extends SlimeState {
     {
         this.slime.anims.play("slime_death", true).on('animationcomplete-slime_death', 
         ()=>{this.slime.destroy()}, this);
-    }
-    update()
-    {
-        
     }
 }
