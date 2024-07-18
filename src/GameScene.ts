@@ -160,6 +160,7 @@ class GameScene extends Phaser.Scene
         this.physics.add.collider(this.dynamiteColliderGroup, this.GroundLayer.layer);
         this.physics.add.overlap(this.explosionOverlapGroup, this.GroundLayer.layer, this.GroundLayer.removeGround, undefined, this);
         this.physics.add.overlap(this.explosionOverlapGroup, this.ItemLayer.layer, this.ItemLayer.removeItems, undefined, this);
+        this.physics.add.overlap(this.player, this.explosionOverlapGroup, this.player.handlePlayerDamage, undefined, this);
 
         // Input Events
         if(this.input.keyboard)

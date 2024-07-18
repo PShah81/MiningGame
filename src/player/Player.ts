@@ -4,6 +4,7 @@ import GroundLayer from "../map/GroundLayer";
 import ItemLayer from "../map/ItemLayer";
 import { Directions, States } from "./PlayerStateClasses";
 import PlayerStateManager from "./PlayerStateManager";
+import Explosion from "../items/Explosion";
 
 export default class Player extends Phaser.Physics.Arcade.Sprite
 {
@@ -11,6 +12,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
     canClimb: boolean
     health: number
     enemiesHit: Set<integer>
+    explosions: Set<integer>
     canBeHit: boolean
     attackHitBox: Phaser.Types.Physics.Arcade.ImageWithDynamicBody
     constructor(scene: GameScene, x:integer, y: integer, texture: string, GroundLayer: GroundLayer, ItemLayer: ItemLayer)
@@ -28,6 +30,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         this.health = 20;
         this.canBeHit = true;
         this.enemiesHit = new Set<integer>();  
+        this.explosions = new Set<integer>();  
         
         //Collision Logic
         scene.physics.add.collider(this, GroundLayer.layer);
@@ -65,13 +68,19 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         this.playerStateManager.update(cursors, lastKeyPressed);
     }
 
-    handleEnemyDamage(hitbox: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject, enemy: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject)
+    handleEnemyDamage = (hitbox: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject, enemy: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject) =>
     {
         if(enemy instanceof Enemy)
         {
             if(!this.enemiesHit.has(enemy.id))
             {
                 enemy.handleDamage(5);
+                let knockbackDirection = new Phaser.Math.Vector2(enemy.x - this.x, enemy.y - this.y).normalize();
+                // Apply knockback to the enemy
+                let knockbackForce = 100;
+                let friction = 30;
+                enemy.setVelocity(knockbackDirection.x * knockbackForce, knockbackDirection.y * knockbackForce);
+                enemy.setAccelerationX(-knockbackDirection.x * friction);
             }
             this.enemiesHit.add(enemy.id);
         }
@@ -81,15 +90,13 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         }
     }
 
-    handlePlayerDamage(player: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject, enemy: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject)
+    handlePlayerDamage = (player: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject, assailant: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject) =>
     {
-        if(enemy instanceof Enemy)
+        if(assailant instanceof Enemy)
         {
             if(this.canBeHit)
             {
-                this.health -= enemy.attack;
-                this.playerStateManager.changeState(States.HURT, Directions.IDLE);
-                console.log(this.health);
+                this.takeDamage(assailant.attack);
                 this.canBeHit = false;
                 this.scene.time.addEvent({
                     callback: () => {
@@ -100,9 +107,24 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
                 });
             }
         }
-        else
+        else if(assailant instanceof Explosion)
+        {
+            if(!this.explosions.has(assailant.id))
+            {
+                this.takeDamage(assailant.attack);
+            }
+            this.explosions.add(assailant.id);
+        }
+        else 
         {
             console.error("Not of type Enemy");
         }
+    }
+
+    takeDamage = (damage: number) =>
+    {
+        this.health -= damage;
+        console.log(this.health);
+        this.playerStateManager.changeState(States.HURT, Directions.IDLE);
     }
 }

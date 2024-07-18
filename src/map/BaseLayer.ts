@@ -1,3 +1,4 @@
+import Dynamite from "../items/Dynamite";
 import GameScene from "../GameScene";
 
 export default class BaseLayer
@@ -74,24 +75,6 @@ export default class BaseLayer
     handleDynamite()
     {
         let [x,y] = this.getCenterOfObject(this.scene.player);
-        let dynamite = this.scene.physics.add.sprite(x, y, "dynamite");
-        dynamite.setScale(1.2,1.2);
-        this.scene.dynamiteColliderGroup.add(dynamite);
-        dynamite.anims.play("dynamite", true);
-        
-        dynamite.on('animationcomplete-dynamite', () =>{
-            let x = dynamite.x;
-            let y = dynamite.y;
-            dynamite.destroy();
-            let explosion = this.scene.physics.add.sprite(x, y, "explosion");
-            this.scene.explosionOverlapGroup.add(explosion);
-            explosion.body.setAllowGravity(false);
-            explosion.body.setVelocityY(0);
-            explosion.setScale(3.5,3.5);
-            explosion.anims.play("explosion", true);
-            explosion.on('animationcomplete-explosion', function() {
-                explosion.destroy()
-            });
-        });
+        new Dynamite(this.scene, x, y, "dynamite");
     }
 }
