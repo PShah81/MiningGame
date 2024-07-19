@@ -65,6 +65,15 @@ export class PlayerState {
             this.player.setVelocityX(Math.max(100, velocity.x));
         }
     }
+    handleKeyPress(lastKeyPressed?: integer)
+    {
+        if(lastKeyPressed)
+        {
+            this.craft(lastKeyPressed);
+            this.dropDynamite(lastKeyPressed);
+            this.removeItem(lastKeyPressed);
+        }
+    }
     craft(lastKeyPressed: integer)
     {
         let itemIndex = -1;
@@ -83,11 +92,18 @@ export class PlayerState {
     }
     dropDynamite(lastKeyPressed: integer)
     {
-        if(lastKeyPressed && lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.THREE)
+        if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.THREE)
         {
             this.GroundLayer.handleDynamite();
         }
         
+    }
+    removeItem(lastKeyPressed: integer)
+    {
+        if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.Q)
+        {
+            this.ItemLayer.removeItem(this.player);
+        }
     }
     playerOnFloor()
     {
@@ -150,11 +166,7 @@ export class Idle extends PlayerState {
         let newState = States.IDLE;
         let newDirection = Directions.IDLE;
 
-        if(lastKeyPressed)
-        {
-            this.craft(lastKeyPressed);
-            this.dropDynamite(lastKeyPressed);
-        }
+        this.handleKeyPress(lastKeyPressed);
 
         
         if (cursors.left.isDown)
@@ -248,11 +260,7 @@ export class Walk extends PlayerState {
         let newDirection = Directions.IDLE;
         let velocity = this.getPlayerVelocity();
 
-        if(lastKeyPressed)
-        {
-            this.craft(lastKeyPressed);
-            this.dropDynamite(lastKeyPressed);
-        }
+        this.handleKeyPress(lastKeyPressed);
 
         if (cursors.left.isDown)
         {
@@ -373,11 +381,7 @@ export class Run extends PlayerState {
         let newDirection = Directions.IDLE;
         let velocity = this.getPlayerVelocity();
 
-        if(lastKeyPressed)
-        {
-            this.craft(lastKeyPressed);
-            this.dropDynamite(lastKeyPressed);
-        }
+        this.handleKeyPress(lastKeyPressed);
 
         if (cursors.left.isDown)
         {
@@ -612,11 +616,7 @@ export class Jump extends PlayerState {
         let newState = States.IDLE;
         let newDirection = Directions.IDLE;
 
-        if(lastKeyPressed)
-        {
-            this.craft(lastKeyPressed);
-            this.dropDynamite(lastKeyPressed);
-        }
+        this.handleKeyPress(lastKeyPressed);
 
         if(this.finishedAnimation)
         {
@@ -706,11 +706,7 @@ export class Fall extends PlayerState {
         let newState = States.IDLE;
         let newDirection = Directions.IDLE;
 
-        if(lastKeyPressed)
-        {
-            this.craft(lastKeyPressed)
-            this.dropDynamite(lastKeyPressed);
-        }
+        this.handleKeyPress(lastKeyPressed);
 
         if (cursors.left.isDown)
         {
@@ -798,11 +794,7 @@ export class Land extends PlayerState {
         let newState = States.IDLE;
         let newDirection = Directions.IDLE;
 
-        if(lastKeyPressed)
-        {
-            this.craft(lastKeyPressed);
-            this.dropDynamite(lastKeyPressed);
-        }
+        this.handleKeyPress(lastKeyPressed);
 
         if(this.finishedAnimation)
         {
@@ -951,11 +943,7 @@ export class Climb extends PlayerState {
         let newState = States.IDLE;
         let newDirection = Directions.IDLE;
 
-        if(lastKeyPressed)
-        {
-            this.craft(lastKeyPressed);
-            this.dropDynamite(lastKeyPressed);
-        }
+        this.handleKeyPress(lastKeyPressed);
 
 
         if (cursors.left.isDown)

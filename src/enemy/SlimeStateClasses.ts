@@ -84,6 +84,7 @@ export class SlimeState {
     }
     moveHorizontally(direction: Directions)
     {
+        this.slime.setAccelerationX(0);
         if(direction == Directions.RIGHT)
         {
             this.slime.setFlipX(true);

@@ -22,6 +22,7 @@ class GameScene extends Phaser.Scene
 {
     gold: integer
     goldText!: Phaser.GameObjects.Text
+    playerHealth!: Phaser.GameObjects.Rectangle
     lastKeyPressed?: integer
     map!: Phaser.Tilemaps.Tilemap
     ItemLayer!: ItemLayer
@@ -137,8 +138,8 @@ class GameScene extends Phaser.Scene
 
         // #region Gold Bar
         // Gold Bar text
-        this.goldText = this.add.text(this.game.canvas.width-50, 5, String(this.gold.toFixed(1)), {
-            fontSize: '32px'
+        this.goldText = this.add.text(64, 50, String(this.gold.toFixed(1)), {
+            fontSize: '24px'
         });
         this.goldText.setOrigin(1, 0);
         //Keep it in the same position relative to the viewport
@@ -146,14 +147,16 @@ class GameScene extends Phaser.Scene
         this.goldText.scrollFactorY = 0
 
         //Gold Bar image
-        let goldImage = this.add.image(this.game.canvas.width-10, 5, 'goldImage');
+        let goldImage = this.add.image(96, 49, 'goldImage');
         goldImage.setOrigin(1,0);
-        goldImage.setScale(2,2);
+        goldImage.setScale(1.5,1.5);
         goldImage.scrollFactorX = 0;
         goldImage.scrollFactorY = 0;
 
         // #endregion Gold Bar
         
+        
+
         // Sprites
         this.player = new Player(this, 400, 300, "idle", this.GroundLayer, this.ItemLayer);
         this.slime = new Slime(this, 500, 300, "slime_idle", this.GroundLayer, this.player);
@@ -341,10 +344,11 @@ class GameScene extends Phaser.Scene
         
     }
 
-    updateGold(material: integer)
+    updateGold(material: string)
     {
-        let price = orePrices[material];
-        this.gold += parseInt(price);
+        let price = orePrices[material as keyof typeof orePrices];
+        this.gold += price;
+        console.log(this.gold)
         this.goldText.setText(this.gold.toFixed(1));
     }
     

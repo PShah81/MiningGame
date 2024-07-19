@@ -5,12 +5,16 @@ import ItemLayer from "../map/ItemLayer";
 import { Directions, States } from "./PlayerStateClasses";
 import PlayerStateManager from "./PlayerStateManager";
 import Explosion from "../items/Explosion";
+import { GameObjects } from "phaser";
 
 export default class Player extends Phaser.Physics.Arcade.Sprite
 {
     playerStateManager: PlayerStateManager
+    playerHealth: GameObjects.Rectangle
     canClimb: boolean
     health: number
+    maxHealth: number
+    maxHealthWidth: number
     enemiesHit: Set<integer>
     explosions: Set<integer>
     canBeHit: boolean
@@ -27,7 +31,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         //Misc
         this.setMaxVelocity(250);
         this.playerStateManager = new PlayerStateManager(this, GroundLayer, ItemLayer);
-        this.health = 20;
+        this.maxHealth = 40;
+        this.health = this.maxHealth;
         this.canBeHit = true;
         this.enemiesHit = new Set<integer>();  
         this.explosions = new Set<integer>();  
@@ -61,6 +66,25 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         this.attackHitBox.body.setAllowGravity(false);
         this.attackHitBox.body.enable = false; 
         scene.physics.add.overlap(this.attackHitBox, scene.enemyGroup, this.handleEnemyDamage, undefined, this);
+
+        // #region Health Bar   
+        const borderWidth = 2;
+        this.maxHealthWidth = 128;
+        const height = 20;
+        const xPos = 80;
+        const yPos = 25;
+        const borderX = xPos - (this.maxHealthWidth+borderWidth) / 2;
+        const borderY = yPos - (height+borderWidth) / 2;
+        let healthBarBorder = scene.add.graphics();
+        healthBarBorder.lineStyle(borderWidth, 0xffffff, 1);
+        healthBarBorder.strokeRect(borderX, borderY, this.maxHealthWidth+borderWidth, height+borderWidth);
+        this.playerHealth = scene.add.rectangle(xPos, yPos, this.maxHealthWidth, height, 0xff0000);
+        //Keep it in the same position relative to the viewport
+        healthBarBorder.scrollFactorX = 0;
+        healthBarBorder.scrollFactorY = 0;
+        this.playerHealth.scrollFactorX = 0;
+        this.playerHealth.scrollFactorY = 0;
+        // #endregion Health Bar
     }
 
     update(cursors: Phaser.Types.Input.Keyboard.CursorKeys, lastKeyPressed?: integer)
@@ -124,7 +148,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
     takeDamage = (damage: number) =>
     {
         this.health -= damage;
-        console.log(this.health);
+        this.playerHealth.width = Math.max(this.maxHealthWidth * this.health / this.maxHealth,0);
         this.playerStateManager.changeState(States.HURT, Directions.IDLE);
     }
 }

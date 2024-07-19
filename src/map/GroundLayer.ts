@@ -36,15 +36,7 @@ export default class GroundLayer extends BaseLayer
                 callback: (x: integer, y: integer, index: integer) => {
                     // Remove tile at coords
                     this.layer.removeTileAt(x,y)
-                    let key = Object.keys(oreMapping)[index];
-                    if(key in oreMapping)
-                    {
-                        this.scene.updateGold(oreMapping[key as keyof typeof oreMapping])
-                    }
-                    else
-                    {
-                        console.error("Invalid Key");
-                    }
+                    this.scene.updateGold(oreMapping[index]);
                     this.miningCooldown = undefined;
                     this.miningTile = undefined;
                 },
