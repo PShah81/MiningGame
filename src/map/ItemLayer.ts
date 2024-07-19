@@ -16,8 +16,13 @@ export default class ItemLayer extends BaseLayer
         let tile = this.layer.getTileAtWorldXY(x, y);
         if(!tile)
         {
-            this.layer.putTileAtWorldXY(tileIndex, x, y);
+            let tilePlaced = this.layer.putTileAtWorldXY(tileIndex, x, y);
+            if(tilePlaced)
+            {
+                return true;
+            }
         }
+        return false;
     }
     removeItem(object: Phaser.Physics.Arcade.Sprite)
     {
@@ -60,6 +65,10 @@ export default class ItemLayer extends BaseLayer
                 player.body.top + Math.floor(player.body.height/4) < bottom)
             {
                 player.canClimb = true;
+            }
+            else if(player instanceof Player)
+            {
+                player.canClimb = false;
             }
         }
     }

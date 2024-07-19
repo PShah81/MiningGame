@@ -28,6 +28,11 @@ export enum Items {
     TORCH = 1,
     DYNAMITE = 2
 }
+export enum GoldCost {
+    LADDER = -0.5,
+    TORCH = -1,
+    DYNAMITE = -2
+}
 
 
 
@@ -69,34 +74,45 @@ export class PlayerState {
     {
         if(lastKeyPressed)
         {
-            this.craft(lastKeyPressed);
-            this.dropDynamite(lastKeyPressed);
+            this.craftItem(lastKeyPressed);
             this.removeItem(lastKeyPressed);
         }
     }
-    craft(lastKeyPressed: integer)
+    craftItem(lastKeyPressed: integer)
     {
-        let itemIndex = -1;
+        let item = -1;
+        let goldCost = 0;
         if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.ONE)
         {
-            itemIndex = Items.LADDER;
+            item = Items.LADDER;
+            goldCost = GoldCost.LADDER;
         }
         else if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.TWO)
         {
-            itemIndex = Items.TORCH;
+            item = Items.TORCH;
+            goldCost = GoldCost.TORCH;
         }
-        if(itemIndex != -1)
+        else if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.THREE)
         {
-            this.ItemLayer.placeItem(itemIndex, this.player);
+            item = Items.DYNAMITE;
+            goldCost = GoldCost.DYNAMITE;
         }
-    }
-    dropDynamite(lastKeyPressed: integer)
-    {
-        if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.THREE)
+        if(item != -1 && this.player.gold + goldCost >= 0)
         {
-            this.GroundLayer.handleDynamite();
+            if(item != Items.DYNAMITE)
+            {
+                let placed = this.ItemLayer.placeItem(item, this.player);
+                if(placed)
+                {
+                    this.player.scene.updateGold(goldCost);
+                }
+            }
+            else
+            {
+                this.GroundLayer.handleDynamite();   
+                this.player.scene.updateGold(goldCost);
+            }
         }
-        
     }
     removeItem(lastKeyPressed: integer)
     {

@@ -12,6 +12,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
     playerStateManager: PlayerStateManager
     playerHealth: GameObjects.Rectangle
     canClimb: boolean
+    gold: number
     health: number
     maxHealth: number
     maxHealthWidth: number
@@ -19,10 +20,12 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
     explosions: Set<integer>
     canBeHit: boolean
     attackHitBox: Phaser.Types.Physics.Arcade.ImageWithDynamicBody
+    scene: GameScene;
     constructor(scene: GameScene, x:integer, y: integer, texture: string, GroundLayer: GroundLayer, ItemLayer: ItemLayer)
     {
         super(scene, x, y, texture);
-        
+
+        this.scene = scene;
         //Add Player to Game Scene
         scene.add.existing(this);
         scene.physics.add.existing(this);
@@ -35,7 +38,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         this.health = this.maxHealth;
         this.canBeHit = true;
         this.enemiesHit = new Set<integer>();  
-        this.explosions = new Set<integer>();  
+        this.explosions = new Set<integer>();
+        this.gold = 20;  
         
         //Collision Logic
         scene.physics.add.collider(this, GroundLayer.layer);
@@ -69,9 +73,9 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
 
         // #region Health Bar   
         const borderWidth = 2;
-        this.maxHealthWidth = 128;
+        this.maxHealthWidth = 200;
         const height = 20;
-        const xPos = 80;
+        const xPos = 120;
         const yPos = 25;
         const borderX = xPos - (this.maxHealthWidth+borderWidth) / 2;
         const borderY = yPos - (height+borderWidth) / 2;

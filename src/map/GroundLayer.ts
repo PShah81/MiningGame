@@ -1,4 +1,4 @@
-import GameScene from "~/GameScene";
+import GameScene from "../GameScene";
 import BaseLayer from "./BaseLayer";
 
 export enum oreMapping {
@@ -12,6 +12,18 @@ export enum oreMapping {
     GOLD = 7,
     DIAMOND = 8,
     EMERALD = 9
+}
+enum orePrices {
+    GRASS = 0,
+    DIRT = 0,
+    STONE = 0,
+    COAL = 0.1,
+    IRON = 0.3,
+    COPPER = 0.4,
+    SILVER = 0.5,
+    GOLD = 1,
+    DIAMOND = 3,
+    EMERALD = 10
 }
 export default class GroundLayer extends BaseLayer
 {
@@ -35,8 +47,9 @@ export default class GroundLayer extends BaseLayer
                 args: [tile.x, tile.y, tile.index],
                 callback: (x: integer, y: integer, index: integer) => {
                     // Remove tile at coords
-                    this.layer.removeTileAt(x,y)
-                    this.scene.updateGold(oreMapping[index]);
+                    this.layer.removeTileAt(x,y);
+                    let price = orePrices[oreMapping[index] as keyof typeof orePrices];
+                    this.scene.updateGold(price);
                     this.miningCooldown = undefined;
                     this.miningTile = undefined;
                 },

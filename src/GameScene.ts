@@ -6,21 +6,8 @@ import GroundLayer from './map/GroundLayer';
 import ItemLayer from './map/ItemLayer';
 import Enemy from './enemy/Enemy';
 import Explosion from './items/Explosion';
-enum orePrices {
-    GRASS = 0,
-    DIRT = 0,
-    STONE = 0,
-    COAL = 0.1,
-    IRON = 0.3,
-    COPPER = 0.4,
-    SILVER = 0.5,
-    GOLD = 1,
-    DIAMOND = 3,
-    EMERALD = 10
-}
 class GameScene extends Phaser.Scene
 {
-    gold: integer
     goldText!: Phaser.GameObjects.Text
     playerHealth!: Phaser.GameObjects.Rectangle
     lastKeyPressed?: integer
@@ -37,7 +24,6 @@ class GameScene extends Phaser.Scene
     constructor()
     {
         super('game-scene');
-        this.gold = 0;
     }
 
     preload ()
@@ -80,7 +66,7 @@ class GameScene extends Phaser.Scene
         this.createPlayerAnimations();
         this.createEnemyAnimations();
 
-        // Collider Group
+        // #region Collider Group
         this.dynamiteColliderGroup = this.physics.add.group({
             defaultKey: 'dynamite',
             collideWorldBounds: true
@@ -94,6 +80,8 @@ class GameScene extends Phaser.Scene
         this.enemyGroup = this.physics.add.group({
             collideWorldBounds: true
         })
+
+        // #endregion Collider Group
 
         // #region Map
 
@@ -135,10 +123,93 @@ class GameScene extends Phaser.Scene
             console.error("Failed to load the tileset image");
         }
         // #endregion Map
+    
+        // Sprites
+        this.player = new Player(this, 400, 300, "idle", this.GroundLayer, this.ItemLayer);
+        this.slime = new Slime(this, 500, 300, "slime_idle", this.GroundLayer, this.player);
+
+        // #region Purchasable Items
+        let ladderBackground = this.add.rectangle(300, 25, 32, 32, 0xbbbdb9);
+        ladderBackground.scrollFactorX = 0;
+        ladderBackground.scrollFactorY = 0;
+
+        let ladderImage = this.add.image(300, 25, "items", 0);
+        ladderImage.setSize(32,32);
+        ladderImage.setScale(1.8,1.8);
+        ladderImage.scrollFactorX = 0;
+        ladderImage.scrollFactorY = 0;
+        let ladderBorder = this.createBorder(ladderImage, 2);
+        let ladderKey = this.add.text(295, 50, "1", {
+            fontSize: '20px'
+        });
+        ladderKey.scrollFactorX = 0;
+        ladderKey.scrollFactorY = 0;
+        let ladderCost = this.add.text(270, 75, "0.5", {
+            fontSize: '14px'
+        });
+        ladderCost.scrollFactorX = 0;
+        ladderCost.scrollFactorY = 0;
+        let ladderGold = this.add.image(310, 82, 'goldImage');
+        ladderGold.setScale(0.8,0.8);
+        ladderGold.scrollFactorX = 0;
+        ladderGold.scrollFactorY = 0;
+        
+
+
+        let torchBackground = this.add.rectangle(350, 25, 32, 32, 0xbbbdb9);
+        torchBackground.scrollFactorX = 0;
+        torchBackground.scrollFactorY = 0;
+
+        let torchImage = this.add.image(350, 25, "items", 1);
+        torchImage.setSize(32,32);
+        torchImage.setScale(2.5,2.5);
+        torchImage.scrollFactorX = 0;
+        torchImage.scrollFactorY = 0;
+        let torchBorder = this.createBorder(torchImage, 2);
+        let torchKey = this.add.text(345, 50, "2", {
+            fontSize: '20px'
+        });
+        torchKey.scrollFactorX = 0;
+        torchKey.scrollFactorY = 0;
+        let torchCost = this.add.text(340, 75, "1", {
+            fontSize: '14px'
+        });
+        torchCost.scrollFactorX = 0;
+        torchCost.scrollFactorY = 0;
+        let torchGold = this.add.image(360, 82, 'goldImage');
+        torchGold.setScale(0.8,0.8);
+        torchGold.scrollFactorX = 0;
+        torchGold.scrollFactorY = 0;
+        
+
+        let dynamiteBackground = this.add.rectangle(400, 25, 32, 32, 0xbbbdb9);
+        dynamiteBackground.scrollFactorX = 0;
+        dynamiteBackground.scrollFactorY = 0;
+
+        let dynamiteImage = this.add.image(400, 25, "dynamite", 0);
+        dynamiteImage.setSize(32,32);
+        dynamiteImage.scrollFactorX = 0;
+        dynamiteImage.scrollFactorY = 0;
+        let dynamiteBorder = this.createBorder(dynamiteImage, 2);
+        let dynamiteKey = this.add.text(395, 50, "3", {
+            fontSize: '20px'
+        });
+        dynamiteKey.scrollFactorX = 0;
+        dynamiteKey.scrollFactorY = 0;
+        let dynamiteCost = this.add.text(390, 75, "2", {
+            fontSize: '14px'
+        });
+        dynamiteCost.scrollFactorX = 0;
+        dynamiteCost.scrollFactorY = 0;
+        let dynamiteGold = this.add.image(410, 82, 'goldImage');
+        dynamiteGold.setScale(0.8,0.8);
+        dynamiteGold.scrollFactorX = 0;
+        dynamiteGold.scrollFactorY = 0;
+        // #endregion Purchasable Items
 
         // #region Gold Bar
         // Gold Bar text
-        this.goldText = this.add.text(64, 50, String(this.gold.toFixed(1)), {
+        this.goldText = this.add.text(100, 50, String(this.player.gold.toFixed(1)), {
             fontSize: '24px'
         });
         this.goldText.setOrigin(1, 0);
@@ -147,20 +218,14 @@ class GameScene extends Phaser.Scene
         this.goldText.scrollFactorY = 0
 
         //Gold Bar image
-        let goldImage = this.add.image(96, 49, 'goldImage');
-        goldImage.setOrigin(1,0);
+        let goldImage = this.add.image(120, 60, 'goldImage');
         goldImage.setScale(1.5,1.5);
         goldImage.scrollFactorX = 0;
         goldImage.scrollFactorY = 0;
 
         // #endregion Gold Bar
-        
-        
 
-        // Sprites
-        this.player = new Player(this, 400, 300, "idle", this.GroundLayer, this.ItemLayer);
-        this.slime = new Slime(this, 500, 300, "slime_idle", this.GroundLayer, this.player);
-    
+
         // Collision 
         this.physics.add.collider(this.dynamiteColliderGroup, this.GroundLayer.layer);
         this.physics.add.overlap(this.explosionOverlapGroup, this.GroundLayer.layer, this.GroundLayer.removeGround, undefined, this);
@@ -344,14 +409,27 @@ class GameScene extends Phaser.Scene
         
     }
 
-    updateGold(material: string)
+    updateGold(price: number)
     {
-        let price = orePrices[material as keyof typeof orePrices];
-        this.gold += price;
-        console.log(this.gold)
-        this.goldText.setText(this.gold.toFixed(1));
+        this.player.gold += price;
+        this.goldText.setText(this.player.gold.toFixed(1));
     }
     
+    createBorder(image: Phaser.GameObjects.Image, borderWidth: number)
+    {
+        let imageX = image.x;
+        let imageY = image.y;
+        let imageWidth = image.width;
+        let imageHeight = image.height;
+        let border = this.add.graphics();
+        const borderX = imageX - (imageWidth+borderWidth) / 2;
+        const borderY = imageY - (imageHeight+borderWidth) / 2;
+        border.lineStyle(borderWidth, 0x000000, 1);
+        border.strokeRect(borderX, borderY, imageWidth+borderWidth, imageHeight+borderWidth);
+        border.scrollFactorX = 0;
+        border.scrollFactorY = 0;
+        return border;
+    }
 }
 
 export default GameScene
