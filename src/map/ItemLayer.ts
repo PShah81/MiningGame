@@ -19,7 +19,16 @@ export default class ItemLayer extends BaseLayer
             this.layer.putTileAtWorldXY(tileIndex, x, y);
         }
     }
-    removeItems = (explosion: Phaser.Tilemaps.Tile | GameObjects.GameObject, itemsTile: Phaser.Tilemaps.Tile | GameObjects.GameObject) => {
+    removeItem(object: Phaser.Physics.Arcade.Sprite)
+    {
+        let [x,y] = this.getCenterOfObject(object);
+        let tile = this.layer.getTileAtWorldXY(x, y);
+        if(tile)
+        {
+            this.layer.removeTileAt(tile.x, tile.y);
+        }
+    }
+    itemsExploded = (explosion: Phaser.Tilemaps.Tile | GameObjects.GameObject, itemsTile: Phaser.Tilemaps.Tile | GameObjects.GameObject) => {
         if(itemsTile instanceof Phaser.Tilemaps.Tile)
         {
             this.layer.removeTileAt(itemsTile.x,itemsTile.y);

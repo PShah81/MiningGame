@@ -1,9 +1,11 @@
-import Phaser from 'phaser'
+import Phaser, { GameObjects } from 'phaser'
 import PlayerStateManager from './player/PlayerStateManager';
 import Slime from './enemy/Slime';
 import Player from './player/Player';
 import GroundLayer from './map/GroundLayer';
 import ItemLayer from './map/ItemLayer';
+import Enemy from './enemy/Enemy';
+import Explosion from './items/Explosion';
 enum orePrices {
     GRASS = 0,
     DIRT = 0,
@@ -159,8 +161,9 @@ class GameScene extends Phaser.Scene
         // Collision 
         this.physics.add.collider(this.dynamiteColliderGroup, this.GroundLayer.layer);
         this.physics.add.overlap(this.explosionOverlapGroup, this.GroundLayer.layer, this.GroundLayer.removeGround, undefined, this);
-        this.physics.add.overlap(this.explosionOverlapGroup, this.ItemLayer.layer, this.ItemLayer.removeItems, undefined, this);
+        this.physics.add.overlap(this.explosionOverlapGroup, this.ItemLayer.layer, this.ItemLayer.itemsExploded, undefined, this);
         this.physics.add.overlap(this.player, this.explosionOverlapGroup, this.player.handlePlayerDamage, undefined, this);
+        this.physics.add.overlap(this.enemyGroup, this.explosionOverlapGroup, this.handleExplosionDamage, undefined, this);
 
         // Input Events
         if(this.input.keyboard)
@@ -183,6 +186,14 @@ class GameScene extends Phaser.Scene
         this.slime.update();
         // Reset the lastKeyPressed after processing
         this.lastKeyPressed = undefined;
+    }
+
+    handleExplosionDamage(enemy: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject, explosion: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject)
+    {
+        if(explosion instanceof Explosion)
+        {
+            explosion.handleDamage(enemy, explosion);
+        }
     }
 
     handleKeyPress(event: KeyboardEvent)
