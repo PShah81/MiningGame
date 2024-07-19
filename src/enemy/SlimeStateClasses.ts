@@ -1,15 +1,13 @@
 import Player from "../player/Player";
 import SlimeStateManager from "./SlimeStateManager";
 import Slime from "./Slime";
-import PlayerStateManager from "~/player/PlayerStateManager";
 export enum States{
     IDLE = 0,
     WALK = 1,
     JUMP = 2,
     FALL = 3,
     LAND = 4,
-    ATTACK = 5,
-    DEATH = 6
+    DEATH = 5
 }
 export enum Directions {
     LEFT = 0,
@@ -101,29 +99,6 @@ export class SlimeState {
             this.slime.setVelocityX(0);
         }
     }
-    checkAttackable()
-    {
-        if(this.player.body && this.slime.body)
-        {
-            let playerPos = this.player.body.center;
-            let slimePos = this.slime.body.center;
-            let distancePlayerAndSlime = Phaser.Math.Distance.Between(playerPos.x, playerPos.y, slimePos.x, slimePos.y);
-            if(distancePlayerAndSlime < 40 && this.SlimeStateManager.canAttack)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        else
-        {
-            console.error("No player or slime body");
-            return false;
-        }
-
-    }
 }
 
 export class Idle extends SlimeState {
@@ -139,11 +114,7 @@ export class Idle extends SlimeState {
     {
         let state = States.IDLE;
         let direction = this.findFollowDirection();
-        if(this.checkAttackable())
-        {
-            state = States.ATTACK;
-        }
-        else if(direction != Directions.IDLE)
+        if(direction != Directions.IDLE)
         {
             state = States.WALK;
         }
@@ -165,13 +136,9 @@ export class Walk extends SlimeState {
     {
         let state = States.IDLE;
         let direction = this.findFollowDirection();
-        if(this.checkAttackable())
+        if(direction != Directions.IDLE)
         {
-            state = States.ATTACK;
-        }
-        else if(direction != Directions.IDLE)
-        {
-            if(Math.random()*10 < 0.5 && this.slimeOnFloor())
+            if(Math.random()*10 < 0.1 && this.slimeOnFloor())
             {
                 state = States.JUMP;
             }
@@ -200,11 +167,7 @@ export class Jump extends SlimeState {
         let state = States.JUMP;
         let direction = this.findFollowDirection();
         this.moveHorizontally(direction);
-        if(this.checkAttackable())
-        {
-            state = States.ATTACK;
-        }
-        else if(this.slime.body && this.slime.body.velocity.y > -20)
+        if(this.slime.body && this.slime.body.velocity.y > -20)
         {
             state = States.FALL;
         }
@@ -237,10 +200,6 @@ export class Fall extends SlimeState {
         {
             state = States.LAND;
         }
-        else if(this.checkAttackable())
-        {
-            state = States.ATTACK;
-        }
 
         //Don't want to recall fall and call enter method again
         if(state != States.FALL)
@@ -268,64 +227,12 @@ export class Land extends SlimeState {
         {
             let state = States.IDLE;
             let direction = this.findFollowDirection();
-            if(this.checkAttackable())
-            {
-                state = States.ATTACK;
-            }
-            else if(direction != Directions.IDLE)
-            {
-                state = States.WALK;
-            }
-            this.SlimeStateManager.changeState(state, direction);
-        }
-    }
-}
-
-export class Attack extends SlimeState {
-    finishedAnimation: boolean
-    constructor(player: Player, slime: Slime, SlimeStateManager: SlimeStateManager) {
-        super(player, slime, SlimeStateManager);
-        this.finishedAnimation = false;
-    }
-    enter(direction: Directions)
-    {
-        this.moveHorizontally(direction);
-        if(this.slime.body)
-        {
-            this.slime.body.setSize(32,24,false);
-        }
-        else
-        {
-            console.error("No Body");
-        }
-        this.slime.anims.play("slime_attack", true).on('animationcomplete-slime_attack', 
-        ()=>{this.finishedAnimation = true}, this);
-    }
-    update()
-    {
-        if(this.finishedAnimation)
-        {
-            let state = States.IDLE;
-            let direction = this.findFollowDirection();
             if(direction != Directions.IDLE)
             {
                 state = States.WALK;
             }
             this.SlimeStateManager.changeState(state, direction);
         }
-    }
-    exit(exitState: States)
-    {
-        if(this.slime.body)
-        {
-            this.slime.body.setSize(16,16);
-            this.slime.body.setOffset(0,0);
-        }
-        else
-        {
-            console.error("No Body");
-        }
-        this.finishedAnimation = false;
     }
 }
 

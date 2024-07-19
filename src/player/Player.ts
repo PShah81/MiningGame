@@ -77,7 +77,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
                 enemy.handleDamage(5);
                 let knockbackDirection = new Phaser.Math.Vector2(enemy.x - this.x, enemy.y - this.y).normalize();
                 // Apply knockback to the enemy
-                let knockbackForce = 100;
+                let knockbackForce = 50;
                 let friction = 30;
                 enemy.setVelocity(knockbackDirection.x * knockbackForce, knockbackDirection.y * knockbackForce);
                 enemy.setAccelerationX(-knockbackDirection.x * friction);

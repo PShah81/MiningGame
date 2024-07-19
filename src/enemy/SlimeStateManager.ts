@@ -1,4 +1,4 @@
-import {SlimeState, Directions, States, Idle, Walk, Jump, Fall, Land, Attack, Death} from './SlimeStateClasses';
+import {SlimeState, Directions, States, Idle, Walk, Jump, Fall, Land, Death} from './SlimeStateClasses';
 import Slime from './Slime';
 import Player from '../player/Player';
 export default class SlimeStateManager
@@ -20,7 +20,6 @@ export default class SlimeStateManager
             new Jump(this.player, this.slime, this),
             new Fall(this.player, this.slime, this),
             new Land(this.player, this.slime, this),
-            new Attack(this.player, this.slime, this),
             new Death(this.player, this.slime, this)
         ];
         this.currentDirection = Directions.IDLE;
@@ -45,17 +44,6 @@ export default class SlimeStateManager
         newState.direction = direction;
         if(newState != this.currentState || direction != this.currentDirection)
         {
-            if(state == States.ATTACK)
-            {
-                this.canAttack = false;
-                this.player.scene.time.addEvent({
-                    callback: () => {
-                        this.canAttack = true;
-                    },
-                    callbackScope: this,
-                    delay: 4000
-                })
-            }
             this.currentState.exit(state);
             this.currentState = newState;
             this.currentDirection = direction;
