@@ -26,12 +26,14 @@ export enum Directions {
 export enum Items {
     LADDER = 0,
     TORCH = 1,
-    DYNAMITE = 2
+    DYNAMITE = 2,
+    POTION = 3
 }
 export enum GoldCost {
     LADDER = -0.5,
     TORCH = -1,
-    DYNAMITE = -2
+    DYNAMITE = -2,
+    POTION = -5
 }
 
 
@@ -97,9 +99,14 @@ export class PlayerState {
             item = Items.DYNAMITE;
             goldCost = GoldCost.DYNAMITE;
         }
+        else if(lastKeyPressed == Phaser.Input.Keyboard.KeyCodes.FOUR)
+        {
+            item = Items.POTION;
+            goldCost = GoldCost.POTION;
+        }
         if(item != -1 && this.player.gold + goldCost >= 0)
         {
-            if(item != Items.DYNAMITE)
+            if(item == Items.LADDER || item == Items.TORCH)
             {
                 let placed = this.ItemLayer.placeItem(item, this.player);
                 if(placed)
@@ -107,10 +114,18 @@ export class PlayerState {
                     this.player.scene.updateGold(goldCost);
                 }
             }
-            else
+            else if(item == Items.DYNAMITE)
             {
                 this.GroundLayer.handleDynamite();   
                 this.player.scene.updateGold(goldCost);
+            }
+            else if(item == Items.POTION)
+            {
+                let changed = this.player.changeHealth(0.5 * this.player.maxHealth);
+                if(changed)
+                {
+                    this.player.scene.updateGold(goldCost);
+                }
             }
         }
     }

@@ -151,8 +151,29 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
 
     takeDamage = (damage: number) =>
     {
-        this.health -= damage;
-        this.playerHealth.width = Math.max(this.maxHealthWidth * this.health / this.maxHealth,0);
+        this.changeHealth(-1*damage);
         this.playerStateManager.changeState(States.HURT, Directions.IDLE);
+    }
+
+    changeHealth(change: number)
+    {
+        let newHealth = this.health + change;
+        if(newHealth < 0)
+        {
+            newHealth = 0;
+        }
+        else if(newHealth > this.maxHealth)
+        {
+            newHealth = this.maxHealth;
+        }
+        //Return false if no healing happened;
+        if(change > 0 && newHealth == this.health)
+        {
+            return false;
+        }
+        //Change health and health bar
+        this.health = newHealth;
+        this.playerHealth.width = Math.max(this.maxHealthWidth * this.health / this.maxHealth,0);
+        return true;
     }
 }

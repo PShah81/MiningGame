@@ -38,6 +38,7 @@ class GameScene extends Phaser.Scene
         this.load.image('sky', '../assets/sprites/sky.png');
         this.load.image('underground', '../assets/sprites/background.png');
         this.load.image('goldImage', '../assets/sprites/gold.png');
+        this.load.image('potion', '../assets/sprites/health_potion.png');
         this.load.spritesheet("mine", '../assets/sprites/3 SteamMan/mine.png', { frameWidth: 48, frameHeight: 48});
         this.load.spritesheet("walk", '../assets/sprites/3 SteamMan/walk.png', { frameWidth: 48, frameHeight: 48});
         this.load.spritesheet("idle", '../assets/sprites/3 SteamMan/idle.png', { frameWidth: 48, frameHeight: 48});
@@ -225,6 +226,32 @@ class GameScene extends Phaser.Scene
         dynamiteGold.setScale(0.8,0.8);
         dynamiteGold.scrollFactorX = 0;
         dynamiteGold.scrollFactorY = 0;
+
+
+        let potionBackground = this.add.rectangle(450, 25, 32, 32, 0xbbbdb9);
+        potionBackground.scrollFactorX = 0;
+        potionBackground.scrollFactorY = 0;
+
+        let potionImage = this.add.image(450, 25, "potion", 0);
+        potionImage.setSize(32,32);
+        potionImage.setScale(1.5,1.5);
+        potionImage.scrollFactorX = 0;
+        potionImage.scrollFactorY = 0;
+        let potionBorder = this.createBorder(potionImage, 2);
+        let potionKey = this.add.text(445, 50, "4", {
+            fontSize: '20px'
+        });
+        potionKey.scrollFactorX = 0;
+        potionKey.scrollFactorY = 0;
+        let potionCost = this.add.text(440, 75, "5", {
+            fontSize: '14px'
+        });
+        potionCost.scrollFactorX = 0;
+        potionCost.scrollFactorY = 0;
+        let potionGold = this.add.image(460, 82, 'goldImage');
+        potionGold.setScale(0.8,0.8);
+        potionGold.scrollFactorX = 0;
+        potionGold.scrollFactorY = 0;
         // #endregion Purchasable Items
 
         // #region Gold Bar
