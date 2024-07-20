@@ -83,7 +83,7 @@ export default class BaseLayer
         if(this instanceof GroundLayer)
         {
             this.layer.removeTileAt(x,y);
-            this.scene.InvisibleLayer.removeDarknessTiles(x,y);
+            this.scene.InvisibleLayer.removeInvisibilityTiles(x,y);
         }
         else
         {

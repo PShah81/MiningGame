@@ -58,12 +58,12 @@ class GameScene extends Phaser.Scene
 
     create ()
     {
-        this.add.image(400,300, 'sky');
-
+        //Background Images
+        this.add.image(400, 300, 'sky');
         // Background that shows after a block has been mined
-        let underground = this.add.image(0,500, 'underground');
-        underground.setOrigin(0,0)
-        underground.setDisplaySize(this.game.canvas.width, this.game.canvas.height - 500)
+        let underground = this.add.image(0,500, 'underground').setPipeline("Light2D");
+        underground.setOrigin(0,0);
+        underground.setDisplaySize(this.game.canvas.width, this.game.canvas.height - 500);
 
         // Create Animations
         this.createPlayerAnimations();
@@ -291,7 +291,10 @@ class GameScene extends Phaser.Scene
         this.cameras.main.startFollow(this.player);
         this.cameras.main.height = 1000;
 
-
+        // Lights
+        this.lights.enable().setAmbientColor(0x111111);
+        //Imitate the sun
+        this.lights.addLight(this.game.canvas.width / 2, 0, this.game.canvas.width).setIntensity(30);
     }
 
     update () 

@@ -6,13 +6,12 @@ export default class InvisibleLayer extends BaseLayer
     constructor(scene: GameScene, layer: Phaser.Tilemaps.TilemapLayer, x: integer, y: integer)
     {
         super(scene, layer, x, y);
-        this.generateInitialDarkness(this.layer.tilemap.width, this.layer.tilemap.height);
+        this.generateInitialInvisibilityTiles(this.layer.tilemap.width, this.layer.tilemap.height);
     }
-    generateInitialDarkness(width: integer, height: integer)
+    generateInitialInvisibilityTiles(width: integer, height: integer)
     {
         for(let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
-                console.log("he")
                 let tileIndex = 0;
                 if(y == 0)
                 {
@@ -22,7 +21,7 @@ export default class InvisibleLayer extends BaseLayer
             }
         }
     }
-    removeDarknessTiles(tileX: integer, tileY: integer)
+    removeInvisibilityTiles(tileX: integer, tileY: integer)
     {
         let newTileX;
         let newTileY;

@@ -1,6 +1,6 @@
 import BaseLayer from "./BaseLayer";
 import {Items} from '../player/PlayerStateClasses';
-import GameScene from "~/GameScene";
+import GameScene from "../GameScene";
 import Player from "../player/Player";
 import { GameObjects } from "phaser";
 
@@ -9,6 +9,7 @@ export default class ItemLayer extends BaseLayer
     constructor(scene: GameScene, layer: Phaser.Tilemaps.TilemapLayer, x: integer, y: integer)
     {
         super(scene, layer, x, y);
+        this.layer.setPipeline("Light2D");
     }
     placeItem(tileIndex: integer, object: Phaser.Physics.Arcade.Sprite)
     {
@@ -19,6 +20,10 @@ export default class ItemLayer extends BaseLayer
             let tilePlaced = this.layer.putTileAtWorldXY(tileIndex, x, y);
             if(tilePlaced)
             {
+                if(tileIndex == Items.TORCH)
+                {
+                    this.scene.lights.addLight(x,y).setIntensity(4);
+                }
                 return true;
             }
         }

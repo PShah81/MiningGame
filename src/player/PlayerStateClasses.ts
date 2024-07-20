@@ -106,7 +106,15 @@ export class PlayerState {
         }
         if(item != -1 && this.player.gold + goldCost >= 0)
         {
-            if(item == Items.LADDER || item == Items.TORCH)
+            if(item == Items.LADDER)
+            {
+                let placed = this.ItemLayer.placeItem(item, this.player);
+                if(placed)
+                {
+                    this.player.scene.updateGold(goldCost);
+                }
+            }
+            else if(item == Items.TORCH)
             {
                 let placed = this.ItemLayer.placeItem(item, this.player);
                 if(placed)

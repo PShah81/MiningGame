@@ -37,6 +37,7 @@ export default class GroundLayer extends BaseLayer
         this.miningRate = 750;
         this.generateRandomTiles(this.layer.tilemap.width, this.layer.tilemap.height);
         this.layer.setCollisionByExclusion([-1]);
+        this.layer.setPipeline("Light2D");
     }
     mineBlock(direction: string) 
     {
