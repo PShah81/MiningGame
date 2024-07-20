@@ -31,7 +31,7 @@ class GameScene extends Phaser.Scene
     {
         this.load.spritesheet('tiles', '../assets/sprites/ores.png', { frameWidth: 16, frameHeight: 16});
         this.load.spritesheet('items', '../assets/sprites/Extras/items.png', { frameWidth: 16, frameHeight: 16});
-        this.load.spritesheet('darkness', '../assets/sprites/darkness.png',  {frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet('invisible', '../assets/sprites/invisible.png',  {frameWidth: 16, frameHeight: 16});
         this.load.spritesheet('dynamite', '../assets/sprites/Extras/dynamite.png', {frameWidth: 22, frameHeight: 24});
         this.load.spritesheet('explosion', '../assets/sprites/Extras/explosion.png', {frameWidth: 32, frameHeight: 32})
         this.load.image('sky', '../assets/sprites/sky.png');
@@ -125,7 +125,7 @@ class GameScene extends Phaser.Scene
         {
             console.error("Failed to load the tileset image");
         }
-        let invisibleTileset = this.map.addTilesetImage('darkness', undefined, 16, 16);
+        let invisibleTileset = this.map.addTilesetImage('invisible', undefined, 16, 16);
         if(invisibleTileset)
         {
             let invisibleLayer = this.map.createBlankLayer('darknessLayer', invisibleTileset);
