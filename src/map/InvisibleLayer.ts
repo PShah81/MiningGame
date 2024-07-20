@@ -1,7 +1,7 @@
 import GameScene from "../GameScene";
 import BaseLayer from "./BaseLayer";
 
-export default class DarknessLayer extends BaseLayer
+export default class InvisibleLayer extends BaseLayer
 {
     constructor(scene: GameScene, layer: Phaser.Tilemaps.TilemapLayer, x: integer, y: integer)
     {

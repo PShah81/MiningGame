@@ -4,9 +4,8 @@ import Slime from './enemy/Slime';
 import Player from './player/Player';
 import GroundLayer from './map/GroundLayer';
 import ItemLayer from './map/ItemLayer';
-import Enemy from './enemy/Enemy';
 import Explosion from './items/Explosion';
-import DarknessLayer from './map/DarknessLayer';
+import InvisibleLayer from './map/InvisibleLayer';
 class GameScene extends Phaser.Scene
 {
     goldText!: Phaser.GameObjects.Text
@@ -15,7 +14,7 @@ class GameScene extends Phaser.Scene
     map!: Phaser.Tilemaps.Tilemap
     ItemLayer!: ItemLayer
     GroundLayer!: GroundLayer
-    DarknessLayer!: DarknessLayer
+    InvisibleLayer!: InvisibleLayer
     player!: Player
     cursors!: Phaser.Types.Input.Keyboard.CursorKeys
     dynamiteColliderGroup!: Phaser.Physics.Arcade.Group
@@ -126,13 +125,13 @@ class GameScene extends Phaser.Scene
         {
             console.error("Failed to load the tileset image");
         }
-        let darknessTileset = this.map.addTilesetImage('darkness', undefined, 16, 16);
-        if(darknessTileset)
+        let invisibleTileset = this.map.addTilesetImage('darkness', undefined, 16, 16);
+        if(invisibleTileset)
         {
-            let darknessLayer = this.map.createBlankLayer('darknessLayer', darknessTileset);
-            if(darknessLayer)
+            let invisibleLayer = this.map.createBlankLayer('darknessLayer', invisibleTileset);
+            if(invisibleLayer)
             {
-                this.DarknessLayer = new DarknessLayer(this, darknessLayer, 0, 500);
+                this.InvisibleLayer = new InvisibleLayer(this, invisibleLayer, 0, 500);
             }
             else
             {
