@@ -47,7 +47,7 @@ export default class GroundLayer extends BaseLayer
                 args: [tile.x, tile.y, tile.index],
                 callback: (x: integer, y: integer, index: integer) => {
                     // Remove tile at coords
-                    this.layer.removeTileAt(x,y);
+                    this.removeGroundTiles(x,y);
                     let price = orePrices[oreMapping[index] as keyof typeof orePrices];
                     this.scene.updateGold(price);
                     this.miningCooldown = undefined;
@@ -210,10 +210,10 @@ export default class GroundLayer extends BaseLayer
         }
         return weightedArray;
     }
-    removeGround = (explosion: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject, groundTile: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject) => {
+    groundExploded = (explosion: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject, groundTile: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject) => {
         if(groundTile instanceof Phaser.Tilemaps.Tile)
         {
-            this.layer.removeTileAt(groundTile.x,groundTile.y);
+            this.removeGroundTiles(groundTile.x,groundTile.y);
         }
         else
         {

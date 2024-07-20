@@ -6,6 +6,7 @@ import GroundLayer from './map/GroundLayer';
 import ItemLayer from './map/ItemLayer';
 import Enemy from './enemy/Enemy';
 import Explosion from './items/Explosion';
+import DarknessLayer from './map/DarknessLayer';
 class GameScene extends Phaser.Scene
 {
     goldText!: Phaser.GameObjects.Text
@@ -14,6 +15,7 @@ class GameScene extends Phaser.Scene
     map!: Phaser.Tilemaps.Tilemap
     ItemLayer!: ItemLayer
     GroundLayer!: GroundLayer
+    DarknessLayer!: DarknessLayer
     player!: Player
     cursors!: Phaser.Types.Input.Keyboard.CursorKeys
     dynamiteColliderGroup!: Phaser.Physics.Arcade.Group
@@ -30,6 +32,7 @@ class GameScene extends Phaser.Scene
     {
         this.load.spritesheet('tiles', '../assets/sprites/ores.png', { frameWidth: 16, frameHeight: 16});
         this.load.spritesheet('items', '../assets/sprites/Extras/items.png', { frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet('darkness', '../assets/sprites/darkness.png',  {frameWidth: 16, frameHeight: 16});
         this.load.spritesheet('dynamite', '../assets/sprites/Extras/dynamite.png', {frameWidth: 22, frameHeight: 24});
         this.load.spritesheet('explosion', '../assets/sprites/Extras/explosion.png', {frameWidth: 32, frameHeight: 32})
         this.load.image('sky', '../assets/sprites/sky.png');
@@ -116,6 +119,23 @@ class GameScene extends Phaser.Scene
             else
             {
                 console.error("groundLayer does not exist");
+            }
+        }
+        else
+        {
+            console.error("Failed to load the tileset image");
+        }
+        let darknessTileset = this.map.addTilesetImage('darkness', undefined, 16, 16);
+        if(darknessTileset)
+        {
+            let darknessLayer = this.map.createBlankLayer('darknessLayer', darknessTileset);
+            if(darknessLayer)
+            {
+                this.DarknessLayer = new DarknessLayer(this, darknessLayer, 0, 500);
+            }
+            else
+            {
+                console.error("darknessLayer does not exist");
             }
         }
         else
@@ -228,7 +248,7 @@ class GameScene extends Phaser.Scene
 
         // Collision 
         this.physics.add.collider(this.dynamiteColliderGroup, this.GroundLayer.layer);
-        this.physics.add.overlap(this.explosionOverlapGroup, this.GroundLayer.layer, this.GroundLayer.removeGround, undefined, this);
+        this.physics.add.overlap(this.explosionOverlapGroup, this.GroundLayer.layer, this.GroundLayer.groundExploded, undefined, this);
         this.physics.add.overlap(this.explosionOverlapGroup, this.ItemLayer.layer, this.ItemLayer.itemsExploded, undefined, this);
         this.physics.add.overlap(this.player, this.explosionOverlapGroup, this.player.handlePlayerDamage, undefined, this);
         this.physics.add.overlap(this.enemyGroup, this.explosionOverlapGroup, this.handleExplosionDamage, undefined, this);

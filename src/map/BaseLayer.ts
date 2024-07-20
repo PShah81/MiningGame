@@ -1,5 +1,6 @@
 import Dynamite from "../items/Dynamite";
 import GameScene from "../GameScene";
+import GroundLayer from "./GroundLayer";
 
 export default class BaseLayer
 {
@@ -76,5 +77,18 @@ export default class BaseLayer
     {
         let [x,y] = this.getCenterOfObject(this.scene.player);
         new Dynamite(this.scene, x, y, "dynamite");
+    }
+    removeGroundTiles(x:integer, y:integer)
+    {
+        if(this instanceof GroundLayer)
+        {
+            this.layer.removeTileAt(x,y);
+            this.scene.DarknessLayer.removeDarknessTiles(x,y);
+        }
+        else
+        {
+            console.log("Not supposed to be called by non-ground layer");
+        }
+
     }
 }
