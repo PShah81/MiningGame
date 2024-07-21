@@ -38,27 +38,13 @@ export default class ItemLayer extends BaseLayer
         let tile = this.layer.getTileAtWorldXY(x, y);
         if(tile)
         {
-            let preciseVector = this.layer.tileToWorldXY(tile.x, tile.y);
-            let preciseX = preciseVector.x;
-            let preciseY = preciseVector.y;
-            if(tile.index == Items.TORCH)
-            {
-                let lightArray = this.scene.lights.lights;
-                for (let i = lightArray.length - 1; i >= 0; i--) {
-                    const light = lightArray[i];
-                    if (light.x === preciseX && light.y === preciseY) {
-                        this.scene.lights.removeLight(light); // Remove the light from the scene
-                        break;
-                    }
-                }
-            }
-            this.layer.removeTileAt(tile.x, tile.y);
+           this.removeLightsAndTile(tile);
         }
     }
     itemsExploded = (explosion: Phaser.Tilemaps.Tile | GameObjects.GameObject, itemsTile: Phaser.Tilemaps.Tile | GameObjects.GameObject) => {
         if(itemsTile instanceof Phaser.Tilemaps.Tile)
         {
-            this.layer.removeTileAt(itemsTile.x,itemsTile.y);
+            this.removeLightsAndTile(itemsTile);
         }
         else
         {
@@ -93,5 +79,23 @@ export default class ItemLayer extends BaseLayer
                 player.canClimb = false;
             }
         }
+    }
+    removeLightsAndTile(tile: Phaser.Tilemaps.Tile)
+    {
+        let preciseVector = this.layer.tileToWorldXY(tile.x, tile.y);
+        let preciseX = preciseVector.x;
+        let preciseY = preciseVector.y;
+        if(tile.index == Items.TORCH)
+        {
+            let lightArray = this.scene.lights.lights;
+            for (let i = lightArray.length - 1; i >= 0; i--) {
+                const light = lightArray[i];
+                if (light.x === preciseX && light.y === preciseY) {
+                    this.scene.lights.removeLight(light); // Remove the light from the scene
+                    break;
+                }
+            }
+        }
+        this.layer.removeTileAt(tile.x, tile.y);
     }
 }
