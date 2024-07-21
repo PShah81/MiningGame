@@ -36,7 +36,7 @@ export default class GroundLayer extends BaseLayer
     {
         super(scene, layer, x, y);
         this.miningRate = 750;
-        this.generateRandomTiles(this.layer.tilemap.width, this.layer.tilemap.height);
+        this.mapCreation();
         this.layer.setCollisionByExclusion([-1]);
         this.layer.setPipeline("Light2D");
     }
@@ -93,20 +93,19 @@ export default class GroundLayer extends BaseLayer
     generateRandomTiles(width: integer, height: integer) 
     {
         let weightedArray;
+        let map: number[][] = [];
         for (let y = 0; y < height; y++) {
             weightedArray = this.getWeightedArr(y);
+            map[y] = [];
             for (let x = 0; x < width; x++) {
                 // Generate a random tile index
                 let weightedArrayIndex  = Math.floor(Math.random() * weightedArray.length) // Get an index in the weighted array
                 let tileIndex = weightedArray[weightedArrayIndex];
-                if(tileIndex != oreMapping.EMPTY)
-                {
-                    this.layer.putTileAt(tileIndex, x, y);
-                }
+                map[y][x] = tileIndex;
             }
         }
+        return map;
     }
-
     getWeightedArr(depth: number)
     {
         let surface = {0: 1, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0};
@@ -155,7 +154,6 @@ export default class GroundLayer extends BaseLayer
         }
         return weightedArray;
     }
-
     groundExploded = (explosion: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject, groundTile: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject) => {
         if(groundTile instanceof Phaser.Tilemaps.Tile)
         {
@@ -165,5 +163,63 @@ export default class GroundLayer extends BaseLayer
         {
             console.error("Got game object instead of tile");
         }
+    }
+    applyAutomataRules(map: number[][]) 
+    {
+        let newMap: number[][] = [];
+        for (let y = 0; y < map.length; y++) {
+            newMap[y] = [];
+            for (let x = 0; x < map[0].length; x++) {
+                let emptyNeighbors = this.countEmptyNeighbors(map, x, y);
+                if (map[y][x] == oreMapping.EMPTY) {
+                    newMap[y][x] = (emptyNeighbors >= 4) ? oreMapping.EMPTY : map[y][x];
+                } else {
+                    newMap[y][x] = (emptyNeighbors >= 5) ? oreMapping.EMPTY : map[y][x];
+                }
+            }
+        }
+        return newMap;
+    }
+    countEmptyNeighbors(map: number[][], x: integer, y: integer) 
+    {
+        let emptyCount = 0;
+        for (let i = -1; i <= 1; i++) {
+            for (let j = -1; j <= 1; j++) {
+                if (i != 0 || j != 0)
+                {
+                    let newX = x + i;
+                    let newY = y + j;
+                    //Valid tile location
+                    if (newX >= 0 && newY >= 0 && newX < map[0].length && newY < map.length) {
+                        if(map[newX][newY] == oreMapping.EMPTY)
+                        {
+                            emptyCount += 1;
+                        }
+                    }
+                }
+                
+            }
+        }
+        return emptyCount;
+    }
+    addTiles(map: number[][]) 
+    {
+        for (let row = 0; row < map.length; row++) {
+            for (let col = 0; col < map[0].length; col++) {
+                if(map[row][col] != oreMapping.EMPTY)
+                {
+                    this.layer.putTileAt(map[row][col], col, row);
+                }
+            }
+        }
+    }
+    mapCreation()
+    {
+        let iterations = 10;
+        let map = this.generateRandomTiles(this.layer.tilemap.width, this.layer.tilemap.height);
+        for (let i = 0; i < iterations; i++) {
+            map = this.applyAutomataRules(map);
+        }
+        this.addTiles(map);
     }
 }
