@@ -11,7 +11,8 @@ export enum oreMapping {
     SILVER = 6,
     GOLD = 7,
     DIAMOND = 8,
-    EMERALD = 9
+    EMERALD = 9,
+    EMPTY = 10
 }
 enum orePrices {
     GRASS = 0,
@@ -91,126 +92,70 @@ export default class GroundLayer extends BaseLayer
     }
     generateRandomTiles(width: integer, height: integer) 
     {
-        //Get right frequencies
-        let frequencyArr = [
-            {
-                0: 1,
-                1: 0,
-                2: 0,
-                3: 0,
-                4: 0,
-                5: 0,
-                6: 0,
-                7: 0,
-                8: 0,
-                9: 0
-            },
-            {
-                0: 0,
-                1: 1,
-                2: 0,
-                3: 0,
-                4: 0,
-                5: 0,
-                6: 0,
-                7: 0,
-                8: 0,
-                9: 0
-            },
-            {
-                0: 0,
-                1: 5,
-                2: 5,
-                3: 2,
-                4: 0,
-                5: 0,
-                6: 0,
-                7: 0,
-                8: 0,
-                9: 0
-            },
-            {
-                0: 0,
-                1: 0,
-                2: 80,
-                3: 20,
-                4: 10,
-                5: 5,
-                6: 3,
-                7: 1,
-                8: 0,
-                9: 0
-            },
-            {
-                0: 0,
-                1: 0,
-                2: 200,
-                3: 80,
-                4: 40,
-                5: 20,
-                6: 10,
-                7: 5,
-                8: 3,
-                9: 0
-            },
-            {
-                0: 0,
-                1: 0,
-                2: 200,
-                3: 40,
-                4: 80,
-                5: 40,
-                6: 20,
-                7: 10,
-                8: 5,
-                9: 1
-            },
-        ]
-        let weightedArray: integer[] = [];
+        let weightedArray;
         for (let y = 0; y < height; y++) {
-            if (y == 0)
-            {
-                weightedArray = this.generateFrequencyArr(frequencyArr[0])
-            }
-            else if (y < 3)
-            {
-                weightedArray = this.generateFrequencyArr(frequencyArr[1])
-            }
-            else if (y < 10)
-            {
-                weightedArray = this.generateFrequencyArr(frequencyArr[2])
-            }
-            else if (y < 40)
-            {
-                weightedArray = this.generateFrequencyArr(frequencyArr[3])
-            }
-            else if(y < 100)
-            {
-                weightedArray = this.generateFrequencyArr(frequencyArr[4])
-            }
-            else
-            {
-                weightedArray = this.generateFrequencyArr(frequencyArr[5])
-            }
+            weightedArray = this.getWeightedArr(y);
             for (let x = 0; x < width; x++) {
                 // Generate a random tile index
                 let weightedArrayIndex  = Math.floor(Math.random() * weightedArray.length) // Get an index in the weighted array
                 let tileIndex = weightedArray[weightedArrayIndex];
-                this.layer.putTileAt(tileIndex, x, y);
+                if(tileIndex != oreMapping.EMPTY)
+                {
+                    this.layer.putTileAt(tileIndex, x, y);
+                }
             }
         }
     }
+
+    getWeightedArr(depth: number)
+    {
+        let surface = {0: 1, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0};
+        let subSurface = {0: 0, 1: 0.9, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0.1};
+        let earlyDepth = {0: 0, 1: 0.4, 2: 0.3, 3: 0.1, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0.2};
+        let midDepth = {0: 0, 1: 0, 2: 0.4, 3: 0.15, 4: 0.05, 5: 0.03, 6: 0.02, 7: 0.01, 8: 0, 9: 0, 10: 0.3};
+        let lateDepth = {0: 0, 1: 0, 2: 0.4, 3: 0.1, 4: 0.05, 5: 0.05, 6: 0.05, 7: 0.03, 8: 0.02, 9: 0, 10: 0.3};
+        let finalDepth = {0: 0, 1: 0, 2: 0.3, 3: 0.1, 4: 0.15, 5: 0.07, 6: 0.03, 7: 0.02, 8: 0.02, 9: 0.01, 10: 0.3};
+        let weightedArray: integer[] = [];
+        if (depth == 0)
+        {
+            weightedArray = this.generateFrequencyArr(surface)
+        }
+        else if (depth < 3)
+        {
+            weightedArray = this.generateFrequencyArr(subSurface)
+        }
+        else if (depth < 10)
+        {
+            weightedArray = this.generateFrequencyArr(earlyDepth)
+        }
+        else if (depth < 40)
+        {
+            weightedArray = this.generateFrequencyArr(midDepth)
+        }
+        else if(depth < 100)
+        {
+            weightedArray = this.generateFrequencyArr(lateDepth)
+        }
+        else
+        {
+            weightedArray = this.generateFrequencyArr(finalDepth)
+        }
+        return weightedArray;
+    }
     generateFrequencyArr(distribution: Record<integer,integer>)
     {
-        let weightedArray: integer[] = [];
-        for (let number in distribution) {
-            let frequency = distribution[number];
+        let weightedArray = [];
+        let arrayLength = 100;
+        
+        for (let index in distribution) {
+            let frequency = distribution[index]*arrayLength;
             for (let i = 0; i < frequency; i++) {
-                weightedArray.push(parseInt(number));
+                weightedArray.push(parseInt(index));
             }
         }
         return weightedArray;
     }
+
     groundExploded = (explosion: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject, groundTile: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject) => {
         if(groundTile instanceof Phaser.Tilemaps.Tile)
         {

@@ -3,9 +3,11 @@ import BaseLayer from "./BaseLayer";
 
 export default class InvisibleLayer extends BaseLayer
 {
+    exploredTileSet: Set<string>
     constructor(scene: GameScene, layer: Phaser.Tilemaps.TilemapLayer, x: integer, y: integer)
     {
         super(scene, layer, x, y);
+        this.exploredTileSet = new Set<string>();
         this.generateInitialInvisibilityTiles(this.layer.tilemap.width, this.layer.tilemap.height);
     }
     generateInitialInvisibilityTiles(width: integer, height: integer)
@@ -23,16 +25,35 @@ export default class InvisibleLayer extends BaseLayer
     }
     removeInvisibilityTiles(tileX: integer, tileY: integer)
     {
+        let groundTile;
+        let darknessTile;
         let newTileX;
         let newTileY;
+        let key = tileX.toString() + tileY.toString();
+        this.exploredTileSet.add(key);
         for(let i=-1; i<2; i++)
         {
             for(let j=-1; j<2; j++)
             {
                 newTileX = tileX + i;
                 newTileY = tileY + j;
+                groundTile = this.scene.GroundLayer.layer.getTileAt(newTileX, newTileY);
                 this.layer.removeTileAt(newTileX, newTileY);
+                key = newTileX.toString() + newTileY.toString();
+                //The ground tile is missing and the tile hasn't been explored yet 
+                if(!groundTile && !this.exploredTileSet.has(key) && (j==0 || i==0) && (j != 0 || i != 0) && this.checkIfTileIsValid(newTileX, newTileY))
+                {
+                    this.removeInvisibilityTiles(newTileX, newTileY);
+                }
             }
         }
+    }
+    checkIfTileIsValid(tileX: integer, tileY: integer)
+    {
+        if(tileX >= 0 && tileX < this.layer.tilemap.width && tileY >= 0 && tileY < this.layer.tilemap.height)
+        {
+            return true;
+        }
+        return false;
     }
 }
