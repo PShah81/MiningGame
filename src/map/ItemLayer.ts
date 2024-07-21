@@ -18,11 +18,14 @@ export default class ItemLayer extends BaseLayer
         if(!tile)
         {
             let tilePlaced = this.layer.putTileAtWorldXY(tileIndex, x, y);
+            let preciseVector = this.layer.tileToWorldXY(tilePlaced.x, tilePlaced.y);
+            let preciseX = preciseVector.x;
+            let preciseY = preciseVector.y;
             if(tilePlaced)
             {
                 if(tileIndex == Items.TORCH)
                 {
-                    this.scene.lights.addLight(x,y).setIntensity(4);
+                    this.scene.lights.addLight(preciseX,preciseY, 200).setIntensity(4);
                 }
                 return true;
             }
@@ -35,6 +38,20 @@ export default class ItemLayer extends BaseLayer
         let tile = this.layer.getTileAtWorldXY(x, y);
         if(tile)
         {
+            let preciseVector = this.layer.tileToWorldXY(tile.x, tile.y);
+            let preciseX = preciseVector.x;
+            let preciseY = preciseVector.y;
+            if(tile.index == Items.TORCH)
+            {
+                let lightArray = this.scene.lights.lights;
+                for (let i = lightArray.length - 1; i >= 0; i--) {
+                    const light = lightArray[i];
+                    if (light.x === preciseX && light.y === preciseY) {
+                        this.scene.lights.removeLight(light); // Remove the light from the scene
+                        break;
+                    }
+                }
+            }
             this.layer.removeTileAt(tile.x, tile.y);
         }
     }

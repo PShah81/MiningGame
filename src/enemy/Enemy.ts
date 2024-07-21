@@ -10,6 +10,7 @@ export default class Enemy extends Phaser.Physics.Arcade.Sprite
     constructor(scene: GameScene, x:integer, y: integer, texture: string, GroundLayer: GroundLayer)
     {
         super(scene, x, y, texture);
+        this.setPipeline("Light2D");
         this.health = 10;
         this.attack = 5;
         this.id = Enemy.currentId;

@@ -24,8 +24,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
     constructor(scene: GameScene, x:integer, y: integer, texture: string, GroundLayer: GroundLayer, ItemLayer: ItemLayer)
     {
         super(scene, x, y, texture);
-
         this.scene = scene;
+        this.setPipeline("Light2D");
         //Add Player to Game Scene
         scene.add.existing(this);
         scene.physics.add.existing(this);
