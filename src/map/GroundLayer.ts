@@ -1,5 +1,6 @@
 import GameScene from "../GameScene";
 import BaseLayer from "./BaseLayer";
+import InvisibleLayer from "./InvisibleLayer";
 
 export enum oreMapping {
     GRASS = 0,
@@ -229,5 +230,59 @@ export default class GroundLayer extends BaseLayer
             map = this.applyAutomataRules(map);
         }
         this.addTiles(map);
+        console.log(this.findCaves(map, 10))
+    }
+    findCaves(map: number[][], minCaveSize: number) {
+        let caves: number[][][] = [];
+        let visited = new Set<String>();
+    
+        
+        for (let y = 0; y < map.length; y++) {
+            for (let x = 0; x < map[0].length; x++) {
+                //Check that tile hasn't been visited yet and that the tile is empty
+                if (!visited.has([x,y].toString()) && map[y][x] == oreMapping.EMPTY) {
+                    let cave = this.findCave(x, y, map, visited);
+                    if (cave.length >= minCaveSize) {
+                        caves.push(cave);
+                    }
+                }
+            }
+        }
+        return caves;
+    }
+    findCave(x: number, y: number, map: number[][], visited: Set<String>) {
+        let stack = [[x, y]];
+        let cave: number[][] = [];
+        while (stack.length > 0) {
+            let caveTuple = stack.pop();
+            if(caveTuple)
+            {
+                let [caveX, caveY] = caveTuple;
+                //Check that tile is valid
+                if (InvisibleLayer.checkIfTileIsValid(caveX, caveY, this.layer))
+                {
+                    //Check that tile hasn't been visited yet and that the tile is empty
+                    if (!visited.has(caveTuple.toString()) && map[caveY][caveX] == oreMapping.EMPTY)
+                    {
+                        visited.add(caveTuple.toString());
+                        cave.push([caveX, caveY]);
+                        let stackAdditions = [[caveX + 1, caveY], [caveX - 1, caveY], [caveX, caveY + 1], [caveX, caveY - 1]];
+                        
+                        
+                        for(let additionTuple of stackAdditions)
+                        {
+                            let [additionX, additionY] = additionTuple;
+                            //Check if tile is valid and hasn't been visited yet
+                            if(InvisibleLayer.checkIfTileIsValid(additionX, additionY, this.layer) && !visited.has(additionTuple.toString()))
+                            {
+                                stack.push(additionTuple);
+                            }
+                            
+                        }
+                    }
+                }
+            }
+        }
+        return cave;
     }
 }

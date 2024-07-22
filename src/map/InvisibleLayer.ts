@@ -29,7 +29,7 @@ export default class InvisibleLayer extends BaseLayer
         let darknessTile;
         let newTileX;
         let newTileY;
-        let key = tileX.toString() + tileY.toString();
+        let key = `${tileX.toString()},${tileY.toString()}`;
         this.exploredTileSet.add(key);
         for(let i=-1; i<2; i++)
         {
@@ -39,18 +39,18 @@ export default class InvisibleLayer extends BaseLayer
                 newTileY = tileY + j;
                 groundTile = this.scene.GroundLayer.layer.getTileAt(newTileX, newTileY);
                 this.layer.removeTileAt(newTileX, newTileY);
-                key = newTileX.toString() + newTileY.toString();
-                //The ground tile is missing and the tile hasn't been explored yet 
-                if(!groundTile && !this.exploredTileSet.has(key) && (j==0 || i==0) && (j != 0 || i != 0) && this.checkIfTileIsValid(newTileX, newTileY))
+                key = `${newTileX.toString()},${newTileY.toString()}`;
+                //The ground tile is missing and the tile hasn't been explored yet
+                if(!groundTile && !this.exploredTileSet.has(key) && (j==0 || i==0) && (j != 0 || i != 0) && InvisibleLayer.checkIfTileIsValid(newTileX, newTileY, this.layer))
                 {
                     this.removeInvisibilityTiles(newTileX, newTileY);
                 }
             }
         }
     }
-    checkIfTileIsValid(tileX: integer, tileY: integer)
+    static checkIfTileIsValid(tileX: integer, tileY: integer, layer: Phaser.Tilemaps.TilemapLayer)
     {
-        if(tileX >= 0 && tileX < this.layer.tilemap.width && tileY >= 0 && tileY < this.layer.tilemap.height)
+        if(tileX >= 0 && tileX < layer.tilemap.width && tileY >= 0 && tileY < layer.tilemap.height)
         {
             return true;
         }
