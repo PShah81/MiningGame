@@ -171,10 +171,18 @@ export default class GroundLayer extends BaseLayer
             newMap[y] = [];
             for (let x = 0; x < map[0].length; x++) {
                 let emptyNeighbors = this.countEmptyNeighbors(map, x, y);
-                if (map[y][x] == oreMapping.EMPTY) {
-                    newMap[y][x] = (emptyNeighbors >= 4) ? oreMapping.EMPTY : map[y][x];
-                } else {
-                    newMap[y][x] = (emptyNeighbors >= 5) ? oreMapping.EMPTY : map[y][x];
+                //Don't want to change the grass
+                if(y != 0)
+                {
+                    if (map[y][x] == oreMapping.EMPTY) {
+                        newMap[y][x] = (emptyNeighbors >= 4) ? oreMapping.EMPTY : map[y][x];
+                    } else {
+                        newMap[y][x] = (emptyNeighbors >= 5) ? oreMapping.EMPTY : map[y][x];
+                    }
+                }
+                else
+                {
+                    newMap[y][x] = map[y][x];
                 }
             }
         }

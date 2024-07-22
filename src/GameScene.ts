@@ -22,9 +22,11 @@ class GameScene extends Phaser.Scene
     enemyGroup!: Phaser.Physics.Arcade.Group
     PlayerStateManager!: PlayerStateManager
     slime!: Slime
+    landPos: number
     constructor()
     {
         super('game-scene');
+        this.landPos = 500;
     }
 
     preload ()
@@ -59,11 +61,11 @@ class GameScene extends Phaser.Scene
     create ()
     {
         //Background Images
-        this.add.image(400, 300, 'sky');
+        this.add.image(this.game.canvas.width / 2, this.landPos, 'sky').setDisplaySize(this.game.canvas.width, 1500);
         // Background that shows after a block has been mined
-        let underground = this.add.image(0,500, 'underground').setPipeline("Light2D");
+        let underground = this.add.image(0,this.landPos, 'underground').setPipeline("Light2D");
         underground.setOrigin(0,0);
-        underground.setDisplaySize(this.game.canvas.width, this.game.canvas.height - 500);
+        underground.setDisplaySize(this.game.canvas.width, this.game.canvas.height - this.landPos);
 
         // Create Animations
         this.createPlayerAnimations();
@@ -88,7 +90,7 @@ class GameScene extends Phaser.Scene
 
         // #region Map
 
-        this.map = this.make.tilemap({ width: 25, height: 200, tileWidth: 16, tileHeight: 16});
+        this.map = this.make.tilemap({ width: this.game.canvas.width / 48, height: this.game.canvas.height / 48, tileWidth: 16, tileHeight: 16});
 
         let itemTileset = this.map.addTilesetImage('items', undefined, 16, 16);
         if(itemTileset)
@@ -96,7 +98,7 @@ class GameScene extends Phaser.Scene
             let itemLayer = this.map.createBlankLayer('itemLayer', itemTileset);
             if(itemLayer)
             {
-                this.ItemLayer = new ItemLayer(this, itemLayer, 0, 500);
+                this.ItemLayer = new ItemLayer(this, itemLayer, 0, this.landPos);
             }
             else
             {
@@ -114,7 +116,7 @@ class GameScene extends Phaser.Scene
             let groundLayer = this.map.createBlankLayer('groundLayer', groundTileset);
             if(groundLayer)
             {
-                this.GroundLayer = new GroundLayer(this, groundLayer, 0, 500);
+                this.GroundLayer = new GroundLayer(this, groundLayer, 0, this.landPos);
             }
             else
             {
@@ -131,7 +133,7 @@ class GameScene extends Phaser.Scene
             let invisibleLayer = this.map.createBlankLayer('darknessLayer', invisibleTileset);
             if(invisibleLayer)
             {
-                this.InvisibleLayer = new InvisibleLayer(this, invisibleLayer, 0, 500);
+                this.InvisibleLayer = new InvisibleLayer(this, invisibleLayer, 0, this.landPos);
             }
             else
             {
@@ -145,7 +147,7 @@ class GameScene extends Phaser.Scene
         // #endregion Map
     
         // Sprites
-        this.player = new Player(this, 400, 300, "idle", this.GroundLayer, this.ItemLayer);
+        this.player = new Player(this, this.game.canvas.width/2, this.landPos - 40, "idle", this.GroundLayer, this.ItemLayer);
         this.slime = new Slime(this, 500, 300, "slime_idle", this.GroundLayer, this.player);
 
         // #region Purchasable Items
@@ -288,13 +290,14 @@ class GameScene extends Phaser.Scene
         }
 
         // Camera
+        this.cameras.main.centerOn(this.game.canvas.width / 2, this.game.canvas.height / 2);
         this.cameras.main.startFollow(this.player);
         this.cameras.main.height = 1000;
 
         // Lights
         this.lights.enable().setAmbientColor(0x111111);
         //Imitate the sun
-        this.lights.addLight(this.game.canvas.width / 2, 0, this.game.canvas.width).setIntensity(30);
+        this.lights.addLight(this.game.canvas.width / 2, 0, this.game.canvas.width).setIntensity(20);
     }
 
     update () 

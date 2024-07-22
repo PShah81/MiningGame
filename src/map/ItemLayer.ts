@@ -18,11 +18,11 @@ export default class ItemLayer extends BaseLayer
         if(!tile)
         {
             let tilePlaced = this.layer.putTileAtWorldXY(tileIndex, x, y);
-            let preciseVector = this.layer.tileToWorldXY(tilePlaced.x, tilePlaced.y);
-            let preciseX = preciseVector.x;
-            let preciseY = preciseVector.y;
             if(tilePlaced)
             {
+                let preciseVector = this.layer.tileToWorldXY(tilePlaced.x, tilePlaced.y);
+                let preciseX = preciseVector.x;
+                let preciseY = preciseVector.y;
                 if(tileIndex == Items.TORCH)
                 {
                     this.scene.lights.addLight(preciseX,preciseY, 200).setIntensity(4);
