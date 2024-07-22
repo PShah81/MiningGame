@@ -6,6 +6,8 @@ import GroundLayer from './map/GroundLayer';
 import ItemLayer from './map/ItemLayer';
 import Explosion from './items/Explosion';
 import InvisibleLayer from './map/InvisibleLayer';
+import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
+
 class GameScene extends Phaser.Scene
 {
     goldText!: Phaser.GameObjects.Text
@@ -20,13 +22,24 @@ class GameScene extends Phaser.Scene
     dynamiteColliderGroup!: Phaser.Physics.Arcade.Group
     explosionOverlapGroup!: Phaser.Physics.Arcade.Group
     enemyGroup!: Phaser.Physics.Arcade.Group
-    PlayerStateManager!: PlayerStateManager
-    slime!: Slime
     landPos: number
+    rexUI!: RexUIPlugin
+    textIndex: number
+    textArr: string[]
+    textBox!: RexUIPlugin.TextBox
+    dialog!: RexUIPlugin.Dialog
+    intro: boolean
     constructor()
     {
         super('game-scene');
         this.landPos = 500;
+        this.textIndex = 0;
+        this.textArr = ['Welcome, your goal is to reach the center of the planet and defeat the demon lord. Press Enter to continue.',
+        'Use arrow keys to move around and mine and Space to attack.',
+        'To place/use items, press the number corresponding to your item shown on the top left of the screen.',
+        'You can only use torches and ladders underground, and you can remove them by pressing Q.',
+        'Good luck!'];
+        this.intro = true;
     }
 
     preload ()
@@ -151,7 +164,7 @@ class GameScene extends Phaser.Scene
         let caves = this.GroundLayer.findCaves(10);
         this.spawnMobs(caves);
         
-
+        // #region Drawing on Screen
         // #region Purchasable Items
         let ladderBackground = this.add.rectangle(300, 25, 32, 32, 0xbbbdb9);
         ladderBackground.scrollFactorX = 0;
@@ -274,7 +287,8 @@ class GameScene extends Phaser.Scene
         goldImage.scrollFactorY = 0;
 
         // #endregion Gold Bar
-
+        // #endregion Drawing on Screen
+        this.handleInitialDialog();
 
         // Collision 
         this.physics.add.collider(this.dynamiteColliderGroup, this.GroundLayer.layer);
@@ -289,6 +303,7 @@ class GameScene extends Phaser.Scene
             this.cursors = this.input.keyboard.createCursorKeys();
             //Adding key presses
             this.input.keyboard.on('keydown', this.handleKeyPress, this);
+            this.input.keyboard.on('keydown-ENTER', this.updateText, this);
         }
 
         // Camera
@@ -468,8 +483,13 @@ class GameScene extends Phaser.Scene
 
     updateGold(price: number)
     {
-        this.player.gold += price;
-        this.goldText.setText(this.player.gold.toFixed(1));
+        //If in intro all purchases are free
+        if(!this.intro)
+        {
+            this.player.gold += price;
+            this.goldText.setText(this.player.gold.toFixed(1));
+        }
+
     }
     
     createBorder(image: Phaser.GameObjects.Image, borderWidth: number)
@@ -504,6 +524,53 @@ class GameScene extends Phaser.Scene
             }
         }
     }
+
+    handleInitialDialog()
+    {
+        this.dialog = this.rexUI.add.dialog({
+            x: this.game.canvas.width/2,
+            y: 200,
+            width: 550,
+            height: 100,
+            background: this.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0xffffff),
+            content: this.textBox
+        }).layout();
+
+        this.textBox = this.rexUI.add.textBox({
+            x: this.game.canvas.width/2,
+            y: this.dialog.y - this.dialog.height/4,
+            width: 550,
+            height: 50,
+            text: this.add.text(0, 0, this.textArr[this.textIndex], {
+              fontSize: '24px',
+              fontFamily: 'Open Sans',
+              color: '#000',
+              wordWrap: {width: 550, useAdvancedWrap: true}
+            }),
+            space: {
+              left: 30,
+              right: 30,
+              top: 60,
+              bottom: 20
+            }
+        }).layout();
+
+
+        // Initial text update
+        this.updateText();
+    }
+    updateText()
+    {
+        if(this.textIndex < this.textArr.length) {
+            this.textBox.setText(this.textArr[this.textIndex]);
+            this.textIndex++;
+        } 
+        else {
+            this.dialog.setVisible(false); // Close the dialog when no text is left
+            this.textBox.setText("");
+            this.intro = false;
+        }
+    };
 }
 
 export default GameScene

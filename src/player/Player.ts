@@ -157,23 +157,28 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
 
     changeHealth(change: number)
     {
-        let newHealth = this.health + change;
-        if(newHealth < 0)
+        //If in intro do not allow damage to be taken
+        if(!this.scene.intro)
         {
-            newHealth = 0;
+            let newHealth = this.health + change;
+            if(newHealth < 0)
+            {
+                newHealth = 0;
+            }
+            else if(newHealth > this.maxHealth)
+            {
+                newHealth = this.maxHealth;
+            }
+            //Return false if no healing happened;
+            if(change > 0 && newHealth == this.health)
+            {
+                return false;
+            }
+            //Change health and health bar
+            this.health = newHealth;
+            this.playerHealth.width = Math.max(this.maxHealthWidth * this.health / this.maxHealth,0);
+            return true;
         }
-        else if(newHealth > this.maxHealth)
-        {
-            newHealth = this.maxHealth;
-        }
-        //Return false if no healing happened;
-        if(change > 0 && newHealth == this.health)
-        {
-            return false;
-        }
-        //Change health and health bar
-        this.health = newHealth;
-        this.playerHealth.width = Math.max(this.maxHealthWidth * this.health / this.maxHealth,0);
-        return true;
+        
     }
 }

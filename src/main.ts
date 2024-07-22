@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 
 import GameScene from './GameScene'
 const config: Phaser.Types.Core.GameConfig = {
@@ -15,7 +16,15 @@ const config: Phaser.Types.Core.GameConfig = {
     render: {
         pixelArt: true
     },
-    scene: [GameScene]
+    scene: [GameScene],
+    plugins: {
+        scene: [{
+            key: 'rexUI',
+            plugin: RexUIPlugin,
+            mapping: 'rexUI'
+        },
+        ]
+    }
 }
 
 export default new Phaser.Game(config)

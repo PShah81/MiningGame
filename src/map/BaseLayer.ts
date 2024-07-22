@@ -80,15 +80,18 @@ export default class BaseLayer
     }
     removeGroundTiles(x:integer, y:integer)
     {
-        if(this instanceof GroundLayer)
+        //If still in introduction prevent block removal
+        if(!this.scene.intro)
         {
-            this.layer.removeTileAt(x,y);
-            this.scene.InvisibleLayer.removeInvisibilityTiles(x,y);
+            if(this instanceof GroundLayer)
+            {
+                this.layer.removeTileAt(x,y);
+                this.scene.InvisibleLayer.removeInvisibilityTiles(x,y);
+            }
+            else
+            {
+                console.log("Not supposed to be called by non-ground layer");
+            }
         }
-        else
-        {
-            console.log("Not supposed to be called by non-ground layer");
-        }
-
     }
 }

@@ -37,7 +37,7 @@ export default class GroundLayer extends BaseLayer
     constructor(scene: GameScene, layer: Phaser.Tilemaps.TilemapLayer, x: integer, y: integer)
     {
         super(scene, layer, x, y);
-        this.miningRate = 750;
+        this.miningRate = 500;
         this.mapCreation();
         this.layer.setCollisionByExclusion([-1]);
         this.layer.setPipeline("Light2D");
