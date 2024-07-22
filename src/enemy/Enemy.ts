@@ -1,5 +1,6 @@
 import GroundLayer from "~/map/GroundLayer";
 import GameScene from "../GameScene";
+import InvisibleLayer from "~/map/InvisibleLayer";
 
 export default class Enemy extends Phaser.Physics.Arcade.Sprite
 {

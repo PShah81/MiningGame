@@ -148,7 +148,9 @@ class GameScene extends Phaser.Scene
     
         // Sprites
         this.player = new Player(this, this.game.canvas.width/2, this.landPos - 40, "idle", this.GroundLayer, this.ItemLayer);
-        this.slime = new Slime(this, 500, 300, "slime_idle", this.GroundLayer, this.player);
+        let caves = this.GroundLayer.findCaves(10);
+        this.spawnMobs(caves);
+        
 
         // #region Purchasable Items
         let ladderBackground = this.add.rectangle(300, 25, 32, 32, 0xbbbdb9);
@@ -303,7 +305,10 @@ class GameScene extends Phaser.Scene
     update () 
     {
         this.player.update(this.cursors, this.lastKeyPressed);
-        this.slime.update();
+        for (let child of this.enemyGroup.children.entries)
+        {
+            child.update();
+        }
         // Reset the lastKeyPressed after processing
         this.lastKeyPressed = undefined;
     }
@@ -481,6 +486,23 @@ class GameScene extends Phaser.Scene
         border.scrollFactorX = 0;
         border.scrollFactorY = 0;
         return border;
+    }
+
+    spawnMobs(caves: number[][][])
+    {
+        console.log(caves);
+        for(let cave of caves)
+        {
+            let spawnPoint = cave.pop();
+            if(spawnPoint)
+            {
+                let [tileX,tileY] = spawnPoint;
+                let worldVec = this.GroundLayer.layer.tileToWorldXY(tileX, tileY);
+                // Centers slime on the tile
+                let slime = new Slime(this, worldVec.x + this.GroundLayer.layer.tilemap.tileWidth, worldVec.y + this.GroundLayer.layer.tilemap.tileHeight, "slime_idle", this.GroundLayer, this.player);
+                this.enemyGroup.add(slime);
+            }
+        }
     }
 }
 

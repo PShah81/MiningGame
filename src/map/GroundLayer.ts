@@ -33,6 +33,7 @@ export default class GroundLayer extends BaseLayer
     miningTile?: Phaser.Tilemaps.Tile
     miningRate: integer
     currentMiningDirection?: string
+    map!: number[][]
     constructor(scene: GameScene, layer: Phaser.Tilemaps.TilemapLayer, x: integer, y: integer)
     {
         super(scene, layer, x, y);
@@ -225,23 +226,22 @@ export default class GroundLayer extends BaseLayer
     mapCreation()
     {
         let iterations = 10;
-        let map = this.generateRandomTiles(this.layer.tilemap.width, this.layer.tilemap.height);
+        this.map = this.generateRandomTiles(this.layer.tilemap.width, this.layer.tilemap.height);
         for (let i = 0; i < iterations; i++) {
-            map = this.applyAutomataRules(map);
+            this.map = this.applyAutomataRules(this.map);
         }
-        this.addTiles(map);
-        console.log(this.findCaves(map, 10))
+        this.addTiles(this.map);
     }
-    findCaves(map: number[][], minCaveSize: number) {
+    findCaves(minCaveSize: number) {
         let caves: number[][][] = [];
         let visited = new Set<String>();
     
         
-        for (let y = 0; y < map.length; y++) {
-            for (let x = 0; x < map[0].length; x++) {
+        for (let y = 0; y < this.map.length; y++) {
+            for (let x = 0; x < this.map[0].length; x++) {
                 //Check that tile hasn't been visited yet and that the tile is empty
-                if (!visited.has([x,y].toString()) && map[y][x] == oreMapping.EMPTY) {
-                    let cave = this.findCave(x, y, map, visited);
+                if (!visited.has([x,y].toString()) && this.map[y][x] == oreMapping.EMPTY) {
+                    let cave = this.findCave(x, y, this.map, visited);
                     if (cave.length >= minCaveSize) {
                         caves.push(cave);
                     }
