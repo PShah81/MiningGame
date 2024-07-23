@@ -333,9 +333,9 @@ class GameScene extends Phaser.Scene
         }
 
         // Camera
-        this.cameras.main.centerOn(this.trueCenter, this.game.canvas.height / 2);
         this.cameras.main.startFollow(this.player);
-        this.cameras.main.height = 1000;
+        this.cameras.main.height = window.innerHeight;
+        this.cameras.main.width = window.innerWidth;
 
         // Lights
         this.lights.enable().setAmbientColor(0x111111);

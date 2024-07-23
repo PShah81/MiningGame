@@ -5,7 +5,7 @@ import GameScene from './GameScene';
 import PauseScene from './PauseScene';
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
-    width: 1200,
+    width: 1920,
     height: 5400,
     physics: {
         default: 'arcade',
