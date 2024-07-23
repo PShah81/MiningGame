@@ -29,6 +29,10 @@ class GameScene extends Phaser.Scene
     textBox!: RexUIPlugin.TextBox
     dialog!: RexUIPlugin.Dialog
     intro: boolean
+    tileOffset!: number
+    tileOffsetPos!: number
+    trueGameWidth!: number
+    trueCenter!: number
     constructor()
     {
         super('GameScene');
@@ -38,6 +42,7 @@ class GameScene extends Phaser.Scene
         'Use arrow keys to move around and mine and Space to attack.',
         'To place/use items, press the number corresponding to your item shown on the top left of the screen.',
         'You can only use torches and ladders underground, and you can remove them by pressing Q.',
+        'If you ever forget the controls of the game or need to step away from the game, click P to pause.',
         'Good luck!'];
         this.intro = true;
     }
@@ -73,12 +78,19 @@ class GameScene extends Phaser.Scene
 
     create ()
     {
+        // Create measurement fields
+        this.tileOffset = Math.ceil(this.cameras.main.width/(48*2));
+        this.tileOffsetPos = -48*this.tileOffset;
+        this.trueGameWidth = 48 * 2 * this.tileOffset + this.game.canvas.width;
+        this.trueCenter = this.trueGameWidth/2 + this.tileOffsetPos;
+
         //Background Images
-        this.add.image(this.game.canvas.width / 2, this.landPos, 'sky').setDisplaySize(this.game.canvas.width, 1500);
-        // Background that shows after a block has been mined
-        let underground = this.add.image(0,this.landPos, 'underground').setPipeline("Light2D");
-        underground.setOrigin(0,0);
-        underground.setDisplaySize(this.game.canvas.width, this.game.canvas.height - this.landPos);
+        let sky = this.add.image(this.trueCenter, this.landPos, 'sky');
+        sky.setOrigin(0.5,1);
+        sky.setDisplaySize(this.trueGameWidth, 750);
+        let underground = this.add.image(this.trueCenter, this.landPos, 'underground').setPipeline("Light2D");
+        underground.setOrigin(0.5,0);
+        underground.setDisplaySize(this.trueGameWidth, this.game.canvas.height - this.landPos);
 
         // Create Animations
         this.createPlayerAnimations();
@@ -103,7 +115,20 @@ class GameScene extends Phaser.Scene
 
         // #region Map
 
-        this.map = this.make.tilemap({ width: this.game.canvas.width / 48, height: this.game.canvas.height / 48, tileWidth: 16, tileHeight: 16});
+        // World barrier
+        var graphics = this.add.graphics();
+        var outlineThickness = 1;
+        var outlineColor = 0xff0000;  // Red color for the outline
+
+        graphics.lineStyle(outlineThickness, outlineColor, 1);
+        graphics.beginPath();
+        graphics.moveTo(0, -150);
+        graphics.lineTo(0, this.game.canvas.height);
+        graphics.moveTo(this.game.canvas.width, -150);
+        graphics.lineTo(this.game.canvas.width, this.game.canvas.height);
+        graphics.strokePath();
+
+        this.map = this.make.tilemap({ width: this.trueGameWidth / 48, height: this.game.canvas.height / 48, tileWidth: 16, tileHeight: 16});
 
         let itemTileset = this.map.addTilesetImage('items', undefined, 16, 16);
         if(itemTileset)
@@ -111,7 +136,7 @@ class GameScene extends Phaser.Scene
             let itemLayer = this.map.createBlankLayer('itemLayer', itemTileset);
             if(itemLayer)
             {
-                this.ItemLayer = new ItemLayer(this, itemLayer, 0, this.landPos);
+                this.ItemLayer = new ItemLayer(this, itemLayer, this.tileOffsetPos, this.landPos);
             }
             else
             {
@@ -129,7 +154,7 @@ class GameScene extends Phaser.Scene
             let groundLayer = this.map.createBlankLayer('groundLayer', groundTileset);
             if(groundLayer)
             {
-                this.GroundLayer = new GroundLayer(this, groundLayer, 0, this.landPos);
+                this.GroundLayer = new GroundLayer(this, groundLayer, this.tileOffsetPos, this.landPos);
             }
             else
             {
@@ -146,7 +171,7 @@ class GameScene extends Phaser.Scene
             let invisibleLayer = this.map.createBlankLayer('darknessLayer', invisibleTileset);
             if(invisibleLayer)
             {
-                this.InvisibleLayer = new InvisibleLayer(this, invisibleLayer, 0, this.landPos);
+                this.InvisibleLayer = new InvisibleLayer(this, invisibleLayer, this.tileOffsetPos, this.landPos);
             }
             else
             {
@@ -158,9 +183,9 @@ class GameScene extends Phaser.Scene
             console.error("Failed to load the tileset image");
         }
         // #endregion Map
-    
+        
         // Sprites
-        this.player = new Player(this, this.game.canvas.width/2, this.landPos - 40, "idle", this.GroundLayer, this.ItemLayer);
+        this.player = new Player(this, this.trueCenter, this.landPos - 40, "idle", this.GroundLayer, this.ItemLayer);
         let caves = this.GroundLayer.findCaves(10);
         this.spawnMobs(caves);
         
@@ -308,14 +333,14 @@ class GameScene extends Phaser.Scene
         }
 
         // Camera
-        this.cameras.main.centerOn(this.game.canvas.width / 2, this.game.canvas.height / 2);
+        this.cameras.main.centerOn(this.trueCenter, this.game.canvas.height / 2);
         this.cameras.main.startFollow(this.player);
         this.cameras.main.height = 1000;
 
         // Lights
         this.lights.enable().setAmbientColor(0x111111);
         //Imitate the sun
-        this.lights.addLight(this.game.canvas.width / 2, 0, this.game.canvas.width).setIntensity(20);
+        this.lights.addLight(this.game.canvas.width / 2, 0, this.trueGameWidth).setIntensity(15);
     }
 
     update () 

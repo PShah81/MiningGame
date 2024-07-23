@@ -154,7 +154,7 @@ export default class GroundLayer extends BaseLayer
         let midDepth: Record<number, number> = {};
         midDepth[oreMapping.GRASS] = 0;
         midDepth[oreMapping.DIRT] = 0;
-        midDepth[oreMapping.STONE] = 0.3;
+        midDepth[oreMapping.STONE] = 0.4;
         midDepth[oreMapping.COAL] = 0.1;
         midDepth[oreMapping.IRON] = 0.1;
         midDepth[oreMapping.COPPER] = 0.05;
@@ -162,7 +162,7 @@ export default class GroundLayer extends BaseLayer
         midDepth[oreMapping.GOLD] = 0.02;
         midDepth[oreMapping.DIAMOND] = 0;
         midDepth[oreMapping.EMERALD] = 0;
-        midDepth[oreMapping.EMPTY] = 0.4;
+        midDepth[oreMapping.EMPTY] = 0.3;
 
         let lateDepth: Record<number, number> = {};
         lateDepth[oreMapping.GRASS] = 0;
@@ -203,7 +203,7 @@ export default class GroundLayer extends BaseLayer
         {
             weightedArray = this.generateFrequencyArr(earlyDepth)
         }
-        else if (depth < 40)
+        else if (depth < 50)
         {
             weightedArray = this.generateFrequencyArr(midDepth)
         }
@@ -299,7 +299,7 @@ export default class GroundLayer extends BaseLayer
     }
     mapCreation()
     {
-        let iterations = 7;
+        let iterations = 5;
         this.map = this.generateRandomTiles(this.layer.tilemap.width, this.layer.tilemap.height);
         for (let i = 0; i < iterations; i++) {
             this.map = this.applyAutomataRules(this.map);
