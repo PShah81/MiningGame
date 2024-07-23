@@ -110,12 +110,86 @@ export default class GroundLayer extends BaseLayer
     }
     getWeightedArr(depth: number)
     {
-        let surface = {0: 1, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0};
-        let subSurface = {0: 0, 1: 0.9, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0.1};
-        let earlyDepth = {0: 0, 1: 0.4, 2: 0.3, 3: 0.1, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0.2};
-        let midDepth = {0: 0, 1: 0, 2: 0.4, 3: 0.15, 4: 0.05, 5: 0.03, 6: 0.02, 7: 0.01, 8: 0, 9: 0, 10: 0.3};
-        let lateDepth = {0: 0, 1: 0, 2: 0.4, 3: 0.1, 4: 0.05, 5: 0.05, 6: 0.05, 7: 0.03, 8: 0.02, 9: 0, 10: 0.3};
-        let finalDepth = {0: 0, 1: 0, 2: 0.3, 3: 0.1, 4: 0.15, 5: 0.07, 6: 0.03, 7: 0.02, 8: 0.02, 9: 0.01, 10: 0.3};
+        // Standard
+        // 1, 0.9, 0.6, 0.4, 0.2, 0.1, 0.05, 0.03, 0.02, 0
+        let surface: Record<number, number> = {};
+        surface[oreMapping.GRASS] = 1;
+        surface[oreMapping.DIRT] = 0;
+        surface[oreMapping.STONE] = 0;
+        surface[oreMapping.COAL] = 0;
+        surface[oreMapping.IRON] = 0;
+        surface[oreMapping.COPPER] = 0;
+        surface[oreMapping.SILVER] = 0;
+        surface[oreMapping.GOLD] = 0;
+        surface[oreMapping.DIAMOND] = 0;
+        surface[oreMapping.EMERALD] = 0;
+        surface[oreMapping.EMPTY] = 0;
+
+        let subSurface: Record<number, number> = {};
+        subSurface[oreMapping.GRASS] = 0;
+        subSurface[oreMapping.DIRT] = 0.9;
+        subSurface[oreMapping.STONE] = 0;
+        subSurface[oreMapping.COAL] = 0;
+        subSurface[oreMapping.IRON] = 0;
+        subSurface[oreMapping.COPPER] = 0;
+        subSurface[oreMapping.SILVER] = 0;
+        subSurface[oreMapping.GOLD] = 0;
+        subSurface[oreMapping.DIAMOND] = 0;
+        subSurface[oreMapping.EMERALD] = 0;
+        subSurface[oreMapping.EMPTY] = 0.1;
+
+        let earlyDepth: Record<number, number> = {};
+        earlyDepth[oreMapping.GRASS] = 0;
+        earlyDepth[oreMapping.DIRT] = 0.2;
+        earlyDepth[oreMapping.STONE] = 0.4;
+        earlyDepth[oreMapping.COAL] = 0.2;
+        earlyDepth[oreMapping.IRON] = 0;
+        earlyDepth[oreMapping.COPPER] = 0;
+        earlyDepth[oreMapping.SILVER] = 0;
+        earlyDepth[oreMapping.GOLD] = 0;
+        earlyDepth[oreMapping.DIAMOND] = 0;
+        earlyDepth[oreMapping.EMERALD] = 0;
+        earlyDepth[oreMapping.EMPTY] = 0.2;
+
+        let midDepth: Record<number, number> = {};
+        midDepth[oreMapping.GRASS] = 0;
+        midDepth[oreMapping.DIRT] = 0;
+        midDepth[oreMapping.STONE] = 0.3;
+        midDepth[oreMapping.COAL] = 0.1;
+        midDepth[oreMapping.IRON] = 0.1;
+        midDepth[oreMapping.COPPER] = 0.05;
+        midDepth[oreMapping.SILVER] = 0.03;
+        midDepth[oreMapping.GOLD] = 0.02;
+        midDepth[oreMapping.DIAMOND] = 0;
+        midDepth[oreMapping.EMERALD] = 0;
+        midDepth[oreMapping.EMPTY] = 0.4;
+
+        let lateDepth: Record<number, number> = {};
+        lateDepth[oreMapping.GRASS] = 0;
+        lateDepth[oreMapping.DIRT] = 0;
+        lateDepth[oreMapping.STONE] = 0.2;
+        lateDepth[oreMapping.COAL] = 0.1;
+        lateDepth[oreMapping.IRON] = 0.1;
+        lateDepth[oreMapping.COPPER] = 0.1;
+        lateDepth[oreMapping.SILVER] = 0.05;
+        lateDepth[oreMapping.GOLD] = 0.03;
+        lateDepth[oreMapping.DIAMOND] = 0.02;
+        lateDepth[oreMapping.EMERALD] = 0;
+        lateDepth[oreMapping.EMPTY] = 0.4;
+
+        let finalDepth: Record<number, number> = {};
+        finalDepth[oreMapping.GRASS] = 0;
+        finalDepth[oreMapping.DIRT] = 0;
+        finalDepth[oreMapping.STONE] = 0.2;
+        finalDepth[oreMapping.COAL] = 0.1;
+        finalDepth[oreMapping.IRON] = 0.1;
+        finalDepth[oreMapping.COPPER] = 0.1;
+        finalDepth[oreMapping.SILVER] = 0.1;
+        finalDepth[oreMapping.GOLD] = 0.05;
+        finalDepth[oreMapping.DIAMOND] = 0.03;
+        finalDepth[oreMapping.EMERALD] = 0.02;
+        finalDepth[oreMapping.EMPTY] = 0.4;
+
         let weightedArray: integer[] = [];
         if (depth == 0)
         {
@@ -225,7 +299,7 @@ export default class GroundLayer extends BaseLayer
     }
     mapCreation()
     {
-        let iterations = 10;
+        let iterations = 7;
         this.map = this.generateRandomTiles(this.layer.tilemap.width, this.layer.tilemap.height);
         for (let i = 0; i < iterations; i++) {
             this.map = this.applyAutomataRules(this.map);

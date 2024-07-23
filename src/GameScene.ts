@@ -31,7 +31,7 @@ class GameScene extends Phaser.Scene
     intro: boolean
     constructor()
     {
-        super('game-scene');
+        super('GameScene');
         this.landPos = 500;
         this.textIndex = 0;
         this.textArr = ['Welcome, your goal is to reach the center of the planet and defeat the demon lord. Press Enter to continue.',
@@ -304,6 +304,7 @@ class GameScene extends Phaser.Scene
             //Adding key presses
             this.input.keyboard.on('keydown', this.handleKeyPress, this);
             this.input.keyboard.on('keydown-ENTER', this.updateText, this);
+            this.input.keyboard.on('keydown-P', this.pauseGame, this);
         }
 
         // Camera
@@ -559,6 +560,7 @@ class GameScene extends Phaser.Scene
         // Initial text update
         this.updateText();
     }
+
     updateText()
     {
         if(this.textIndex < this.textArr.length) {
@@ -571,6 +573,13 @@ class GameScene extends Phaser.Scene
             this.intro = false;
         }
     };
+
+    pauseGame()
+    {
+        this.physics.pause();
+        this.scene.pause();
+        this.scene.launch('PauseScene');
+    }
 }
 
 export default GameScene
