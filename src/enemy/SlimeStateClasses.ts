@@ -1,6 +1,6 @@
-import Player from "../player/Player";
-import SlimeStateManager from "./SlimeStateManager";
-import Slime from "./Slime";
+import Player from "../player/Player.ts";
+import SlimeStateManager from "./SlimeStateManager.ts";
+import Slime from "./Slime.ts";
 export enum States{
     IDLE = 0,
     WALK = 1,

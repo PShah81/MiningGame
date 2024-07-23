@@ -12,6 +12,7 @@
 		"experimentalDecorators": true,
 		"esModuleInterop": true,
 		"allowSyntheticDefaultImports": true,
+		"allowImportingTsExtensions": true,
 		"sourceMap": true,
 		"baseUrl": "./src",
 		"paths": {

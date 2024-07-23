@@ -1,5 +1,5 @@
-import Enemy from "../enemy/Enemy"
-import GameScene from "../GameScene"
+import Enemy from "../enemy/Enemy.ts"
+import GameScene from "../GameScene.ts"
 
 export default class Explosion extends Phaser.Physics.Arcade.Sprite
 {

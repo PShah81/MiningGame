@@ -1,5 +1,5 @@
-import GameScene from "../GameScene";
-import BaseLayer from "./BaseLayer";
+import GameScene from "../GameScene.ts";
+import BaseLayer from "./BaseLayer.ts";
 
 export default class InvisibleLayer extends BaseLayer
 {

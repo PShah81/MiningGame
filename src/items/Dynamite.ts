@@ -1,5 +1,5 @@
-import GameScene from "../GameScene";
-import Explosion from "./Explosion";
+import GameScene from "../GameScene.ts";
+import Explosion from "./Explosion.ts";
 
 export default class Dynamite extends Phaser.Physics.Arcade.Sprite
 {

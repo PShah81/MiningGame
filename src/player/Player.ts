@@ -1,10 +1,10 @@
-import Enemy from "../enemy/Enemy";
-import GameScene from "../GameScene";
-import GroundLayer from "../map/GroundLayer";
-import ItemLayer from "../map/ItemLayer";
-import { Directions, States } from "./PlayerStateClasses";
-import PlayerStateManager from "./PlayerStateManager";
-import Explosion from "../items/Explosion";
+import Enemy from "../enemy/Enemy.ts";
+import GameScene from "../GameScene.ts";
+import GroundLayer from "../map/GroundLayer.ts";
+import ItemLayer from "../map/ItemLayer.ts";
+import { Directions, States } from "./PlayerStateClasses.ts";
+import PlayerStateManager from "./PlayerStateManager.ts";
+import Explosion from "../items/Explosion.ts";
 import { GameObjects } from "phaser";
 
 export default class Player extends Phaser.Physics.Arcade.Sprite

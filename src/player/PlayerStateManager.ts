@@ -1,8 +1,7 @@
-import GameScene from '../GameScene';
-import GroundLayer from '../map/GroundLayer';
-import ItemLayer from '../map/ItemLayer';
-import Player from './Player';
-import {PlayerState, Idle, Walk, Run, Mine, Jump, Fall, Land, Climb, Attack, Hurt, Directions, States, Death} from './PlayerStateClasses';
+import GroundLayer from '../map/GroundLayer.ts';
+import ItemLayer from '../map/ItemLayer.ts';
+import Player from './Player.ts';
+import {PlayerState, Idle, Walk, Run, Mine, Jump, Fall, Land, Climb, Attack, Hurt, Directions, States, Death} from './PlayerStateClasses.ts';
 class PlayerStateManager
 {
     player: Player

@@ -1,6 +1,6 @@
-import Dynamite from "../items/Dynamite";
-import GameScene from "../GameScene";
-import GroundLayer from "./GroundLayer";
+import Dynamite from "../items/Dynamite.ts";
+import GameScene from "../GameScene.ts";
+import GroundLayer from "./GroundLayer.ts";
 
 export default class BaseLayer
 {

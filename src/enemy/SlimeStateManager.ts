@@ -1,6 +1,6 @@
-import {SlimeState, Directions, States, Idle, Walk, Jump, Fall, Land, Death} from './SlimeStateClasses';
-import Slime from './Slime';
-import Player from '../player/Player';
+import {SlimeState, Directions, States, Idle, Walk, Jump, Fall, Land, Death} from './SlimeStateClasses.ts';
+import Slime from './Slime.ts';
+import Player from '../player/Player.ts';
 export default class SlimeStateManager
 {
     slime: Slime

@@ -1,6 +1,6 @@
-import GameScene from "../GameScene";
-import BaseLayer from "./BaseLayer";
-import InvisibleLayer from "./InvisibleLayer";
+import GameScene from "../GameScene.ts";
+import BaseLayer from "./BaseLayer.ts";
+import InvisibleLayer from "./InvisibleLayer.ts";
 
 export enum oreMapping {
     GRASS = 0,

@@ -1,14 +1,13 @@
-import Phaser, { GameObjects } from 'phaser'
-import PlayerStateManager from './player/PlayerStateManager';
-import Slime from './enemy/Slime';
-import Player from './player/Player';
-import GroundLayer from './map/GroundLayer';
-import ItemLayer from './map/ItemLayer';
-import Explosion from './items/Explosion';
-import InvisibleLayer from './map/InvisibleLayer';
+import Phaser from 'phaser'
+import Slime from './enemy/Slime.ts';
+import Player from './player/Player.ts';
+import GroundLayer from './map/GroundLayer.ts';
+import ItemLayer from './map/ItemLayer.ts';
+import Explosion from './items/Explosion.ts';
+import InvisibleLayer from './map/InvisibleLayer.ts';
 import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 
-class GameScene extends Phaser.Scene
+export default class GameScene extends Phaser.Scene
 {
     goldText!: Phaser.GameObjects.Text
     playerHealth!: Phaser.GameObjects.Rectangle
@@ -606,5 +605,3 @@ class GameScene extends Phaser.Scene
         this.scene.launch('PauseScene');
     }
 }
-
-export default GameScene

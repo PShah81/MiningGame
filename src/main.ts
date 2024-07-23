@@ -1,8 +1,8 @@
 import Phaser from 'phaser'
 import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 
-import GameScene from './GameScene';
-import PauseScene from './PauseScene';
+import GameScene from './GameScene.ts';
+import PauseScene from './PauseScene.ts';
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     width: 1920,

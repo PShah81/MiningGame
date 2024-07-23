@@ -1,7 +1,7 @@
-import PlayerStateManager from "./PlayerStateManager";
-import Player from "./Player";
-import GroundLayer from "../map/GroundLayer";
-import ItemLayer from "../map/ItemLayer";
+import PlayerStateManager from "./PlayerStateManager.ts";
+import Player from "./Player.ts";
+import GroundLayer from "../map/GroundLayer.ts";
+import ItemLayer from "../map/ItemLayer.ts";
 
 export enum States{
     IDLE = 0,

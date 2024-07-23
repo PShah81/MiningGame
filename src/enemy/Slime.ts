@@ -1,9 +1,9 @@
-import GroundLayer from "~/map/GroundLayer";
-import GameScene from "../GameScene";
-import Enemy from "./Enemy";
-import SlimeStateManager from "./SlimeStateManager";
-import Player from "../player/Player";
-import InvisibleLayer from "~/map/InvisibleLayer";
+import GroundLayer from "../map/GroundLayer.ts";
+import GameScene from "../GameScene.ts";
+import Enemy from "./Enemy.ts";
+import SlimeStateManager from "./SlimeStateManager.ts";
+import Player from "../player/Player.ts";
+import InvisibleLayer from "../map/InvisibleLayer.ts";
 
 export default class Slime extends Enemy
 {

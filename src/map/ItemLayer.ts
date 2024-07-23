@@ -1,7 +1,7 @@
-import BaseLayer from "./BaseLayer";
-import {Items} from '../player/PlayerStateClasses';
-import GameScene from "../GameScene";
-import Player from "../player/Player";
+import BaseLayer from "./BaseLayer.ts";
+import {Items} from '../player/PlayerStateClasses.ts';
+import GameScene from "../GameScene.ts";
+import Player from "../player/Player.ts";
 import { GameObjects } from "phaser";
 
 export default class ItemLayer extends BaseLayer
