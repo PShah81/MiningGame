@@ -1,7 +1,27 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-	plugins: [],
-	server: { host: '0.0.0.0', port: 8000 },
-	clearScreen: false,
-})
+    base: './',
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    phaser: ['phaser']
+                }
+            }
+        },
+        minify: 'terser',
+        terserOptions: {
+            compress: {
+                passes: 2
+            },
+            mangle: true,
+            format: {
+                comments: false
+            }
+        }
+    },
+    server: {
+        port: 8000
+    }
+});

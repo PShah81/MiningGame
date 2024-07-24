@@ -48,30 +48,30 @@ export default class GameScene extends Phaser.Scene
 
     preload ()
     {
-        this.load.spritesheet('tiles', '../assets/sprites/ores.png', { frameWidth: 16, frameHeight: 16});
-        this.load.spritesheet('items', '../assets/sprites/Extras/items.png', { frameWidth: 16, frameHeight: 16});
-        this.load.spritesheet('invisible', '../assets/sprites/invisible.png',  {frameWidth: 16, frameHeight: 16});
-        this.load.spritesheet('dynamite', '../assets/sprites/Extras/dynamite.png', {frameWidth: 22, frameHeight: 24});
-        this.load.spritesheet('explosion', '../assets/sprites/Extras/explosion.png', {frameWidth: 32, frameHeight: 32})
-        this.load.image('sky', '../assets/sprites/sky.png');
-        this.load.image('underground', '../assets/sprites/background.png');
-        this.load.image('goldImage', '../assets/sprites/gold.png');
-        this.load.image('potion', '../assets/sprites/health_potion.png');
-        this.load.spritesheet("mine", '../assets/sprites/3 SteamMan/mine.png', { frameWidth: 48, frameHeight: 48});
-        this.load.spritesheet("walk", '../assets/sprites/3 SteamMan/walk.png', { frameWidth: 48, frameHeight: 48});
-        this.load.spritesheet("idle", '../assets/sprites/3 SteamMan/idle.png', { frameWidth: 48, frameHeight: 48});
-        this.load.spritesheet("jump", '../assets/sprites/3 SteamMan/jump.png', { frameWidth: 48, frameHeight: 48});
-        this.load.spritesheet("run", '../assets/sprites/3 SteamMan/run.png', { frameWidth: 48, frameHeight: 48});
-        this.load.spritesheet("climb", '../assets/sprites/3 SteamMan/climb.png', { frameWidth: 48, frameHeight: 48});
-        this.load.spritesheet("attack", '../assets/sprites/3 SteamMan/attack.png', { frameWidth: 48, frameHeight: 48});
-        this.load.spritesheet("hurt", '../assets/sprites/3 SteamMan/hurt.png', { frameWidth: 48, frameHeight: 48});
-        this.load.spritesheet("death", '../assets/sprites/3 SteamMan/death.png', { frameWidth: 48, frameHeight: 48});
+        this.load.spritesheet('tiles', 'assets/sprites/ores.png', { frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet('items', 'assets/sprites/Extras/items.png', { frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet('invisible', 'assets/sprites/invisible.png',  {frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet('dynamite', 'assets/sprites/Extras/dynamite.png', {frameWidth: 22, frameHeight: 24});
+        this.load.spritesheet('explosion', 'assets/sprites/Extras/explosion.png', {frameWidth: 32, frameHeight: 32})
+        this.load.image('sky', 'assets/sprites/sky.png');
+        this.load.image('underground', 'assets/sprites/background.png');
+        this.load.image('goldImage', 'assets/sprites/gold.png');
+        this.load.image('potion', 'assets/sprites/health_potion.png');
+        this.load.spritesheet("mine", 'assets/sprites/3 SteamMan/mine.png', { frameWidth: 48, frameHeight: 48});
+        this.load.spritesheet("walk", 'assets/sprites/3 SteamMan/walk.png', { frameWidth: 48, frameHeight: 48});
+        this.load.spritesheet("idle", 'assets/sprites/3 SteamMan/idle.png', { frameWidth: 48, frameHeight: 48});
+        this.load.spritesheet("jump", 'assets/sprites/3 SteamMan/jump.png', { frameWidth: 48, frameHeight: 48});
+        this.load.spritesheet("run", 'assets/sprites/3 SteamMan/run.png', { frameWidth: 48, frameHeight: 48});
+        this.load.spritesheet("climb", 'assets/sprites/3 SteamMan/climb.png', { frameWidth: 48, frameHeight: 48});
+        this.load.spritesheet("attack", 'assets/sprites/3 SteamMan/attack.png', { frameWidth: 48, frameHeight: 48});
+        this.load.spritesheet("hurt", 'assets/sprites/3 SteamMan/hurt.png', { frameWidth: 48, frameHeight: 48});
+        this.load.spritesheet("death", 'assets/sprites/3 SteamMan/death.png', { frameWidth: 48, frameHeight: 48});
 
-        this.load.spritesheet("slime_idle", '../assets/sprites/Slime/slime_idle_spritesheet.png', { frameWidth: 16, frameHeight: 16});
-        this.load.spritesheet("slime_walk", '../assets/sprites/Slime/slime_walk_spritesheet.png', { frameWidth: 16, frameHeight: 16});
-        this.load.spritesheet("slime_death", '../assets/sprites/Slime/slime_death_spritesheet.png', { frameWidth: 16, frameHeight: 16});
-        this.load.spritesheet("slime_attack", '../assets/sprites/Slime/slime_attack_spritesheet.png', { frameWidth: 32, frameHeight: 24});
-        this.load.spritesheet("slime_jump", '../assets/sprites/Slime/slime_jump_spritesheet.png', { frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet("slime_idle", 'assets/sprites/Slime/slime_idle_spritesheet.png', { frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet("slime_walk", 'assets/sprites/Slime/slime_walk_spritesheet.png', { frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet("slime_death", 'assets/sprites/Slime/slime_death_spritesheet.png', { frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet("slime_attack", 'assets/sprites/Slime/slime_attack_spritesheet.png', { frameWidth: 32, frameHeight: 24});
+        this.load.spritesheet("slime_jump", 'assets/sprites/Slime/slime_jump_spritesheet.png', { frameWidth: 16, frameHeight: 16});
 
     }
 
