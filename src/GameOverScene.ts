@@ -16,7 +16,6 @@ export default class GameOverScene extends Phaser.Scene {
         this.scene.bringToTop();
         this.options = ['Yes', 'No'];
         this.selectedOption = 0;
-        console.log("here")
         this.add.text(window.innerWidth/2, 150, 'Game Over', { fontSize: '32px'}).setOrigin(0.5).setColor("#FF0000");
         this.add.text(window.innerWidth/2, 200, 'Play again?', { fontSize: '24px'}).setOrigin(0.5).setColor("#FF0000");3
 

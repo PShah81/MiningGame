@@ -145,6 +145,7 @@ export default class GameScene extends Phaser.Scene
         this.cameras.main.height = window.innerHeight;
         this.cameras.main.width = window.innerWidth;
 
+        this.scale.on('resize', this.resizeCamera, this);
         // Lights
         this.lights.enable().setAmbientColor(0x111111);
         //Imitate the sun
@@ -162,6 +163,11 @@ export default class GameScene extends Phaser.Scene
         this.lastKeyPressed = undefined;
     }
 
+    resizeCamera()
+    {
+        console.log(window.innerWidth)
+        this.cameras.main.setSize(window.innerWidth, window.innerHeight);
+    }
     handleExplosionDamage(enemy: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject, explosion: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject)
     {
         if(explosion instanceof Explosion)
