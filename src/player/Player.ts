@@ -161,7 +161,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         if(!this.scene.intro)
         {
             let newHealth = this.health + change;
-            if(newHealth < 0)
+            if(newHealth <= 0)
             {
                 newHealth = 0;
             }

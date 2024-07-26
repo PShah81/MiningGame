@@ -112,207 +112,16 @@ export default class GameScene extends Phaser.Scene
 
         // #endregion Collider Group
 
-        // #region Map
-
-        // World barrier
-        var graphics = this.add.graphics();
-        var outlineThickness = 1;
-        var outlineColor = 0xff0000;  // Red color for the outline
-
-        graphics.lineStyle(outlineThickness, outlineColor, 1);
-        graphics.beginPath();
-        graphics.moveTo(0, -150);
-        graphics.lineTo(0, this.game.canvas.height);
-        graphics.moveTo(this.game.canvas.width, -150);
-        graphics.lineTo(this.game.canvas.width, this.game.canvas.height);
-        graphics.strokePath();
-
-        this.map = this.make.tilemap({ width: this.trueGameWidth / 48, height: this.game.canvas.height / 48, tileWidth: 16, tileHeight: 16});
-
-        let itemTileset = this.map.addTilesetImage('items', undefined, 16, 16);
-        if(itemTileset)
-        {
-            let itemLayer = this.map.createBlankLayer('itemLayer', itemTileset);
-            if(itemLayer)
-            {
-                this.ItemLayer = new ItemLayer(this, itemLayer, this.tileOffsetPos, this.landPos);
-            }
-            else
-            {
-                console.error("itemLayer does not exist");
-            }
-        }
-        else
-        {
-            console.error("Failed to load the tileset image");
-        }
-       
-        let groundTileset = this.map.addTilesetImage('tiles', undefined, 16, 16);
-        if(groundTileset)
-        {
-            let groundLayer = this.map.createBlankLayer('groundLayer', groundTileset);
-            if(groundLayer)
-            {
-                this.GroundLayer = new GroundLayer(this, groundLayer, this.tileOffsetPos, this.landPos);
-            }
-            else
-            {
-                console.error("groundLayer does not exist");
-            }
-        }
-        else
-        {
-            console.error("Failed to load the tileset image");
-        }
-        let invisibleTileset = this.map.addTilesetImage('invisible', undefined, 16, 16);
-        if(invisibleTileset)
-        {
-            let invisibleLayer = this.map.createBlankLayer('darknessLayer', invisibleTileset);
-            if(invisibleLayer)
-            {
-                this.InvisibleLayer = new InvisibleLayer(this, invisibleLayer, this.tileOffsetPos, this.landPos);
-            }
-            else
-            {
-                console.error("darknessLayer does not exist");
-            }
-        }
-        else
-        {
-            console.error("Failed to load the tileset image");
-        }
-        // #endregion Map
+        // Map
+        this.initializeMap();
         
         // Sprites
         this.player = new Player(this, this.trueCenter, this.landPos - 40, "idle", this.GroundLayer, this.ItemLayer);
         let caves = this.GroundLayer.findCaves(10);
         this.spawnMobs(caves);
         
-        // #region Drawing on Screen
-        // #region Purchasable Items
-        let ladderBackground = this.add.rectangle(300, 25, 32, 32, 0xbbbdb9);
-        ladderBackground.scrollFactorX = 0;
-        ladderBackground.scrollFactorY = 0;
-
-        let ladderImage = this.add.image(300, 25, "items", 0);
-        ladderImage.setSize(32,32);
-        ladderImage.setScale(1.8,1.8);
-        ladderImage.scrollFactorX = 0;
-        ladderImage.scrollFactorY = 0;
-        let ladderBorder = this.createBorder(ladderImage, 2);
-        let ladderKey = this.add.text(295, 50, "1", {
-            fontSize: '20px'
-        });
-        ladderKey.scrollFactorX = 0;
-        ladderKey.scrollFactorY = 0;
-        let ladderCost = this.add.text(270, 75, "0.5", {
-            fontSize: '14px'
-        });
-        ladderCost.scrollFactorX = 0;
-        ladderCost.scrollFactorY = 0;
-        let ladderGold = this.add.image(310, 82, 'goldImage');
-        ladderGold.setScale(0.8,0.8);
-        ladderGold.scrollFactorX = 0;
-        ladderGold.scrollFactorY = 0;
-        
-
-
-        let torchBackground = this.add.rectangle(350, 25, 32, 32, 0xbbbdb9);
-        torchBackground.scrollFactorX = 0;
-        torchBackground.scrollFactorY = 0;
-
-        let torchImage = this.add.image(350, 25, "items", 1);
-        torchImage.setSize(32,32);
-        torchImage.setScale(2.5,2.5);
-        torchImage.scrollFactorX = 0;
-        torchImage.scrollFactorY = 0;
-        let torchBorder = this.createBorder(torchImage, 2);
-        let torchKey = this.add.text(345, 50, "2", {
-            fontSize: '20px'
-        });
-        torchKey.scrollFactorX = 0;
-        torchKey.scrollFactorY = 0;
-        let torchCost = this.add.text(340, 75, "1", {
-            fontSize: '14px'
-        });
-        torchCost.scrollFactorX = 0;
-        torchCost.scrollFactorY = 0;
-        let torchGold = this.add.image(360, 82, 'goldImage');
-        torchGold.setScale(0.8,0.8);
-        torchGold.scrollFactorX = 0;
-        torchGold.scrollFactorY = 0;
-        
-
-        let dynamiteBackground = this.add.rectangle(400, 25, 32, 32, 0xbbbdb9);
-        dynamiteBackground.scrollFactorX = 0;
-        dynamiteBackground.scrollFactorY = 0;
-
-        let dynamiteImage = this.add.image(400, 25, "dynamite", 0);
-        dynamiteImage.setSize(32,32);
-        dynamiteImage.scrollFactorX = 0;
-        dynamiteImage.scrollFactorY = 0;
-        let dynamiteBorder = this.createBorder(dynamiteImage, 2);
-        let dynamiteKey = this.add.text(395, 50, "3", {
-            fontSize: '20px'
-        });
-        dynamiteKey.scrollFactorX = 0;
-        dynamiteKey.scrollFactorY = 0;
-        let dynamiteCost = this.add.text(390, 75, "2", {
-            fontSize: '14px'
-        });
-        dynamiteCost.scrollFactorX = 0;
-        dynamiteCost.scrollFactorY = 0;
-        let dynamiteGold = this.add.image(410, 82, 'goldImage');
-        dynamiteGold.setScale(0.8,0.8);
-        dynamiteGold.scrollFactorX = 0;
-        dynamiteGold.scrollFactorY = 0;
-
-
-        let potionBackground = this.add.rectangle(450, 25, 32, 32, 0xbbbdb9);
-        potionBackground.scrollFactorX = 0;
-        potionBackground.scrollFactorY = 0;
-
-        let potionImage = this.add.image(450, 25, "potion", 0);
-        potionImage.setSize(32,32);
-        potionImage.setScale(1.5,1.5);
-        potionImage.scrollFactorX = 0;
-        potionImage.scrollFactorY = 0;
-        let potionBorder = this.createBorder(potionImage, 2);
-        let potionKey = this.add.text(445, 50, "4", {
-            fontSize: '20px'
-        });
-        potionKey.scrollFactorX = 0;
-        potionKey.scrollFactorY = 0;
-        let potionCost = this.add.text(440, 75, "5", {
-            fontSize: '14px'
-        });
-        potionCost.scrollFactorX = 0;
-        potionCost.scrollFactorY = 0;
-        let potionGold = this.add.image(460, 82, 'goldImage');
-        potionGold.setScale(0.8,0.8);
-        potionGold.scrollFactorX = 0;
-        potionGold.scrollFactorY = 0;
-        // #endregion Purchasable Items
-
-        // #region Gold Bar
-        // Gold Bar text
-        this.goldText = this.add.text(100, 50, String(this.player.gold.toFixed(1)), {
-            fontSize: '24px'
-        });
-        this.goldText.setOrigin(1, 0);
-        //Keep it in the same position relative to the viewport
-        this.goldText.scrollFactorX = 0
-        this.goldText.scrollFactorY = 0
-
-        //Gold Bar image
-        let goldImage = this.add.image(120, 60, 'goldImage');
-        goldImage.setScale(1.5,1.5);
-        goldImage.scrollFactorX = 0;
-        goldImage.scrollFactorY = 0;
-
-        // #endregion Gold Bar
-        // #endregion Drawing on Screen
-        this.handleInitialDialog();
+        //Draw items, gold and tutorial on screen
+        this.drawOnScreen();
 
         // Collision 
         this.physics.add.collider(this.dynamiteColliderGroup, this.GroundLayer.layer);
@@ -339,7 +148,7 @@ export default class GameScene extends Phaser.Scene
         // Lights
         this.lights.enable().setAmbientColor(0x111111);
         //Imitate the sun
-        this.lights.addLight(this.game.canvas.width / 2, 0, this.trueGameWidth).setIntensity(15);
+        this.lights.addLight(this.game.canvas.width / 2, 0, this.trueGameWidth).setIntensity(10);
     }
 
     update () 
@@ -505,7 +314,7 @@ export default class GameScene extends Phaser.Scene
         });
         
     }
-
+    
     updateGold(price: number)
     {
         //If in intro all purchases are free
@@ -603,5 +412,210 @@ export default class GameScene extends Phaser.Scene
         this.physics.pause();
         this.scene.pause();
         this.scene.launch('PauseScene');
+    }
+
+    drawOnScreen()
+    {
+        // #region Drawing on Screen
+        // #region Purchasable Items
+        let ladderBackground = this.add.rectangle(300, 25, 32, 32, 0xbbbdb9);
+        ladderBackground.scrollFactorX = 0;
+        ladderBackground.scrollFactorY = 0;
+
+        let ladderImage = this.add.image(300, 25, "items", 0);
+        ladderImage.setSize(32,32);
+        ladderImage.setScale(1.8,1.8);
+        ladderImage.scrollFactorX = 0;
+        ladderImage.scrollFactorY = 0;
+        let ladderBorder = this.createBorder(ladderImage, 2);
+        let ladderKey = this.add.text(295, 50, "1", {
+            fontSize: '20px'
+        });
+        ladderKey.scrollFactorX = 0;
+        ladderKey.scrollFactorY = 0;
+        let ladderCost = this.add.text(270, 75, "0.5", {
+            fontSize: '14px'
+        });
+        ladderCost.scrollFactorX = 0;
+        ladderCost.scrollFactorY = 0;
+        let ladderGold = this.add.image(310, 82, 'goldImage');
+        ladderGold.setScale(0.8,0.8);
+        ladderGold.scrollFactorX = 0;
+        ladderGold.scrollFactorY = 0;
+        
+
+
+        let torchBackground = this.add.rectangle(350, 25, 32, 32, 0xbbbdb9);
+        torchBackground.scrollFactorX = 0;
+        torchBackground.scrollFactorY = 0;
+
+        let torchImage = this.add.image(350, 25, "items", 1);
+        torchImage.setSize(32,32);
+        torchImage.setScale(2.5,2.5);
+        torchImage.scrollFactorX = 0;
+        torchImage.scrollFactorY = 0;
+        let torchBorder = this.createBorder(torchImage, 2);
+        let torchKey = this.add.text(345, 50, "2", {
+            fontSize: '20px'
+        });
+        torchKey.scrollFactorX = 0;
+        torchKey.scrollFactorY = 0;
+        let torchCost = this.add.text(340, 75, "1", {
+            fontSize: '14px'
+        });
+        torchCost.scrollFactorX = 0;
+        torchCost.scrollFactorY = 0;
+        let torchGold = this.add.image(360, 82, 'goldImage');
+        torchGold.setScale(0.8,0.8);
+        torchGold.scrollFactorX = 0;
+        torchGold.scrollFactorY = 0;
+        
+
+        let dynamiteBackground = this.add.rectangle(400, 25, 32, 32, 0xbbbdb9);
+        dynamiteBackground.scrollFactorX = 0;
+        dynamiteBackground.scrollFactorY = 0;
+
+        let dynamiteImage = this.add.image(400, 25, "dynamite", 0);
+        dynamiteImage.setSize(32,32);
+        dynamiteImage.scrollFactorX = 0;
+        dynamiteImage.scrollFactorY = 0;
+        let dynamiteBorder = this.createBorder(dynamiteImage, 2);
+        let dynamiteKey = this.add.text(395, 50, "3", {
+            fontSize: '20px'
+        });
+        dynamiteKey.scrollFactorX = 0;
+        dynamiteKey.scrollFactorY = 0;
+        let dynamiteCost = this.add.text(390, 75, "2", {
+            fontSize: '14px'
+        });
+        dynamiteCost.scrollFactorX = 0;
+        dynamiteCost.scrollFactorY = 0;
+        let dynamiteGold = this.add.image(410, 82, 'goldImage');
+        dynamiteGold.setScale(0.8,0.8);
+        dynamiteGold.scrollFactorX = 0;
+        dynamiteGold.scrollFactorY = 0;
+
+
+        let potionBackground = this.add.rectangle(450, 25, 32, 32, 0xbbbdb9);
+        potionBackground.scrollFactorX = 0;
+        potionBackground.scrollFactorY = 0;
+
+        let potionImage = this.add.image(450, 25, "potion", 0);
+        potionImage.setSize(32,32);
+        potionImage.setScale(1.5,1.5);
+        potionImage.scrollFactorX = 0;
+        potionImage.scrollFactorY = 0;
+        let potionBorder = this.createBorder(potionImage, 2);
+        let potionKey = this.add.text(445, 50, "4", {
+            fontSize: '20px'
+        });
+        potionKey.scrollFactorX = 0;
+        potionKey.scrollFactorY = 0;
+        let potionCost = this.add.text(440, 75, "5", {
+            fontSize: '14px'
+        });
+        potionCost.scrollFactorX = 0;
+        potionCost.scrollFactorY = 0;
+        let potionGold = this.add.image(460, 82, 'goldImage');
+        potionGold.setScale(0.8,0.8);
+        potionGold.scrollFactorX = 0;
+        potionGold.scrollFactorY = 0;
+        // #endregion Purchasable Items
+
+        // #region Gold Bar
+        // Gold Bar text
+        this.goldText = this.add.text(100, 50, String(this.player.gold.toFixed(1)), {
+            fontSize: '24px'
+        });
+        this.goldText.setOrigin(1, 0);
+        //Keep it in the same position relative to the viewport
+        this.goldText.scrollFactorX = 0
+        this.goldText.scrollFactorY = 0
+
+        //Gold Bar image
+        let goldImage = this.add.image(120, 60, 'goldImage');
+        goldImage.setScale(1.5,1.5);
+        goldImage.scrollFactorX = 0;
+        goldImage.scrollFactorY = 0;
+
+        // #endregion Gold Bar
+        this.handleInitialDialog();
+        // #endregion Drawing on Screen
+    }
+
+    initializeMap()
+    {
+        // World barrier
+        var graphics = this.add.graphics();
+        var outlineThickness = 1;
+        var outlineColor = 0xff0000;  // Red color for the outline
+
+        graphics.lineStyle(outlineThickness, outlineColor, 1);
+        graphics.beginPath();
+        graphics.moveTo(0, -150);
+        graphics.lineTo(0, this.game.canvas.height);
+        graphics.moveTo(this.game.canvas.width, -150);
+        graphics.lineTo(this.game.canvas.width, this.game.canvas.height);
+        graphics.strokePath();
+
+        this.map = this.make.tilemap({ width: this.trueGameWidth / 48, height: this.game.canvas.height / 48, tileWidth: 16, tileHeight: 16});
+
+        let itemTileset = this.map.addTilesetImage('items', undefined, 16, 16);
+        if(itemTileset)
+        {
+            let itemLayer = this.map.createBlankLayer('itemLayer', itemTileset);
+            if(itemLayer)
+            {
+                this.ItemLayer = new ItemLayer(this, itemLayer, this.tileOffsetPos, this.landPos);
+            }
+            else
+            {
+                console.error("itemLayer does not exist");
+            }
+        }
+        else
+        {
+            console.error("Failed to load the tileset image");
+        }
+       
+        let groundTileset = this.map.addTilesetImage('tiles', undefined, 16, 16);
+        if(groundTileset)
+        {
+            let groundLayer = this.map.createBlankLayer('groundLayer', groundTileset);
+            if(groundLayer)
+            {
+                this.GroundLayer = new GroundLayer(this, groundLayer, this.tileOffsetPos, this.landPos);
+            }
+            else
+            {
+                console.error("groundLayer does not exist");
+            }
+        }
+        else
+        {
+            console.error("Failed to load the tileset image");
+        }
+        let invisibleTileset = this.map.addTilesetImage('invisible', undefined, 16, 16);
+        if(invisibleTileset)
+        {
+            let invisibleLayer = this.map.createBlankLayer('darknessLayer', invisibleTileset);
+            if(invisibleLayer)
+            {
+                this.InvisibleLayer = new InvisibleLayer(this, invisibleLayer, this.tileOffsetPos, this.landPos);
+            }
+            else
+            {
+                console.error("darknessLayer does not exist");
+            }
+        }
+        else
+        {
+            console.error("Failed to load the tileset image");
+        }
+    }
+
+    gameOver()
+    {
+        this.scene.launch('GameOverScene');
     }
 }

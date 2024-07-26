@@ -1340,7 +1340,7 @@ export class Death extends PlayerState {
         this.player.setVelocityX(0);
         this.player.setAccelerationX(0);
         this.player.anims.play("death", true).on('animationcomplete-death', 
-        ()=>{this.player.destroy()}, this);    
+        ()=>{this.player.scene.gameOver()}, this);    
     }
 
 }

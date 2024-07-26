@@ -3,6 +3,7 @@ import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 
 import GameScene from './GameScene.ts';
 import PauseScene from './PauseScene.ts';
+import GameOverScene from './GameOverScene.ts';
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     width: 1920,
@@ -17,7 +18,7 @@ const config: Phaser.Types.Core.GameConfig = {
     render: {
         pixelArt: true
     },
-    scene: [GameScene, PauseScene],
+    scene: [GameScene, PauseScene, GameOverScene],
     plugins: {
         scene: [{
             key: 'rexUI',
