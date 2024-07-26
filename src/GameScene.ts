@@ -177,144 +177,47 @@ export default class GameScene extends Phaser.Scene
 
     createPlayerAnimations()
     {
-        this.anims.create({
-            key: 'walk',
-            frames: this.anims.generateFrameNumbers('walk', { start: 0, end: 5 }),
-            frameRate: 10,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'idle',
-            frames: this.anims.generateFrameNumbers('idle', { start: 0, end: 3 }),
-            frameRate: 3,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'mine',
-            frames: this.anims.generateFrameNumbers('mine', { start: 0, end: 5 }),
-            frameRate: 20,
-            repeat: -1
-        });
-        this.anims.create({
-            key: "jump",
-            frames: [
-                { key: 'jump', frame: 0},
-                { key: 'jump', frame: 1}, 
-                { key: 'jump', frame: 2},
-                { key: 'jump', frame: 3}
-            ],
-            frameRate: 20
-        });
-        this.anims.create({
-            key: "land",
-            frames: [
-                { key: 'jump', frame: 4, duration: 50 },
-                { key: 'jump', frame: 5, duration: 100 },
-                { key: 'idle', frame: 0, duration: 50}
-            ],
-            frameRate: 5
-        });
-        this.anims.create({
-            key: "fall",
-            frames: [
-                { key: 'jump', frame: 3}
-            ],
-            frameRate: 5
-        });
-        this.anims.create({
-            key: "run",
-            frames: this.anims.generateFrameNumbers('run', { start: 0, end: 5 }),
-            frameRate: 10,
-            repeat: -1
-        });
-        this.anims.create({
-            key: "climbUp",
-            frames: this.anims.generateFrameNumbers('climb', { start: 0, end: 5 }),
-            frameRate: 10,
-            repeat: -1
-        });
-        this.anims.create({
-            key: "climbDown",
-            frames: this.anims.generateFrameNumbers('climb', { start: 5, end: 0 }),
-            frameRate: 10,
-            repeat: -1
-        });
-        this.anims.create({
-            key: "climbIdle",
-            frames: [
-                { key: 'climb', frame: 0}
-            ],
-            frameRate: 5
-        });
-        this.anims.create({
-            key: "dynamite",
-            frames: this.anims.generateFrameNumbers('dynamite', { start: 0, end: 4 }),
-            frameRate: 3
-        });
-        this.anims.create({
-            key: "explosion",
-            frames: this.anims.generateFrameNumbers('explosion', { start: 0, end: 4 }),
-            frameRate: 3
-        });
-        this.anims.create({
-            key: "attack",
-            frames: this.anims.generateFrameNumbers('attack', { start: 0, end: 5 }),
-            frameRate: 10
-        })
-        this.anims.create({
-            key: "hurt",
-            frames: this.anims.generateFrameNumbers('hurt', { start: 0, end: 2}),
-            frameRate: 10
-        })
-        this.anims.create({
-            key: "death",
-            frames: this.anims.generateFrameNumbers('death', { start: 0, end: 5}),
-            frameRate: 5
-        })
+        this.createAnimation('walk', this.anims.generateFrameNumbers('walk', { start: 0, end: 5 }), 10, -1);
+        this.createAnimation('run', this.anims.generateFrameNumbers('run', { start: 0, end: 5 }), 10, -1);
+        this.createAnimation('idle', this.anims.generateFrameNumbers('idle', { start: 0, end: 3 }), 3, -1);
+        this.createAnimation('mine', this.anims.generateFrameNumbers('mine', { start: 0, end: 5 }), 20, -1);
+        this.createAnimation('jump', [{ key: 'jump', frame: 0}, { key: 'jump', frame: 1}, { key: 'jump', frame: 2}, { key: 'jump', frame: 3}], 20, 0);
+        this.createAnimation('land', [{ key: 'jump', frame: 4, duration: 50 }, { key: 'jump', frame: 5, duration: 100 }, { key: 'idle', frame: 0, duration: 50}], 5, 0);
+        this.createAnimation('fall', [{ key: 'jump', frame: 3}], 5, 0);
+        this.createAnimation('climbUp', this.anims.generateFrameNumbers('climb', { start: 0, end: 5 }), 10, -1);
+        this.createAnimation('climbDown', this.anims.generateFrameNumbers('climb', { start: 5, end: 0 }), 10, -1);
+        this.createAnimation('climbIdle', [{ key: 'climb', frame: 0}], 5, 0);
+        this.createAnimation('dynamite', this.anims.generateFrameNumbers('dynamite', { start: 0, end: 4 }), 3, 0);
+        this.createAnimation('explosion', this.anims.generateFrameNumbers('explosion', { start: 0, end: 4 }), 5, 0);
+        this.createAnimation('attack', this.anims.generateFrameNumbers('attack', { start: 0, end: 5 }), 10, 0);
+        this.createAnimation('hurt', this.anims.generateFrameNumbers('hurt', { start: 0, end: 2 }), 10, 0);
+        this.createAnimation('death', this.anims.generateFrameNumbers('death', { start: 0, end: 5 }), 5, 0);
     }
     
     createEnemyAnimations()
     {
-        this.anims.create({
-            key: 'slime_idle',
-            frames: this.anims.generateFrameNumbers('slime_idle', { start: 0, end: 4 }),
-            frameRate: 5,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'slime_walk',
-            frames: this.anims.generateFrameNumbers('slime_walk', { start: 0, end: 6 }),
-            frameRate: 10,
-            repeat: -1
-        });
-        this.anims.create({
-            key: 'slime_attack',
-            frames: this.anims.generateFrameNumbers('slime_attack', { start: 0, end: 4}),
-            frameRate: 10
-        });
-        this.anims.create({
-            key: 'slime_death',
-            frames: this.anims.generateFrameNumbers('slime_death', { start: 0, end: 4}),
-            frameRate: 10
-        });
-        this.anims.create({
-            key: 'slime_jump',
-            frames: this.anims.generateFrameNumbers('slime_jump', { start: 0, end: 2}),
-            frameRate: 30
-        });
-        this.anims.create({
-            key: 'slime_fall',
-            frames: this.anims.generateFrameNumbers('slime_jump', { start: 3, end: 6}),
-            frameRate: 30
-        });
-        this.anims.create({
-            key: 'slime_land',
-            frames: this.anims.generateFrameNumbers('slime_jump', { start: 7, end: 9}),
-            frameRate: 15
-        });
-        
+        this.createAnimation('slime_idle', this.anims.generateFrameNumbers('slime_idle', { start: 0, end: 4 }), 5, -1);
+        this.createAnimation('slime_walk', this.anims.generateFrameNumbers('slime_walk', { start: 0, end: 6 }), 10, -1);
+        this.createAnimation('slime_attack', this.anims.generateFrameNumbers('slime_attack', { start: 0, end: 4 }), 10, 0);
+        this.createAnimation('slime_death', this.anims.generateFrameNumbers('slime_death', { start: 0, end: 4 }), 10, 0);
+        this.createAnimation('slime_jump', this.anims.generateFrameNumbers('slime_jump', { start: 0, end: 2 }), 30, 0);
+        this.createAnimation('slime_fall', this.anims.generateFrameNumbers('slime_jump', { start: 3, end: 6 }), 30, 0);
+        this.createAnimation('slime_land', this.anims.generateFrameNumbers('slime_jump', { start: 7, end: 9 }), 15, 0);     
     }
     
+    createAnimation(key: string, frames: string | Phaser.Types.Animations.AnimationFrame[], frameRate: number, repeat: number | undefined)
+    {
+        if(!this.anims.exists(key))
+        {
+            this.anims.create({
+                key: key,
+                frames: frames,
+                frameRate: frameRate,
+                repeat: repeat
+            });
+        }
+    }
+
     updateGold(price: number)
     {
         //If in intro all purchases are free

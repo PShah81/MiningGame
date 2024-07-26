@@ -74,7 +74,7 @@ export default class ItemLayer extends BaseLayer
             {
                 player.canClimb = true;
             }
-            else if(player instanceof Player)
+            else if(player instanceof Player && tile.index != Items.LADDER)
             {
                 player.canClimb = false;
             }
