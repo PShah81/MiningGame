@@ -151,9 +151,9 @@ export default class GameScene extends Phaser.Scene
 
         this.scale.on('resize', this.resizeCamera, this);
         // Lights
-        this.lights.enable().setAmbientColor(0x111111);
+        this.lights.enable().setAmbientColor(0x000000);
         //Imitate the sun
-        this.lights.addLight(this.game.canvas.width / 2, 0, this.trueGameWidth).setIntensity(10);
+        this.lights.addLight(this.game.canvas.width / 2, -300, this.game.canvas.width).setIntensity(20);
     }
 
     update () 
