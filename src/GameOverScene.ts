@@ -7,12 +7,17 @@ export default class GameOverScene extends Phaser.Scene {
     selectedOption!: number
     yesText!: Phaser.GameObjects.Text
     noText!: Phaser.GameObjects.Text
-
+    elapsedTime!: number
+    enemiesDefeated!: number
+    score !: number
     constructor() {
         super('GameOverScene');
     }
 
-    create() {
+    create(data: {elapsedTime: number, enemiesDefeated: number, score: number}) {
+        this.elapsedTime = data.elapsedTime;
+        this.enemiesDefeated = data.enemiesDefeated;
+        this.score = data.score;
         this.scene.bringToTop();
         this.options = ['Yes', 'No'];
         this.selectedOption = 0;
@@ -59,7 +64,7 @@ export default class GameOverScene extends Phaser.Scene {
             this.scene.remove("GameScene");
             this.scene.add("GameScene", new GameScene(), true);
         } else {
-            this.scene.start("StatsScene");
+            this.scene.start("StatsScene", {elapsedTime: this.elapsedTime, enemiesDefeated: this.enemiesDefeated, score: this.score});
         }
     }
 }

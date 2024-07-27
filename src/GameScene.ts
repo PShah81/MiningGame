@@ -32,6 +32,8 @@ export default class GameScene extends Phaser.Scene
     tileOffsetPos!: number
     trueGameWidth!: number
     trueCenter!: number
+    startTime: number
+    initialMobsCount: number
     constructor()
     {
         super('GameScene');
@@ -44,6 +46,8 @@ export default class GameScene extends Phaser.Scene
         'If you ever forget the controls of the game or need to step away from the game, click P to pause.',
         'Good luck!'];
         this.intro = true;
+        this.startTime = 0;
+        this.initialMobsCount = 0;
     }
 
     preload ()
@@ -266,6 +270,7 @@ export default class GameScene extends Phaser.Scene
                 this.enemyGroup.add(slime);
             }
         }
+        this.initialMobsCount = this.enemyGroup.children.entries.length;
     }
 
     handleInitialDialog()
@@ -312,6 +317,7 @@ export default class GameScene extends Phaser.Scene
             this.dialog.setVisible(false); // Close the dialog when no text is left
             this.textBox.setText("");
             this.intro = false;
+            this.startTime = performance.now();
         }
     };
 
@@ -532,6 +538,10 @@ export default class GameScene extends Phaser.Scene
         {
             console.error("No input.keyboard");
         }
-        this.scene.launch('GameOverScene');
+        // Get time spent in the game
+        let enemiesDefeated = this.initialMobsCount - this.enemyGroup.children.entries.length;
+        let elapsedTime = Math.round((performance.now() - this.startTime) / 1000);
+        let score = elapsedTime + enemiesDefeated * 1000;
+        this.scene.launch('GameOverScene', {elapsedTime: elapsedTime, enemiesDefeated: enemiesDefeated, score: score});
     }
 }

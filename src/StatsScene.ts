@@ -5,18 +5,14 @@ export default class StatsScene extends Phaser.Scene {
     constructor() {
         super({ key: 'StatsScene' });
     }
-
-    init(data: Record<string, number>) {
-        this.stats = {score: 40, enemiesDefeated: 2, timeSurvived: 5};
-    }
-
-    create() {
+    create(data: {elapsedTime: number, enemiesDefeated: number, score: number}) {
+        this.stats = data;
         this.scene.bringToTop();
         // Display Game Over
         this.add.text(window.innerWidth/2, 100, 'Game Over', { fontSize: '32px' }).setOrigin(0.5);
         
         // Display Stats
-        let statsText = `Score: ${this.stats.score}\nEnemies Defeated: ${this.stats.enemiesDefeated}\nTime Survived: ${this.stats.timeSurvived}`;
+        let statsText = `Enemies Defeated: ${this.stats.enemiesDefeated}\nTime Survived: ${this.stats.elapsedTime}s\nScore: ${this.stats.score}`;
         this.add.text(window.innerWidth/2, 200, statsText, { fontSize: '24px'}).setOrigin(0.5);
         
         // Display Play Again Prompt
