@@ -59,8 +59,7 @@ export default class GameOverScene extends Phaser.Scene {
             this.scene.remove("GameScene");
             this.scene.add("GameScene", new GameScene(), true);
         } else {
-            this.scene.stop();
-            this.scene.stop('GameScene');
+            this.scene.start("StatsScene");
         }
     }
 }

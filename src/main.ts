@@ -1,9 +1,10 @@
 import Phaser from 'phaser'
 import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
-
 import GameScene from './GameScene.ts';
 import PauseScene from './PauseScene.ts';
 import GameOverScene from './GameOverScene.ts';
+import StatsScene from './StatsScene.ts';
+import LeaderboardScene from './LeaderboardScene.ts';
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     width: 1920,
@@ -18,7 +19,7 @@ const config: Phaser.Types.Core.GameConfig = {
     render: {
         pixelArt: true
     },
-    scene: [GameScene, PauseScene, GameOverScene],
+    scene: [GameScene, PauseScene, GameOverScene, StatsScene, LeaderboardScene],
     plugins: {
         scene: [{
             key: 'rexUI',

@@ -275,7 +275,6 @@ export default class GameScene extends Phaser.Scene
             y: 200,
             width: 550,
             height: 100,
-            background: this.rexUI.add.roundRectangle(0, 0, 0, 0, 20, 0xffffff),
             content: this.textBox
         }).layout();
 
@@ -525,6 +524,14 @@ export default class GameScene extends Phaser.Scene
 
     gameOver()
     {
+        if(this.input.keyboard)
+        {
+            this.input.keyboard.removeAllListeners();
+        }
+        else
+        {
+            console.error("No input.keyboard");
+        }
         this.scene.launch('GameOverScene');
     }
 }
