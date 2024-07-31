@@ -10,13 +10,17 @@ export default class GameOverScene extends Phaser.Scene {
     elapsedTime!: number
     enemiesDefeated!: number
     score !: number
+    depth!: number
+    goldMined!: number
     constructor() {
         super('GameOverScene');
     }
 
-    create(data: {elapsedTime: number, enemiesDefeated: number, score: number}) {
+    create(data: {elapsedTime: number, enemiesDefeated: number, depth: number, goldMined: number, score: number}) {
         this.elapsedTime = data.elapsedTime;
         this.enemiesDefeated = data.enemiesDefeated;
+        this.depth = data.depth;
+        this.goldMined = data.goldMined;
         this.score = data.score;
         this.scene.bringToTop();
         this.options = ['Yes', 'No'];
@@ -64,7 +68,7 @@ export default class GameOverScene extends Phaser.Scene {
             this.scene.remove("GameScene");
             this.scene.add("GameScene", new GameScene(), true);
         } else {
-            this.scene.start("StatsScene", {elapsedTime: this.elapsedTime, enemiesDefeated: this.enemiesDefeated, score: this.score});
+            this.scene.start("StatsScene", {elapsedTime: this.elapsedTime, enemiesDefeated: this.enemiesDefeated, depth: this.depth, goldMined: this.goldMined, score: this.score});
         }
     }
 }

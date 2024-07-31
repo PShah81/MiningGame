@@ -34,6 +34,8 @@ export default class GameScene extends Phaser.Scene
     trueCenter!: number
     startTime: number
     initialMobsCount: number
+    goldMined: number
+    maxDepth: number
     constructor()
     {
         super('GameScene');
@@ -48,6 +50,8 @@ export default class GameScene extends Phaser.Scene
         this.intro = true;
         this.startTime = 0;
         this.initialMobsCount = 0;
+        this.goldMined = 0.0;
+        this.maxDepth = 0;
     }
 
     preload ()
@@ -163,6 +167,8 @@ export default class GameScene extends Phaser.Scene
         {
             child.update();
         }
+        let curDepth = this.GroundLayer.getTileAtObject(this.player) 
+        this.maxDepth = Math.max(this.maxDepth, curDepth ? curDepth.y : 0);
         // Reset the lastKeyPressed after processing
         this.lastKeyPressed = undefined;
     }
@@ -234,6 +240,10 @@ export default class GameScene extends Phaser.Scene
         if(!this.intro)
         {
             this.player.gold += price;
+            if(price > 0)
+            {
+                this.goldMined += parseFloat(price.toFixed(1));
+            }
             this.goldText.setText(this.player.gold.toFixed(1));
         }
 
@@ -541,7 +551,7 @@ export default class GameScene extends Phaser.Scene
         // Get time spent in the game
         let enemiesDefeated = this.initialMobsCount - this.enemyGroup.children.entries.length;
         let elapsedTime = Math.round((performance.now() - this.startTime) / 1000);
-        let score = elapsedTime + enemiesDefeated * 1000;
-        this.scene.launch('GameOverScene', {elapsedTime: elapsedTime, enemiesDefeated: enemiesDefeated, score: score});
+        let score = elapsedTime + enemiesDefeated * 1000 + this.maxDepth * 100 + this.goldMined * 100;
+        this.scene.launch('GameOverScene', {elapsedTime: elapsedTime, enemiesDefeated: enemiesDefeated, depth: this.maxDepth, goldMined: this.goldMined, score: score});
     }
 }
