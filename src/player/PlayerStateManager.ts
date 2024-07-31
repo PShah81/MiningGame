@@ -35,6 +35,11 @@ class PlayerStateManager
     }
     update(cursors: Phaser.Types.Input.Keyboard.CursorKeys, lastKeyPressed?: integer)
     {
+        let tileAtPlayer= this.GroundLayer.getTilePosAtObject(this.player);
+        if(tileAtPlayer && tileAtPlayer.y + 1 == this.GroundLayer.layer.tilemap.height)
+        {
+            console.log("Winner")
+        }
         this.currentState.update(cursors, lastKeyPressed);
         this.updateHitboxPosition();
     }

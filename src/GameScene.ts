@@ -167,8 +167,8 @@ export default class GameScene extends Phaser.Scene
         {
             child.update();
         }
-        let curDepth = this.GroundLayer.getTileAtObject(this.player) 
-        this.maxDepth = Math.max(this.maxDepth, curDepth ? curDepth.y : 0);
+        let curDepthVec = this.GroundLayer.getTilePosAtObject(this.player);
+        this.maxDepth = Math.max(this.maxDepth, curDepthVec ? curDepthVec.y : 0);
         // Reset the lastKeyPressed after processing
         this.lastKeyPressed = undefined;
     }

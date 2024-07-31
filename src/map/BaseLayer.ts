@@ -70,24 +70,14 @@ export default class BaseLayer
     getTileAtObject(object: Phaser.Physics.Arcade.Sprite)
     {
         let [x,y] = this.getCenterOfObject(object);
-        let tiles = this.layer.getTilesWithinWorldXY(x, y, object.width, object.height);
-        let minTileDistance = Infinity;
-        let minTileIndex = 0;
-        for(let tile of tiles)
-        {
-            let tileWorldX = this.layer.tileToWorldX(tile.x);
-            let tileToWorldY = this.layer.tileToWorldY(tile.y);
-            let distance = Math.abs(tileWorldX - x) + Math.abs(tileToWorldY - y);
-            if(distance < minTileDistance)
-            {
-                minTileDistance = distance;
-                minTileIndex = tile.index;
-            }
-        }
-        if (tiles.length == 0) {
-            return null;
-        }
-        return tiles[minTileIndex];
+        let tile = this.layer.getTileAtWorldXY(x, y);
+        return tile;
+    }
+    getTilePosAtObject(object: Phaser.Physics.Arcade.Sprite)
+    {
+        let [x,y] = this.getCenterOfObject(object);
+        let tileVec = this.layer.worldToTileXY(x, y);
+        return tileVec;
     }
     handleDynamite()
     {
