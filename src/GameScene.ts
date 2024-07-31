@@ -538,7 +538,7 @@ export default class GameScene extends Phaser.Scene
         }
     }
 
-    gameOver()
+    gameOver(won: boolean)
     {
         if(this.input.keyboard)
         {
@@ -551,7 +551,12 @@ export default class GameScene extends Phaser.Scene
         // Get time spent in the game
         let enemiesDefeated = this.initialMobsCount - this.enemyGroup.children.entries.length;
         let elapsedTime = Math.round((performance.now() - this.startTime) / 1000);
-        let score = Math.min(1000, elapsedTime) + elapsedTime + enemiesDefeated * 1000 + this.maxDepth * 100 + this.goldMined * 100;
-        this.scene.launch('GameOverScene', {elapsedTime: elapsedTime, enemiesDefeated: enemiesDefeated, depth: this.maxDepth, goldMined: this.goldMined, score: score});
+        let winBoost = 0;
+        if (won)
+        {
+            winBoost = 10000;
+        }
+        let score = Math.min(1000, elapsedTime) + elapsedTime + enemiesDefeated * 1000 + this.maxDepth * 100 + this.goldMined * 100 + winBoost;
+        this.scene.launch('GameOverScene', {elapsedTime: elapsedTime, enemiesDefeated: enemiesDefeated, depth: this.maxDepth, goldMined: this.goldMined, score: score, won: won});
     }
 }

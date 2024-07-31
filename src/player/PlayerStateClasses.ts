@@ -14,7 +14,8 @@ export enum States{
     CLIMB = 7,
     ATTACK = 8,
     HURT = 9,
-    DEATH = 10
+    DEATH = 10,
+    WIN = 11
 }
 export enum Directions {
     LEFT = 0,
@@ -1340,7 +1341,15 @@ export class Death extends PlayerState {
         this.player.setVelocityX(0);
         this.player.setAccelerationX(0);
         this.player.anims.play("death", true).on('animationcomplete-death', 
-        ()=>{this.player.scene.gameOver()}, this);    
+        ()=>{this.player.scene.gameOver(false)}, this);    
+    }
+}
+
+export class Win extends PlayerState {
+
+    enter(direction: Directions)
+    {
+        this.player.scene.gameOver(true);
     }
 
 }

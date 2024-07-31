@@ -1,15 +1,23 @@
 import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 export default class StatsScene extends Phaser.Scene {
-    stats!: Record<string, number>
+    stats!: Record<string, any>
     rexUI!: RexUIPlugin
     constructor() {
         super({ key: 'GameOverScene' });
     }
-    create(data: {elapsedTime: number, enemiesDefeated: number, depth: number, goldMined: number, score: number}) {
+    create(data: {elapsedTime: number, enemiesDefeated: number, depth: number, goldMined: number, score: number, won: boolean}) {
         this.stats = data;
         this.scene.bringToTop();
         // Display Game Over
-        this.add.text(window.innerWidth/2, 100, 'Game Over', { fontSize: '32px', color: 'red'}).setOrigin(0.5);
+        if(data.won) 
+        {
+            this.add.text(window.innerWidth/2, 100, 'You Win!', { fontSize: '32px', color: 'green'}).setOrigin(0.5);
+        }
+        else
+        {
+            this.add.text(window.innerWidth/2, 100, 'Game Over', { fontSize: '32px', color: 'red'}).setOrigin(0.5);
+        }
+       
         
         // Display Stats
         let statsText = `Enemies Defeated: ${this.stats.enemiesDefeated}\nTime Survived: ${this.stats.elapsedTime}s\nMax Depth: ${this.stats.depth}\nGold Mined: ${this.stats.goldMined}\nScore: ${this.stats.score}`;

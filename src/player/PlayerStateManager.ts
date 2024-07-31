@@ -1,7 +1,7 @@
 import GroundLayer from '../map/GroundLayer.ts';
 import ItemLayer from '../map/ItemLayer.ts';
 import Player from './Player.ts';
-import {PlayerState, Idle, Walk, Run, Mine, Jump, Fall, Land, Climb, Attack, Hurt, Directions, States, Death} from './PlayerStateClasses.ts';
+import {PlayerState, Idle, Walk, Run, Mine, Jump, Fall, Land, Climb, Attack, Hurt, Directions, States, Death, Win} from './PlayerStateClasses.ts';
 class PlayerStateManager
 {
     player: Player
@@ -26,7 +26,8 @@ class PlayerStateManager
             new Climb(this.player, this, this.GroundLayer, this.ItemLayer),
             new Attack(this.player, this, this.GroundLayer, this.ItemLayer),
             new Hurt(this.player, this, this.GroundLayer, this.ItemLayer),
-            new Death(this.player, this, this.GroundLayer, this.ItemLayer)
+            new Death(this.player, this, this.GroundLayer, this.ItemLayer),
+            new Win(this.player, this, this.GroundLayer, this.ItemLayer)
         ];
         this.currentDirection = Directions.IDLE;
         this.currentState = this.states[0];
@@ -35,10 +36,10 @@ class PlayerStateManager
     }
     update(cursors: Phaser.Types.Input.Keyboard.CursorKeys, lastKeyPressed?: integer)
     {
-        let tileAtPlayer= this.GroundLayer.getTilePosAtObject(this.player);
+        let tileAtPlayer = this.GroundLayer.getTilePosAtObject(this.player);
         if(tileAtPlayer && tileAtPlayer.y + 1 == this.GroundLayer.layer.tilemap.height)
         {
-            console.log("Winner")
+            this.changeState(States.WIN, Directions.IDLE);
         }
         this.currentState.update(cursors, lastKeyPressed);
         this.updateHitboxPosition();
