@@ -275,7 +275,7 @@ export default class GroundLayer extends BaseLayer
                     let newY = y + j;
                     //Valid tile location
                     if (newX >= 0 && newY >= 0 && newX < map[0].length && newY < map.length) {
-                        if(map[newX][newY] == oreMapping.EMPTY)
+                        if(map[newY][newX] == oreMapping.EMPTY)
                         {
                             emptyCount += 1;
                         }

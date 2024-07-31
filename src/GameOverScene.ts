@@ -1,76 +1,61 @@
-import { Game } from "phaser";
-import GameScene from "./GameScene";
-
-export default class GameOverScene extends Phaser.Scene {
-    
-    options!: String[]
-    selectedOption!: number
-    yesText!: Phaser.GameObjects.Text
-    noText!: Phaser.GameObjects.Text
-    elapsedTime!: number
-    enemiesDefeated!: number
-    score !: number
-    depth!: number
-    goldMined!: number
+import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
+export default class StatsScene extends Phaser.Scene {
+    stats!: Record<string, number>
+    rexUI!: RexUIPlugin
     constructor() {
-        super('GameOverScene');
+        super({ key: 'GameOverScene' });
     }
-
     create(data: {elapsedTime: number, enemiesDefeated: number, depth: number, goldMined: number, score: number}) {
-        this.elapsedTime = data.elapsedTime;
-        this.enemiesDefeated = data.enemiesDefeated;
-        this.depth = data.depth;
-        this.goldMined = data.goldMined;
-        this.score = data.score;
+        this.stats = data;
         this.scene.bringToTop();
-        this.options = ['Yes', 'No'];
-        this.selectedOption = 0;
-        this.add.text(window.innerWidth/2, 150, 'Game Over', { fontSize: '32px'}).setOrigin(0.5).setColor("#FF0000");
-        this.add.text(window.innerWidth/2, 200, 'Play again?', { fontSize: '24px'}).setOrigin(0.5).setColor("#FF0000");3
+        // Display Game Over
+        this.add.text(window.innerWidth/2, 100, 'Game Over', { fontSize: '32px', color: 'red'}).setOrigin(0.5);
+        
+        // Display Stats
+        let statsText = `Enemies Defeated: ${this.stats.enemiesDefeated}\nTime Survived: ${this.stats.elapsedTime}s\nMax Depth: ${this.stats.depth}\nGold Mined: ${this.stats.goldMined}\nScore: ${this.stats.score}`;
+        this.add.text(window.innerWidth/2, 200, statsText, { fontSize: '24px'}).setOrigin(0.5);
+        
+        // Display Play Again Prompt
+        this.add.text(window.innerWidth/2, 300, 'Enter your name: ', { fontSize: '24px'}).setOrigin(0.5);
+        
+        let inputElement = document.createElement('input');
+        inputElement.type = 'text';
+        inputElement.style.position = 'absolute';
+        inputElement.style.left = '50%';
+        inputElement.style.top = '350px';
+        inputElement.style.transform = 'translate(-50%, -50%)';
+        inputElement.style.width = '175px';
+        inputElement.style.height = '15px';
+        inputElement.style.outline = 'none';
+        inputElement.style.fontFamily = "Open Sans";
+        inputElement.style.fontSize = "16px";
+        document.body.appendChild(inputElement);
 
+        inputElement.style.whiteSpace = 'normal';
+        // Focus on the input element
+        inputElement.focus();
 
-        this.yesText = this.add.text(window.innerWidth/2 - 50, 250, 'Yes', { fontSize: '24px' }).setOrigin(0.5);
-        this.noText = this.add.text(window.innerWidth/2 + 50, 250, 'No', { fontSize: '24px'}).setOrigin(0.5);
+        // Add an event listener for the Enter key
+        inputElement.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                this.submitInput(inputElement.value);
+                inputElement.remove();
+            }else if(event.key === " ")
+            {
+                inputElement.value += " ";
+            }
+        });
 
-        if(this.input.keyboard)
-        {
-            this.input.keyboard.on('keydown-LEFT', this.moveLeft, this);
-            this.input.keyboard.on('keydown-RIGHT', this.moveRight, this);
-            this.input.keyboard.on('keydown-ENTER', this.selectOption, this);
-        }
-
-        this.updateSelection();
+        
     }
 
-    moveLeft() {
-        this.selectedOption = (this.selectedOption - 1 + this.options.length) % this.options.length;
-        this.updateSelection();
-    }
-
-    moveRight() {
-        this.selectedOption = (this.selectedOption + 1) % this.options.length;
-        this.updateSelection();
-    }
-
-    updateSelection() {
-        if (this.selectedOption === 0) {
-            this.yesText.setStyle({ fill: '#0f0' });
-            this.noText.setStyle({ fill: '#fff' });
-        } else {
-            this.yesText.setStyle({ fill: '#fff' });
-            this.noText.setStyle({ fill: '#f00' });
-        }
-    }
-
-    selectOption() {
-        if (this.selectedOption === 0) {
-            this.scene.stop();
-            this.scene.remove("GameScene");
-            this.scene.add("GameScene", new GameScene(), true);
-        } else {
-            this.scene.start("StatsScene", {elapsedTime: this.elapsedTime, enemiesDefeated: this.enemiesDefeated, depth: this.depth, goldMined: this.goldMined, score: this.score});
-        }
+    submitInput(value: string) {
+        this.scene.start("LeaderboardScene", {name: value, score: this.stats.score});
     }
 }
 
+
+     
+        
+ 
 

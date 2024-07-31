@@ -482,7 +482,7 @@ export default class GameScene extends Phaser.Scene
         graphics.lineTo(this.game.canvas.width, this.game.canvas.height);
         graphics.strokePath();
 
-        this.map = this.make.tilemap({ width: this.trueGameWidth / 48, height: this.game.canvas.height / 48, tileWidth: 16, tileHeight: 16});
+        this.map = this.make.tilemap({ width: this.trueGameWidth / 48, height: (this.game.canvas.height - this.landPos) / 48, tileWidth: 16, tileHeight: 16});
 
         let itemTileset = this.map.addTilesetImage('items', undefined, 16, 16);
         if(itemTileset)
@@ -551,7 +551,7 @@ export default class GameScene extends Phaser.Scene
         // Get time spent in the game
         let enemiesDefeated = this.initialMobsCount - this.enemyGroup.children.entries.length;
         let elapsedTime = Math.round((performance.now() - this.startTime) / 1000);
-        let score = elapsedTime + enemiesDefeated * 1000 + this.maxDepth * 100 + this.goldMined * 100;
+        let score = Math.min(1000, elapsedTime) + elapsedTime + enemiesDefeated * 1000 + this.maxDepth * 100 + this.goldMined * 100;
         this.scene.launch('GameOverScene', {elapsedTime: elapsedTime, enemiesDefeated: enemiesDefeated, depth: this.maxDepth, goldMined: this.goldMined, score: score});
     }
 }
