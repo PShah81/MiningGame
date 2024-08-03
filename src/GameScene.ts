@@ -6,6 +6,7 @@ import ItemLayer from './map/ItemLayer.ts';
 import Explosion from './items/Explosion.ts';
 import InvisibleLayer from './map/InvisibleLayer.ts';
 import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
+import Reaper from './enemy/Reaper.ts';
 
 export default class GameScene extends Phaser.Scene
 {
@@ -36,6 +37,7 @@ export default class GameScene extends Phaser.Scene
     initialMobsCount: number
     goldMined: number
     maxDepth: number
+    reaper!: Phaser.Physics.Arcade.Sprite
     constructor()
     {
         super('GameScene');
@@ -56,15 +58,23 @@ export default class GameScene extends Phaser.Scene
 
     preload ()
     {
+        this.load.spritesheet('reaper_idle', 'assets/sprites/Reaper/idle.png', { frameWidth: 100, frameHeight: 100});
+        this.load.spritesheet('reaper_attack', 'assets/sprites/Reaper/attacking.png', { frameWidth: 100, frameHeight: 100});
+        this.load.spritesheet('reaper_death', 'assets/sprites/Reaper/death.png', { frameWidth: 100, frameHeight: 100});
+        this.load.spritesheet('reaper_teleport', 'assets/sprites/Reaper/skill1.png', { frameWidth: 100, frameHeight: 100});
+        this.load.spritesheet('reaper_summon', 'assets/sprites/Reaper/summon.png', { frameWidth: 100, frameHeight: 100});
+
         this.load.spritesheet('tiles', 'assets/sprites/ores.png', { frameWidth: 16, frameHeight: 16});
         this.load.spritesheet('items', 'assets/sprites/Extras/items.png', { frameWidth: 16, frameHeight: 16});
         this.load.spritesheet('invisible', 'assets/sprites/invisible.png',  {frameWidth: 16, frameHeight: 16});
         this.load.spritesheet('dynamite', 'assets/sprites/Extras/dynamite.png', {frameWidth: 22, frameHeight: 24});
-        this.load.spritesheet('explosion', 'assets/sprites/Extras/explosion.png', {frameWidth: 32, frameHeight: 32})
+        this.load.spritesheet('explosion', 'assets/sprites/Extras/explosion.png', {frameWidth: 32, frameHeight: 32});
+
         this.load.image('sky', 'assets/sprites/sky.png');
         this.load.image('underground', 'assets/sprites/background.png');
         this.load.image('goldImage', 'assets/sprites/gold.png');
         this.load.image('potion', 'assets/sprites/health_potion.png');
+
         this.load.spritesheet("mine", 'assets/sprites/3 SteamMan/mine.png', { frameWidth: 48, frameHeight: 48});
         this.load.spritesheet("walk", 'assets/sprites/3 SteamMan/walk.png', { frameWidth: 48, frameHeight: 48});
         this.load.spritesheet("idle", 'assets/sprites/3 SteamMan/idle.png', { frameWidth: 48, frameHeight: 48});
@@ -125,6 +135,7 @@ export default class GameScene extends Phaser.Scene
         
         // Sprites
         this.player = new Player(this, this.trueCenter, this.landPos - 40, "idle", this.GroundLayer, this.ItemLayer);
+        this.reaper = new Reaper(this, this.trueCenter, this.landPos - 40, "reaper_idle", this.GroundLayer, this.player);
         let caves = this.GroundLayer.findCaves(10);
         this.spawnMobs(caves);
         
@@ -218,7 +229,14 @@ export default class GameScene extends Phaser.Scene
         this.createAnimation('slime_death', this.anims.generateFrameNumbers('slime_death', { start: 0, end: 4 }), 10, 0);
         this.createAnimation('slime_jump', this.anims.generateFrameNumbers('slime_jump', { start: 0, end: 2 }), 30, 0);
         this.createAnimation('slime_fall', this.anims.generateFrameNumbers('slime_jump', { start: 3, end: 6 }), 30, 0);
-        this.createAnimation('slime_land', this.anims.generateFrameNumbers('slime_jump', { start: 7, end: 9 }), 15, 0);     
+        this.createAnimation('slime_land', this.anims.generateFrameNumbers('slime_jump', { start: 7, end: 9 }), 15, 0); 
+
+        this.createAnimation('reaper_idle', this.anims.generateFrameNumbers('reaper_idle', { start: 0, end: 3 }), 3, -1);
+        this.createAnimation('reaper_float', this.anims.generateFrameNumbers('reaper_idle', { start: 0, end: 0 }), 5, 0);
+        this.createAnimation('reaper_attack', this.anims.generateFrameNumbers('reaper_attack', { start: 0, end: 12 }), 10, 0);
+        this.createAnimation('reaper_death', this.anims.generateFrameNumbers('reaper_death', { start: 0, end: 16 }), 10, 0);
+        this.createAnimation('reaper_teleport', this.anims.generateFrameNumbers('reaper_teleport', { start: 0, end: 11 }), 5, 0);   
+        this.createAnimation('reaper_summon', this.anims.generateFrameNumbers('reaper_summon', { start: 0, end: 4 }), 5, 0);     
     }
     
     createAnimation(key: string, frames: string | Phaser.Types.Animations.AnimationFrame[], frameRate: number, repeat: number | undefined)
