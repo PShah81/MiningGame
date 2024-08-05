@@ -135,7 +135,6 @@ export default class GameScene extends Phaser.Scene
         
         // Sprites
         this.player = new Player(this, this.trueCenter, this.landPos - 40, "idle", this.GroundLayer, this.ItemLayer);
-        this.reaper = new Reaper(this, this.trueCenter, this.landPos - 40, "reaper_idle", this.GroundLayer, this.player);
         let caves = this.GroundLayer.findCaves(10);
         this.spawnMobs(caves);
         
