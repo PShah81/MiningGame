@@ -70,12 +70,13 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         
 
         //Attack Logic
-        this.attackHitBox = scene.add.rectangle(this.x, this.y, 16, 16, 0xffffff, 0) as unknown as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
+        this.attackHitBox = scene.add.rectangle(this.x, this.y, 20, 20, 0xffffff, 0) as unknown as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
         this.attackHitBox.setScale(1.3,1.3);
         scene.physics.add.existing(this.attackHitBox);
         this.attackHitBox.body.setAllowGravity(false);
         this.attackHitBox.body.enable = false; 
         scene.physics.add.overlap(this.attackHitBox, scene.enemyGroup, this.handleEnemyDamage, undefined, this);
+        scene.physics.add.overlap(this.attackHitBox, scene.bossGroup, this.handleEnemyDamage, undefined, this);
 
         // #region Health Bar   
         const borderWidth = 2;
@@ -104,7 +105,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
 
     handleEnemyDamage = (hitbox: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject, enemy: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject) =>
     {
-        if(enemy instanceof Enemy)
+        if(enemy instanceof Enemy && !(enemy instanceof Reaper))
         {
             if(!this.enemiesHit.has(enemy.id))
             {
@@ -115,6 +116,14 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
                 let friction = 30;
                 enemy.setVelocity(knockbackDirection.x * knockbackForce, knockbackDirection.y * knockbackForce);
                 enemy.setAccelerationX(-knockbackDirection.x * friction);
+            }
+            this.enemiesHit.add(enemy.id);
+        }
+        else if(enemy instanceof Reaper)
+        {
+            if(!this.enemiesHit.has(enemy.id))
+            {
+                enemy.handleDamage(5);
             }
             this.enemiesHit.add(enemy.id);
         }

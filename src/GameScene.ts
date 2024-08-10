@@ -22,6 +22,7 @@ export default class GameScene extends Phaser.Scene
     dynamiteColliderGroup!: Phaser.Physics.Arcade.Group
     explosionOverlapGroup!: Phaser.Physics.Arcade.Group
     enemyGroup!: Phaser.Physics.Arcade.Group
+    bossGroup!: Phaser.Physics.Arcade.Group
     landPos: number
     rexUI!: RexUIPlugin
     textIndex: number
@@ -37,7 +38,6 @@ export default class GameScene extends Phaser.Scene
     initialMobsCount: number
     goldMined: number
     maxDepth: number
-    reaper!: Phaser.Physics.Arcade.Sprite
     constructor()
     {
         super('GameScene');
@@ -131,6 +131,10 @@ export default class GameScene extends Phaser.Scene
             collideWorldBounds: true
         })
 
+        this.bossGroup = this.physics.add.group({
+            collideWorldBounds: true
+        })
+
         // #endregion Collider Group
 
         // Map
@@ -138,7 +142,7 @@ export default class GameScene extends Phaser.Scene
         
         // Sprites
         this.player = new Player(this, this.trueCenter, this.landPos - 40, "idle", this.GroundLayer, this.ItemLayer);
-        //this.reaper = new Reaper(this, this.trueCenter, this.landPos - 40, "reaper_idle", this.GroundLayer, this.player);
+        // let reaper = new Reaper(this, this.trueCenter, this.landPos - 40, "reaper_idle", this.GroundLayer, this.player);
         let caves = this.GroundLayer.findCaves(10);
         this.spawnMobs(caves);
         
@@ -177,8 +181,11 @@ export default class GameScene extends Phaser.Scene
     update () 
     {
         this.player.update(this.cursors, this.lastKeyPressed);
-        //this.reaper.update();
         for (let child of this.enemyGroup.children.entries)
+        {
+            child.update();
+        }
+        for (let child of this.bossGroup.children.entries)
         {
             child.update();
         }

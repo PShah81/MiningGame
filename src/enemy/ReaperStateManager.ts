@@ -8,6 +8,7 @@ export default class ReaperStateManager
     states: ReaperState[]
     currentState: ReaperState
     canAttack: boolean
+    summoner: Phaser.Time.TimerEvent
     constructor(reaper: Reaper, player: Player)
     {
         this.canAttack = true;
@@ -19,12 +20,12 @@ export default class ReaperStateManager
             new Teleport(this.player, this.reaper, this),
             new Summon(this.player, this.reaper, this),
             new Attack(this.player, this.reaper, this),
-            // new Death(this.player, this.slime, this),
+            new Death(this.player, this.reaper, this)
         ];
         this.currentState = this.states[0];
         this.currentState.enter();
 
-        this.player.scene.time.addEvent({
+        this.summoner = this.player.scene.time.addEvent({
             delay: 20000,
             callback: () => {   
                 this.changeState(States.SUMMON);
@@ -36,14 +37,7 @@ export default class ReaperStateManager
     update()
     {
         this.followReaper();
-        if(this.reaper.health <= 0)
-        {
-            this.changeState(States.DEATH);
-        }
-        else
-        {
-            this.currentState.update();
-        }
+        this.currentState.update();
         this.updateHitboxPosition();
     }
     changeState(state: States)
@@ -87,5 +81,15 @@ export default class ReaperStateManager
             this.reaper.attackHitBox.y = centerVec.y; 
         }
         
+    }
+
+    destroy = () => {
+        for (let spirit of this.reaper.spiritArr)
+        {
+            spirit.anims.play("spirit_disappear", true);
+            spirit.visible = false;
+        }
+        this.reaper.destroy();
+        this.summoner.destroy();
     }
 }

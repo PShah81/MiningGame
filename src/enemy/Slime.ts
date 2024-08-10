@@ -4,6 +4,7 @@ import Enemy from "./Enemy.ts";
 import SlimeStateManager from "./SlimeStateManager.ts";
 import Player from "../player/Player.ts";
 import InvisibleLayer from "../map/InvisibleLayer.ts";
+import { Directions, States } from "./SlimeStateClasses.ts";
 
 export default class Slime extends Enemy
 {
@@ -38,6 +39,14 @@ export default class Slime extends Enemy
         else
         {
             this.setVisible(true);
+        }
+    }
+
+    handleDamage(damage: number) {
+        this.health -= damage;
+        if(this.health <= 0)
+        {
+            this.slimeStateManager.changeState(States.DEATH, Directions.IDLE);
         }
     }
 }

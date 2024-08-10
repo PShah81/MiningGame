@@ -57,8 +57,6 @@ class PlayerStateManager
     }
     changeState(state: States, direction: Directions)
     {
-
-        console.log(this.currentState)
         this.updateHitboxPosition();
         //If no longer overlapping with ladder set can climb to false
         if(!this.player.scene.physics.world.overlap(this.player, this.ItemLayer.layer, this.ItemLayer.canClimb))

@@ -340,6 +340,7 @@ export class Summon extends ReaperState {
                 spirit.anims.play("spirit_appear", true).on('animationcomplete-spirit_appear', () => {
                     spirit.anims.play("spirit_idle", true);
                     this.finishedAnimation = true;
+                    this.reaper.vulnerable = false;
                 });
             }
         }
@@ -350,6 +351,7 @@ export class Summon extends ReaperState {
                 spirit.anims.play("spirit_disappear", true).on('animationcomplete-spirit_disappear', () => {
                     spirit.setVisible(false);
                     this.finishedAnimation = true;
+                    this.reaper.vulnerable = true;
                 });
                 
             }
@@ -377,6 +379,6 @@ export class Death extends ReaperState {
     enter()
     {
         this.reaper.anims.play("reaper_death", true).on('animationcomplete-reaper_death', 
-        ()=>{this.reaper.destroy()}, this);
+        ()=>{this.reaperStateManager.destroy()}, this);
     }
 }

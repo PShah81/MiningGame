@@ -4,6 +4,7 @@ import Enemy from "./Enemy.ts";
 import ReaperStateManager from "./ReaperStateManager.ts";
 import Player from "../player/Player.ts";
 import InvisibleLayer from "../map/InvisibleLayer.ts";
+import { States } from "./ReaperStateClasses.ts";
 
 export default class Reaper extends Enemy
 {
@@ -13,11 +14,15 @@ export default class Reaper extends Enemy
     attackHitBox!: Phaser.Types.Physics.Arcade.ImageWithDynamicBody 
     attack: number
     attacked: boolean
+    vulnerable: boolean
+    health: number
     constructor(scene: GameScene, x:integer, y: integer, texture: string, GroundLayer: GroundLayer, player: Player)
     {
         super(scene, x, y, texture, GroundLayer, true);
         this.attack = 10;
+        this.health = 20;
         this.attacked = false;
+        this.vulnerable = false;
         //Adjust body and sprite to map and spritesheet
         if(this.body)
         {
@@ -78,8 +83,17 @@ export default class Reaper extends Enemy
         }
     }
     
-    takeDamage()
+    handleDamage(damage: number)
     {
-
+        if(this.vulnerable)
+        {
+            console.log(this.health)
+            this.health -= damage;
+            if(this.health <= 0)
+            {
+                this.reaperStateManager.changeState(States.DEATH);
+            }
+        }
+        
     }
 }

@@ -29,14 +29,7 @@ export default class SlimeStateManager
     }
     update()
     {
-        if(this.slime.health <= 0)
-        {
-            this.changeState(States.DEATH, Directions.IDLE);
-        }
-        else
-        {
-            this.currentState.update();
-        }
+        this.currentState.update();
     }
     changeState(state: States, direction: Directions)
     {

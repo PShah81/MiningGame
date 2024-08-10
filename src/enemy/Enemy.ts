@@ -26,6 +26,10 @@ export default class Enemy extends Phaser.Physics.Arcade.Sprite
         {
             scene.enemyGroup.add(this);
         }
+        else
+        {
+            scene.bossGroup.add(this);
+        }
         
     }
 
