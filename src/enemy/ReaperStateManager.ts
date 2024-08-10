@@ -7,7 +7,6 @@ export default class ReaperStateManager
     player: Player
     states: ReaperState[]
     currentState: ReaperState
-    currentDirection: Directions
     canAttack: boolean
     constructor(reaper: Reaper, player: Player)
     {
@@ -16,40 +15,77 @@ export default class ReaperStateManager
         this.player = player;
         this.states = [
             new Idle(this.player, this.reaper, this),
-            // new Float(this.player, this.reaper, this),
-            // new Teleport(this.player, this.reaper, this),
-            // new Attack(this.player, this.slime, this),
-            // new Summon(this.player, this.reaper, this),
+            new Float(this.player, this.reaper, this),
+            new Teleport(this.player, this.reaper, this),
+            new Summon(this.player, this.reaper, this),
+            new Attack(this.player, this.reaper, this),
             // new Death(this.player, this.slime, this),
         ];
-        this.currentDirection = Directions.IDLE;
         this.currentState = this.states[0];
-        this.currentState.enter(Directions.IDLE);
-        
+        this.currentState.enter();
+
+        this.player.scene.time.addEvent({
+            delay: 20000,
+            callback: () => {   
+                this.changeState(States.SUMMON);
+            },
+            callbackScope: this,
+            loop: true
+        })
     }
     update()
     {
+        this.followReaper();
         if(this.reaper.health <= 0)
         {
-            this.changeState(States.DEATH, Directions.IDLE);
+            this.changeState(States.DEATH);
         }
         else
         {
             this.currentState.update();
         }
+        this.updateHitboxPosition();
     }
-    changeState(state: States, direction: Directions)
+    changeState(state: States)
     {
         let newState = this.states[state];
-        newState.direction = direction;
-        if(newState != this.currentState || direction != this.currentDirection)
+        if(newState != this.currentState)
         {
             this.currentState.exit(state);
             this.currentState = newState;
-            this.currentDirection = direction;
-            this.currentState.enter(direction);
+            this.currentState.enter();
 
         }
 
+    }
+
+    followReaper()
+    {
+        if(this.reaper.body)
+        {
+            let distance = 30;
+            let reaperPos = this.reaper.body.center;
+            let positions = [[reaperPos.x - distance, reaperPos.y + distance], [reaperPos.x + distance, reaperPos.y + distance], [reaperPos.x - distance, reaperPos.y - distance], [reaperPos.x + distance, reaperPos.y - distance]];
+            for(let i = 0; i < positions.length; i++)
+            {
+                let spirit = this.reaper.spiritArr[i];
+                let [x, y] = positions[i];
+                spirit.x = x;
+                spirit.y = y;
+            }
+        }
+    }
+
+    updateHitboxPosition = () => 
+    {
+        if(this.reaper.body)
+        {
+            let centerVec = this.reaper.body.center; 
+            this.reaper.attackHitBox.x = this.reaper.flipX
+            ? centerVec.x - this.reaper.body.width * 0.3
+            : centerVec.x + this.reaper.body.width * 0.3
+            this.reaper.attackHitBox.y = centerVec.y; 
+        }
+        
     }
 }

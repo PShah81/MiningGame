@@ -196,8 +196,11 @@ export class Idle extends PlayerState {
     enter(direction: Directions)
     {
         this.player.anims.play("idle", true);
-        this.player.setVelocityX(0);
-        this.player.setVelocityY(0);
+        if (!this.player.knockedBack)
+        {
+            this.player.setVelocityX(0);
+            this.player.setVelocityY(0);
+        }
         this.player.setAccelerationX(0);
         this.player.setAccelerationY(0);
     }
@@ -771,8 +774,11 @@ export class Fall extends PlayerState {
         else
         {
             //If not left or right
-            this.player.setAccelerationX(0);
-            this.player.setVelocityX(0);
+            if(!this.player.knockedBack)
+            {
+                this.player.setAccelerationX(0);
+                this.player.setVelocityX(0);
+            }
         }
 
         if(cursors.space.isDown)
@@ -1224,8 +1230,6 @@ export class Hurt extends PlayerState {
     enter(direction: Directions)
     {
         this.finishedAnimation = false;
-        this.player.setVelocityX(0);
-        this.player.setAccelerationX(0);
         this.player.anims.play("hurt", true).on('animationcomplete-hurt', 
         this.handleHurtEnd, this);    
     }

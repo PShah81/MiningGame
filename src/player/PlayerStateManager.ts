@@ -41,11 +41,24 @@ class PlayerStateManager
         {
             this.changeState(States.WIN, Directions.IDLE);
         }
+        if(this.player.knockedBack)
+        {
+            if (this.player.body && Math.abs(this.player.body.velocity.x) < 10)
+            {
+                this.player.knockedBack = false;
+            }
+            else if(cursors.left.isDown || cursors.right.isDown)
+            {
+                this.player.knockedBack = false;
+            }
+        }
         this.currentState.update(cursors, lastKeyPressed);
         this.updateHitboxPosition();
     }
     changeState(state: States, direction: Directions)
     {
+
+        console.log(this.currentState)
         this.updateHitboxPosition();
         //If no longer overlapping with ladder set can climb to false
         if(!this.player.scene.physics.world.overlap(this.player, this.ItemLayer.layer, this.ItemLayer.canClimb))

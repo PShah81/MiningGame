@@ -6,12 +6,15 @@ import { Directions, States } from "./PlayerStateClasses.ts";
 import PlayerStateManager from "./PlayerStateManager.ts";
 import Explosion from "../items/Explosion.ts";
 import { GameObjects } from "phaser";
+import Reaper from "../enemy/Reaper.ts";
 
 export default class Player extends Phaser.Physics.Arcade.Sprite
 {
     playerStateManager: PlayerStateManager
     playerHealth: GameObjects.Rectangle
     canClimb: boolean
+    knockedBack: boolean
+    knockedBackVelocity: number
     gold: number
     health: number
     maxHealth: number
@@ -34,12 +37,15 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         //Misc
         this.setMaxVelocity(250);
         this.playerStateManager = new PlayerStateManager(this, GroundLayer, ItemLayer);
-        this.maxHealth = 40;
+        this.maxHealth = 80;
         this.health = this.maxHealth;
         this.canBeHit = true;
         this.enemiesHit = new Set<integer>();  
         this.explosions = new Set<integer>();
         this.gold = 20;  
+        this.knockedBack = false;
+        this.knockedBackVelocity = 0;
+        this.setDrag(100);
         
         //Collision Logic
         scene.physics.add.collider(this, GroundLayer.layer);
@@ -120,7 +126,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
 
     handlePlayerDamage = (player: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject, assailant: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject) =>
     {
-        if(assailant instanceof Enemy)
+        if(assailant instanceof Enemy && !(assailant instanceof Reaper))
         {
             if(this.canBeHit)
             {
@@ -139,9 +145,25 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         {
             if(!this.explosions.has(assailant.id))
             {
+                let knockbackDirection = new Phaser.Math.Vector2(this.x - assailant.x , this.y - assailant.y).normalize();
+                // Apply knockback to the enemy
+                let knockbackForce = 300;
+                this.knockedBack = true;
+                this.knockedBackVelocity = knockbackDirection.x * knockbackForce;
+                this.setVelocity(knockbackDirection.x * knockbackForce, knockbackDirection.y * knockbackForce);
                 this.takeDamage(assailant.attack);
             }
             this.explosions.add(assailant.id);
+        }
+        else if(assailant instanceof Reaper)
+        {
+            let knockbackDirection = new Phaser.Math.Vector2(this.x - assailant.x, this.y - assailant.y).normalize();
+            // Apply knockback to the enemy
+            let knockbackForce = 200;
+            this.knockedBack = true;
+            this.knockedBackVelocity = knockbackDirection.x * knockbackForce;
+            this.setVelocity(knockbackDirection.x * knockbackForce, knockbackDirection.y * knockbackForce);
+            this.takeDamage(assailant.attack);
         }
         else 
         {

@@ -7,7 +7,7 @@ export default class Enemy extends Phaser.Physics.Arcade.Sprite
     health: number
     id: integer
     attack: number
-    constructor(scene: GameScene, x:integer, y: integer, texture: string, GroundLayer: GroundLayer)
+    constructor(scene: GameScene, x:integer, y: integer, texture: string, GroundLayer: GroundLayer, specialBoss: boolean = false)   
     {
         super(scene, x, y, texture);
         this.setPipeline("Light2D");
@@ -22,7 +22,10 @@ export default class Enemy extends Phaser.Physics.Arcade.Sprite
         //Collision Logic
         scene.physics.add.collider(this, GroundLayer.layer);
         this.setPushable(false);
-        scene.enemyGroup.add(this);
+        if (!specialBoss)
+        {
+            scene.enemyGroup.add(this);
+        }
         
     }
 
