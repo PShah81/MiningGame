@@ -23,8 +23,8 @@ export default class Reaper extends Enemy
     constructor(scene: GameScene, x:integer, y: integer, texture: string, GroundLayer: GroundLayer, player: Player)
     {
         super(scene, x, y, texture, GroundLayer, true);
-        this.attack = 10;
-        this.maxHealth = 20;
+        this.attack = 20;
+        this.maxHealth = 100;
         this.health = this.maxHealth;
         this.attacked = false;
         this.vulnerable = false;
@@ -78,7 +78,7 @@ export default class Reaper extends Enemy
         const borderX = xPos - (this.maxHealthWidth+borderWidth) / 2;
         const borderY = yPos - (height+borderWidth) / 2;
         this.healthBarBorder = scene.add.graphics();
-        this.healthBarBorder.lineStyle(borderWidth, 0x000000, 1);
+        this.healthBarBorder.lineStyle(borderWidth, 0xffffff, 1);
         this. healthBarBorder.strokeRect(borderX, borderY, this.maxHealthWidth+borderWidth, height+borderWidth);
         this.reaperHealth = scene.add.rectangle(xPos, yPos, this.maxHealthWidth, height, 0xff0000);
         //Keep it in the same position relative to the viewport

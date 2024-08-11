@@ -52,6 +52,16 @@ class PlayerStateManager
                 this.player.knockedBack = false;
             }
         }
+        if(this.player.body instanceof Phaser.Physics.Arcade.Body)
+        {
+            if (this.player.body.onFloor()) {
+                // Apply horizontal drag when on the ground
+                this.player.body.setDragX(100);
+            } else {
+                // No horizontal drag when in the air
+                this.player.body.setDragX(0);
+            }
+        }
         this.currentState.update(cursors, lastKeyPressed);
         this.updateHitboxPosition();
     }

@@ -36,7 +36,7 @@ export class SlimeState {
             let slimePos = this.slime.body.center;
             let distancePlayerAndSlime = Phaser.Math.Distance.Between(playerPos.x, playerPos.y, slimePos.x, slimePos.y);
             
-            if(distancePlayerAndSlime < 200)
+            if(distancePlayerAndSlime < 400)
             {
                 let direction = Directions.IDLE;
                 let xDifference = playerPos.x - slimePos.x;

@@ -46,7 +46,7 @@ export default class GameScene extends Phaser.Scene
         super('GameScene');
         this.landPos = 500;
         this.textIndex = 0;
-        this.textArr = ['Welcome, your goal is to reach the center of the planet and defeat the demon lord. Press Enter to continue.',
+        this.textArr = ['Welcome, your goal is to reach the center of the planet and defeat the grim reaper. Press Enter to continue.',
         'Use arrow keys to move around and mine and Space to attack.',
         'To place/use items, press the number corresponding to your item shown on the top left of the screen.',
         'You can only use torches and ladders underground, and you can remove them by pressing Q.',

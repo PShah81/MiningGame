@@ -37,7 +37,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         //Misc
         this.setMaxVelocity(250);
         this.playerStateManager = new PlayerStateManager(this, GroundLayer, ItemLayer);
-        this.maxHealth = 80;
+        this.maxHealth = 40;
         this.health = this.maxHealth;
         this.canBeHit = true;
         this.enemiesHit = new Set<integer>();  
@@ -45,7 +45,6 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         this.gold = 20;  
         this.knockedBack = false;
         this.knockedBackVelocity = 0;
-        this.setDrag(100,0);
         
         //Collision Logic
         scene.physics.add.collider(this, GroundLayer.layer);
