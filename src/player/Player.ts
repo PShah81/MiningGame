@@ -45,7 +45,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         this.gold = 20;  
         this.knockedBack = false;
         this.knockedBackVelocity = 0;
-        this.setDrag(100);
+        this.setDrag(100,0);
         
         //Collision Logic
         scene.physics.add.collider(this, GroundLayer.layer);

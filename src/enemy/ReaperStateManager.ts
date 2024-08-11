@@ -8,12 +8,14 @@ export default class ReaperStateManager
     states: ReaperState[]
     currentState: ReaperState
     canAttack: boolean
-    summoner: Phaser.Time.TimerEvent
+    summoner!: Phaser.Time.TimerEvent
+    startedFight: boolean
     constructor(reaper: Reaper, player: Player)
     {
         this.canAttack = true;
         this.reaper = reaper;
         this.player = player;
+        this.startedFight = false;
         this.states = [
             new Idle(this.player, this.reaper, this),
             new Float(this.player, this.reaper, this),
@@ -24,21 +26,26 @@ export default class ReaperStateManager
         ];
         this.currentState = this.states[0];
         this.currentState.enter();
-
-        this.summoner = this.player.scene.time.addEvent({
-            delay: 20000,
-            callback: () => {   
-                this.changeState(States.SUMMON);
-            },
-            callbackScope: this,
-            loop: true
-        })
     }
     update()
     {
-        this.followReaper();
-        this.currentState.update();
-        this.updateHitboxPosition();
+        if (this.startedFight)
+        {
+            this.followReaper();
+            this.currentState.update();
+            this.updateHitboxPosition();
+        }
+        else if(this.withinDistance())
+        {
+            this.player.scene.time.addEvent({
+                delay: 2000,
+                callback: () => {   
+                    this.startFight();
+                },
+                callbackScope: this,
+                loop: false
+            })
+        }
     }
     changeState(state: States)
     {
@@ -91,5 +98,36 @@ export default class ReaperStateManager
         }
         this.reaper.destroy();
         this.summoner.destroy();
+    }
+
+    withinDistance()
+    {
+        if(this.player.body && this.reaper.body && this.player.scene.bossFight)
+        {
+            let playerPos = this.player.body.center;
+            let reaperPos = this.reaper.body.center;
+            let distance = Math.sqrt((playerPos.x - reaperPos.x)**2 + (playerPos.y - reaperPos.y)**2);
+            return distance < 250;
+        }
+        
+    }
+
+    startFight()
+    {
+        this.startedFight = true;
+        this.reaper.reaperHealth.setVisible(true);
+        this.reaper.healthBarBorder.setVisible(true);
+        if(!this.reaper.spiritArr[0].visible)
+        {
+            this.changeState(States.SUMMON);
+            this.summoner = this.player.scene.time.addEvent({
+                delay: 20000,
+                callback: () => {   
+                    this.changeState(States.SUMMON);
+                },
+                callbackScope: this,
+                loop: true
+            });
+        }
     }
 }

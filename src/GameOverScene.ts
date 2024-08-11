@@ -20,7 +20,7 @@ export default class StatsScene extends Phaser.Scene {
        
         
         // Display Stats
-        let statsText = `Enemies Defeated: ${this.stats.enemiesDefeated}\nTime Survived: ${this.stats.elapsedTime}s\nMax Depth: ${this.stats.depth}\nGold Mined: ${this.stats.goldMined}\nScore: ${this.stats.score}`;
+        let statsText = `Enemies Defeated: ${this.stats.enemiesDefeated}\nTime Survived: ${this.stats.elapsedTime}s\nMax Depth: ${this.stats.depth}\nGold Mined: ${this.stats.goldMined.toFixed(1)}\nScore: ${this.stats.score}`;
         this.add.text(window.innerWidth/2, 200, statsText, { fontSize: '24px'}).setOrigin(0.5);
         
         // Display Play Again Prompt

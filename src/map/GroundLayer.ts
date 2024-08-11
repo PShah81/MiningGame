@@ -167,7 +167,7 @@ export default class GroundLayer extends BaseLayer
         let lateDepth: Record<number, number> = {};
         lateDepth[oreMapping.GRASS] = 0;
         lateDepth[oreMapping.DIRT] = 0;
-        lateDepth[oreMapping.STONE] = 0.2;
+        lateDepth[oreMapping.STONE] = 0.3;
         lateDepth[oreMapping.COAL] = 0.1;
         lateDepth[oreMapping.IRON] = 0.1;
         lateDepth[oreMapping.COPPER] = 0.1;
@@ -175,7 +175,7 @@ export default class GroundLayer extends BaseLayer
         lateDepth[oreMapping.GOLD] = 0.03;
         lateDepth[oreMapping.DIAMOND] = 0.02;
         lateDepth[oreMapping.EMERALD] = 0;
-        lateDepth[oreMapping.EMPTY] = 0.4;
+        lateDepth[oreMapping.EMPTY] = 0.3;
 
         let finalDepth: Record<number, number> = {};
         finalDepth[oreMapping.GRASS] = 0;
@@ -296,6 +296,7 @@ export default class GroundLayer extends BaseLayer
                 }
             }
         }
+        console.log(this.layer)
     }
     mapCreation()
     {
@@ -303,6 +304,11 @@ export default class GroundLayer extends BaseLayer
         this.map = this.generateRandomTiles(this.layer.tilemap.width, this.layer.tilemap.height);
         for (let i = 0; i < iterations; i++) {
             this.map = this.applyAutomataRules(this.map);
+        }
+        for (let row = this.map.length - 10; row < this.map.length - 5; row++) {
+            for (let col = 0; col < this.map[0].length; col++) {
+                this.map[row][col] = oreMapping.EMPTY;
+            }
         }
         this.addTiles(this.map);
     }

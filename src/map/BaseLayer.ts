@@ -87,7 +87,7 @@ export default class BaseLayer
     removeGroundTiles(x:integer, y:integer)
     {
         //If still in introduction prevent block removal
-        if(!this.scene.intro)
+        if(!this.scene.intro && !this.scene.bossFight)
         {
             if(this instanceof GroundLayer)
             {

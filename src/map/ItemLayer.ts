@@ -14,23 +14,33 @@ export default class ItemLayer extends BaseLayer
     placeItem(tileIndex: integer, object: Phaser.Physics.Arcade.Sprite)
     {
         let [x,y] = this.getCenterOfObject(object);
-        let tile = this.layer.getTileAtWorldXY(x, y);
+        let tileXY = this.layer.worldToTileXY(x, y);
+        let tile = this.layer.getTileAt(tileXY.x,tileXY.y);
         if(!tile)
         {
-            let tilePlaced = this.layer.putTileAtWorldXY(tileIndex, x, y);
-            if(tilePlaced)
-            {
-                let preciseVector = this.layer.tileToWorldXY(tilePlaced.x, tilePlaced.y);
-                let preciseX = preciseVector.x;
-                let preciseY = preciseVector.y;
-                if(tileIndex == Items.TORCH)
-                {
-                    this.scene.lights.addLight(preciseX,preciseY, 200).setIntensity(4);
-                }
-                return true;
-            }
+            return this.placeItemHelper(tileIndex, tileXY.x, tileXY.y);
         }
         return false;
+    }
+    placeItemHelper(tileIndex: integer, tileX: number, tileY: number)
+    {
+        let tilePlaced = this.layer.putTileAt(tileIndex, tileX, tileY);
+        if(tilePlaced)
+        {
+            let preciseVector = this.layer.tileToWorldXY(tileX, tileY);
+            let preciseX = preciseVector.x + tilePlaced.width/2;
+            let preciseY = preciseVector.y + tilePlaced.height/2;
+            if(tileIndex == Items.TORCH)
+            {
+                this.scene.lights.addLight(preciseX,preciseY, 200).setIntensity(4);
+            }
+            return true;
+        }
+        return false;
+    }
+    placeLadder(tileIndex: integer, tileX: number, tileY: number)
+    {
+
     }
     removeItem(object: Phaser.Physics.Arcade.Sprite)
     {
@@ -83,8 +93,8 @@ export default class ItemLayer extends BaseLayer
     removeLightsAndTile(tile: Phaser.Tilemaps.Tile)
     {
         let preciseVector = this.layer.tileToWorldXY(tile.x, tile.y);
-        let preciseX = preciseVector.x;
-        let preciseY = preciseVector.y;
+        let preciseX = preciseVector.x + tile.width/2;
+        let preciseY = preciseVector.y + tile.height/2;
         if(tile.index == Items.TORCH)
         {
             let lightArray = this.scene.lights.lights;

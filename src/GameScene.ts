@@ -1,12 +1,13 @@
 import Phaser from 'phaser'
 import Slime from './enemy/Slime.ts';
 import Player from './player/Player.ts';
-import GroundLayer from './map/GroundLayer.ts';
+import GroundLayer, { oreMapping } from './map/GroundLayer.ts';
 import ItemLayer from './map/ItemLayer.ts';
 import Explosion from './items/Explosion.ts';
 import InvisibleLayer from './map/InvisibleLayer.ts';
 import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 import Reaper from './enemy/Reaper.ts';
+import { Items } from './player/PlayerStateClasses.ts';
 
 export default class GameScene extends Phaser.Scene
 {
@@ -38,6 +39,8 @@ export default class GameScene extends Phaser.Scene
     initialMobsCount: number
     goldMined: number
     maxDepth: number
+    bossFight: boolean
+    defeatedBoss: boolean
     constructor()
     {
         super('GameScene');
@@ -54,6 +57,8 @@ export default class GameScene extends Phaser.Scene
         this.initialMobsCount = 0;
         this.goldMined = 0.0;
         this.maxDepth = 0;
+        this.bossFight = false;
+        this.defeatedBoss = false;
     }
 
     preload ()
@@ -142,7 +147,7 @@ export default class GameScene extends Phaser.Scene
         
         // Sprites
         this.player = new Player(this, this.trueCenter, this.landPos - 40, "idle", this.GroundLayer, this.ItemLayer);
-        // let reaper = new Reaper(this, this.trueCenter, this.landPos - 40, "reaper_idle", this.GroundLayer, this.player);
+        let reaper = new Reaper(this, this.trueCenter, this.map.height*48 + 140, "reaper_idle", this.GroundLayer, this.player);
         let caves = this.GroundLayer.findCaves(10);
         this.spawnMobs(caves);
         
@@ -155,6 +160,7 @@ export default class GameScene extends Phaser.Scene
         this.physics.add.overlap(this.explosionOverlapGroup, this.ItemLayer.layer, this.ItemLayer.itemsExploded, undefined, this);
         this.physics.add.overlap(this.player, this.explosionOverlapGroup, this.player.handlePlayerDamage, undefined, this);
         this.physics.add.overlap(this.enemyGroup, this.explosionOverlapGroup, this.handleExplosionDamage, undefined, this);
+        this.physics.add.overlap(this.bossGroup, this.explosionOverlapGroup, this.handleExplosionDamage, undefined, this);
 
         // Input Events
         if(this.input.keyboard)
@@ -191,6 +197,12 @@ export default class GameScene extends Phaser.Scene
         }
         let curDepthVec = this.GroundLayer.getTilePosAtObject(this.player);
         this.maxDepth = Math.max(this.maxDepth, curDepthVec ? curDepthVec.y : 0);
+
+        if(curDepthVec.y > this.map.height - 10 && !this.defeatedBoss)
+        {
+            this.bossFight = true;
+            this.startBossFight(5, 5);
+        }
         // Reset the lastKeyPressed after processing
         this.lastKeyPressed = undefined;
     }
@@ -244,7 +256,7 @@ export default class GameScene extends Phaser.Scene
 
         this.createAnimation('reaper_idle', this.anims.generateFrameNumbers('reaper_idle', { start: 0, end: 3 }), 5, -1);
         this.createAnimation('reaper_attack', this.anims.generateFrameNumbers('reaper_attack', { start: 0, end: 12 }), 10, 0);
-        this.createAnimation('reaper_death', this.anims.generateFrameNumbers('reaper_death', { start: 0, end: 16 }), 10, 0);
+        this.createAnimation('reaper_death', this.anims.generateFrameNumbers('reaper_death', { start: 0, end: 16 }), 7, 0);
         this.createAnimation('reaper_teleport', this.anims.generateFrameNumbers('reaper_teleport', { start: 0, end: 7 }), 10, 0);  
         this.createAnimation('reaper_appear', this.anims.generateFrameNumbers('reaper_teleport', { start: 7, end: 11 }), 10, 0);
         
@@ -551,6 +563,15 @@ export default class GameScene extends Phaser.Scene
         {
             console.error("Failed to load the tileset image");
         }
+
+        let bossClearingHeight = 5;
+        let heightAboveBottom = 5;
+        let row = this.map.height - heightAboveBottom - Math.ceil(bossClearingHeight/2);
+        for (let col = 0; col < this.map.width; col+= 3)
+        {
+            this.ItemLayer.placeItemHelper(Items.TORCH, col, row);
+        }
+
         let invisibleTileset = this.map.addTilesetImage('invisible', undefined, 16, 16);
         if(invisibleTileset)
         {
@@ -590,5 +611,29 @@ export default class GameScene extends Phaser.Scene
         }
         let score = Math.min(1000, elapsedTime) + elapsedTime + enemiesDefeated * 1000 + this.maxDepth * 100 + this.goldMined * 100 + winBoost;
         this.scene.launch('GameOverScene', {elapsedTime: elapsedTime, enemiesDefeated: enemiesDefeated, depth: this.maxDepth, goldMined: this.goldMined, score: score, won: won});
+    }
+
+    startBossFight(heightAboveBottom: number, bossClearingHeight: number)
+    {
+        let row = this.map.height - heightAboveBottom;
+        for (let col = 0; col < this.map.width; col+=1)
+        {
+            this.GroundLayer.layer.removeTileAt(col, row);
+            this.GroundLayer.layer.removeTileAt(col, row-bossClearingHeight - 1);
+            this.GroundLayer.layer.putTileAt(oreMapping.STONE, col, row);
+            this.GroundLayer.layer.putTileAt(oreMapping.STONE, col, row-bossClearingHeight - 1);
+        }
+    }
+
+    endBossFight(heightAboveBottom: number, bossClearingHeight: number)
+    {
+        this.bossFight = false;
+        this.defeatedBoss = true;
+        let row = this.map.height - heightAboveBottom;
+        for (let col = 0; col < this.map.width; col+=1)
+        {
+            this.GroundLayer.removeGroundTiles(col, row);
+            this.GroundLayer.removeGroundTiles(col, row-bossClearingHeight - 1);
+        }
     }
 }
