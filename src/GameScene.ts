@@ -209,7 +209,6 @@ export default class GameScene extends Phaser.Scene
 
     resizeCamera()
     {
-        console.log(window.innerWidth)
         this.cameras.main.setSize(window.innerWidth, window.innerHeight);
     }
     handleExplosionDamage(enemy: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject, explosion: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject)

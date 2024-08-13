@@ -43,7 +43,6 @@ export default class Explosion extends Phaser.Physics.Arcade.Sprite
 
     handleDamage(enemy: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject, explosion: Phaser.Tilemaps.Tile | Phaser.GameObjects.GameObject)
     {
-        console.log("Hit " + enemy);
         if(enemy instanceof Enemy && !(enemy instanceof Reaper))
         {
             if(!this.enemiesHit.has(enemy.id))

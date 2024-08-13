@@ -11,9 +11,13 @@ const config: Phaser.Types.Core.GameConfig = {
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { x: 0, y: 300 },
-            debug: true
+            gravity: { x: 0, y: 300 }
         }
+    },
+    scale:
+    {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
     },
     render: {
         pixelArt: true
