@@ -381,6 +381,8 @@ export class Death extends ReaperState {
         this.reaper.setVelocity(0);
         this.reaper.anims.play("reaper_death", true).on('animationcomplete-reaper_death', 
         ()=>{
+            this.reaper.reaperHealth.setVisible(false);
+            this.reaper.healthBarBorder.setVisible(false);
             this.player.scene.endBossFight(5,5);
             this.reaperStateManager.destroy()}, this);
     }

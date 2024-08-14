@@ -7,7 +7,7 @@ import LeaderboardScene from './LeaderboardScene.ts';
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     width: 1920,
-    height: 2900,
+    height: 6500,
     physics: {
         default: 'arcade',
         arcade: {
