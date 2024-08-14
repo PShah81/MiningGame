@@ -35,15 +35,16 @@ export default class GameScene extends Phaser.Scene
     tileOffsetPos!: number
     trueGameWidth!: number
     trueCenter!: number
-    startTime: number
-    initialMobsCount: number
-    goldMined: number
-    maxDepth: number
-    bossFight: boolean
-    defeatedBoss: boolean
+    startTime!: number
+    initialMobsCount!: number
+    goldMined!: number
+    maxDepth!: number
+    bossFight!: boolean
+    defeatedBoss!: boolean
     constructor()
     {
         super('GameScene');
+        this.intro = true;
         this.landPos = 500;
         this.textIndex = 0;
         this.textArr = ['Welcome, your goal is to reach the center of the planet and defeat the grim reaper. Press Enter to continue.',
@@ -52,13 +53,6 @@ export default class GameScene extends Phaser.Scene
         'You can only use torches and ladders underground, and you can remove them by pressing Q.',
         'If you ever forget the controls of the game or need to step away from the game, click P to pause.',
         'Good luck!'];
-        this.intro = true;
-        this.startTime = 0;
-        this.initialMobsCount = 0;
-        this.goldMined = 0.0;
-        this.maxDepth = 0;
-        this.bossFight = false;
-        this.defeatedBoss = false;
     }
 
     preload ()
@@ -103,6 +97,14 @@ export default class GameScene extends Phaser.Scene
 
     create ()
     {
+        //Intial variables
+        this.startTime = 0;
+        this.initialMobsCount = 0;
+        this.goldMined = 0.0;
+        this.maxDepth = 0;
+        this.bossFight = false;
+        this.defeatedBoss = false;
+
         // Create measurement fields
         this.tileOffset = Math.ceil(this.cameras.main.width/(48*2));
         this.tileOffsetPos = -48*this.tileOffset;
@@ -328,36 +330,39 @@ export default class GameScene extends Phaser.Scene
 
     handleInitialDialog()
     {
-        this.dialog = this.rexUI.add.dialog({
-            x: this.game.canvas.width/2,
-            y: 200,
-            width: 550,
-            height: 100,
-            content: this.textBox
-        }).layout();
-
-        this.textBox = this.rexUI.add.textBox({
-            x: this.game.canvas.width/2,
-            y: this.dialog.y - this.dialog.height/4,
-            width: 550,
-            height: 50,
-            text: this.add.text(0, 0, this.textArr[this.textIndex], {
-              fontSize: '24px',
-              fontFamily: 'Open Sans',
-              color: '#000',
-              wordWrap: {width: 550, useAdvancedWrap: true}
-            }),
-            space: {
-              left: 30,
-              right: 30,
-              top: 60,
-              bottom: 20
-            }
-        }).layout();
-
-
-        // Initial text update
-        this.updateText();
+        if(!this.dialog)
+        {
+            this.dialog = this.rexUI.add.dialog({
+                x: this.game.canvas.width/2,
+                y: 200,
+                width: 550,
+                height: 100,
+                content: this.textBox
+            }).layout();
+    
+            this.textBox = this.rexUI.add.textBox({
+                x: this.game.canvas.width/2,
+                y: this.dialog.y - this.dialog.height/4,
+                width: 550,
+                height: 50,
+                text: this.add.text(0, 0, this.textArr[this.textIndex], {
+                  fontSize: '24px',
+                  fontFamily: 'Open Sans',
+                  color: '#000',
+                  wordWrap: {width: 550, useAdvancedWrap: true}
+                }),
+                space: {
+                  left: 30,
+                  right: 30,
+                  top: 60,
+                  bottom: 20
+                }
+            }).layout();
+    
+    
+            // Initial text update
+            this.updateText();
+        }
     }
 
     updateText()

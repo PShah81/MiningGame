@@ -83,8 +83,6 @@ export default class LeaderboardScene extends Phaser.Scene {
 
     startNewGame()
     {
-        this.scene.stop();
-        this.scene.remove("GameScene");
-        this.scene.add("GameScene", new GameScene(), true);
+        this.scene.start("GameScene");
     }
 }
